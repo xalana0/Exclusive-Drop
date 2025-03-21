@@ -1,0 +1,58 @@
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+  }
+  
+  .modal {
+    background: #111;
+    padding: 30px;
+    border-radius: 10px;
+    color: white;
+    text-align: center;
+    width: 320px;
+    position: relative;
+  }
+  
+  .closeBtn {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    background: none;
+    color: white;
+    font-size: 18px;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .image {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin-bottom: 15px;
+  }
+  
+  .dropdown {
+    width: 100%;
+    margin-top: 10px;
+    padding: 8px;
+    font-size: 16px;
+  }
+  
+  .addBtn {
+    margin-top: 15px;
+    padding: 10px 20px;
+    background: none;
+    border: 2px solid white;
+    color: white;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+  

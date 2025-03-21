@@ -1,0 +1,122 @@
+@import url('https://fonts.googleapis.com/css2?family=Carattere&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Carattere&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap');
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.nome {
+color: white;
+font-family: "Carattere", serif;
+font-weight: 400;
+font-size: 50px;
+font-style: normal;
+}
+
+
+
+.container {
+  height: 100vh;
+  
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  background-image: url('https://i.pinimg.com/originals/45/98/6d/45986d3cf4d64299869db2be4704719e.gif');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+  
+}
+
+.card {
+  font-family: "Roboto Mono", serif;
+  font-weight: 400;
+  font-style: normal;
+  padding: 40px;
+  border-radius: 10px;
+  box-shadow: 0px 10px 30px rgba(255, 255, 255, 0.164);
+  width: 400px;
+  text-align: center;
+  
+}
+
+.input-container {
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+.input-container label {
+  display: block;
+  margin-bottom: 5px;
+  color: #555;
+}
+
+.input-container input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  box-sizing: border-box;
+  transition: border-color 0.3s;
+}
+
+.input-container input:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+.button {
+  background-color: #000000;
+  border-style:double;
+  border-color: white;
+  color: white;
+  padding: 12px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  margin-top: 10px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  width: 100%;
+  font-family: "Roboto Mono", serif;
+  font-weight: 400;
+  font-style: normal;
+}
+.button2 {
+  background-color: #000000;
+  border-style:none;
+  border-color: white;
+  color: white;
+  padding: 12px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  margin-top: 10px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  width: 100%;
+  font-family: "Roboto Mono", serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.button:hover {
+  
+  color: #2b0000;
+}
+
+.error-message {
+  color: red;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+.logo {
+  width: 100px; /* Smaller logo for small screens */
+}
+  

@@ -1,0 +1,158 @@
+@import url('https://fonts.googleapis.com/css2?family=Carattere&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Carattere&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap');
+
+
+
+.main {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #000;
+}
+
+.nome {
+  color: white;
+  font-family: "Carattere", serif;
+  font-weight: 400;
+  font-size: 50px;
+  font-style: normal;
+  }
+
+.content {
+  background-color: #000000;
+  color: #ffffff;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  width: 150px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+}
+
+.logoImage {
+  width: 100%;
+  height: auto;
+  filter: invert(1);
+}
+
+.headerLinks {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  font-family: "Roboto Mono", serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+
+.cartLink,
+.checkoutLink {
+  color: #ffffff;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mainContent {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 0 16px;
+  display: flex;
+  flex: 1;
+}
+
+.sidebar {
+  width: 192px;
+  padding-top: 32px;
+  font-family: "Roboto Mono", serif;
+  font-weight: 400;
+  font-style: normal;
+  
+}
+
+.addToCartBtn {
+  background-color: transparent;
+  border: 2px solid #ffffff;
+  color: #ffffff;
+  padding: 8px 16px;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 10px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  transition: all 0.3s ease;
+}
+
+.addToCartBtn:hover {
+  background: white;
+  color: rgb(0, 0, 0);
+}
+
+.navList {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.navLink {
+  color: #ffffff;
+  text-decoration: none;
+}
+.navLink:hover{
+ 
+  font-style:oblique;
+}
+
+.navLink:hover {
+  text-decoration: underline;
+}
+
+.productsContainer {
+  flex: 1;
+  padding: 32px 0;
+}
+
+.productsGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 32px;
+}
+
+@media (min-width: 768px) {
+  .productsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .productsGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+.productWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}

@@ -1,0 +1,128 @@
+/* General Container Styling */
+.menuContainer {
+  display: flex;
+  flex-direction: column; /* Allow header and card to stack */
+  justify-content: flex-start; /* Align header at the top */
+  align-items: center;
+  height: 100vh; /* Full screen height */
+  width: 100%; /* Full screen width */
+  background-color: #f0f2f5; /* Soft background */
+  box-sizing: border-box; /* Include padding in width/height */
+}
+
+/* Header Styling */
+.menuHeader {
+  display: flex;
+  justify-content: space-between; /* Separate logo and status */
+  align-items: center;
+  width: 100%; /* Full width of the screen */
+  padding: 10px 20px; /* Add spacing */
+  background-color: #ffffff; /* White background for header */
+  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow for separation */
+  border-bottom: 1px solid #ddd; /* Light border for structure */
+  box-sizing: border-box;
+}
+
+.logoSmall {
+  height: 40px; /* Smaller logo size */
+  width: auto;
+}
+
+.statusContainer {
+  display: flex;
+  flex-direction: column; /* Stack statuses vertically */
+  align-items: flex-end; /* Align statuses to the right */
+  gap: 4px; /* Small gap between status messages */
+}
+
+.authStatus,
+.dbStatus {
+  font-size: 12px; /* Smaller, professional font size */
+  font-weight: bold;
+  margin: 0;
+}
+
+/* Card Styling */
+.menuCard {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background: white;
+  padding: 30px; /* Compact padding */
+  border-radius: 10px; /* Rounded corners */
+  box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  width: 90%; /* Responsive width */
+  max-width: 400px; /* Limit card width */
+  gap: 20px; /* Space between elements */
+}
+
+/* Logo Styling */
+.logo {
+  width: 100px; /* Medium logo size */
+  height: auto;
+  margin-bottom: 20px;
+}
+
+/* Card Heading */
+.menuCard h2 {
+  font-size: 22px; /* Balanced heading size */
+  color: #333;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+/* Authentication Status Styling */
+.authStatus {
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: red; /* Red for unauthorized */
+  text-align: center; /* Center-align status */
+}
+
+/* Menu List Styling */
+.menuList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 15px; /* Consistent spacing between buttons */
+  width: 100%;
+  align-items: center; /* Center-align buttons */
+}
+
+/* Shared Button Style */
+.menuButton {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #007bff;
+  color: white;
+  text-decoration: none;
+  border: none;
+  border-radius: 5px; /* Rounded corners */
+  font-size: 16px; /* Consistent font size */
+  font-weight: bold;
+  padding: 12px; /* Space inside button */
+  width: 90%; /* Full width relative to the card */
+  max-width: 350px; /* Limit button width */
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  text-align: center; /* Center-align text */
+  margin: 0 auto; /* Center the button inside the container */
+}
+
+/* Hover and Active States */
+.menuButton:hover {
+  background-color: #0056b3; /* Darker blue on hover */
+  transform: translateY(-2px); /* Lift effect */
+  box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2); /* Add shadow on hover */
+}
+
+.menuButton:active {
+  background-color: #003d80; /* Even darker on click */
+  transform: translateY(0); /* Press-down effect */
+}
