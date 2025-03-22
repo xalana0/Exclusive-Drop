@@ -49,10 +49,10 @@ const Register = () => {
 
     <div className="container">
       <h2 className='nome'>Exclusive Drop</h2>
-      
+
       <div className="card">
 
-      <ClerkProvider>
+        <ClerkProvider>
           <header >
             <SignedOut >
               <div  >
@@ -63,13 +63,13 @@ const Register = () => {
             <SignedIn>
               <UserButton />
               <a href="/home" className="button2">
-Entrar
-</a>
+                Entrar
+              </a>
             </SignedIn>
-            
+
           </header>
         </ClerkProvider>
-           
+
 
 
 
@@ -77,7 +77,7 @@ Entrar
     </div>
   );
 
-}; 
+};
 
 
 export default Register;

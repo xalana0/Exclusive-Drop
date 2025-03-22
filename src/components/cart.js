@@ -16,7 +16,7 @@ export default function CartPage() {
 
   return (
     <div className="cart-container">
-      <h1 className="cart-title">Crrinho</h1>
+      <h1 className="cart-title">Carrinho</h1>
 
       <div className="cart-grid">
         <div>

@@ -1,5 +1,5 @@
 import { Space_Mono } from "next/font/google"
-import '../styles/global.css'
+
 
 const spaceMono = Space_Mono({
   weight: ["400", "700"],

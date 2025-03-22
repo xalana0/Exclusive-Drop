@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import ProductCard from "@/components/product-card"
-import styles from "../styles/page.module.css"
+import styles from "../styles/page.css"
 import DigitalClock from "./DigitalClock"
 import { useCart } from "@/components/cartcontext"
 import ProductModal from "@/components/ProductModal" // 🆕 Importa o modal
@@ -59,19 +59,19 @@ export default function Home() {
   ]
 
   return (
-    <main className={styles.main}>
-      <div className={styles.content}>
-        <header className={styles.header}>
-          <div className={styles.logo}>
-            <img src="https://i.postimg.cc/LXPRwz4v/3dgifmaker25228.gif" alt="Store Logo" className={styles.logoImage} />
+    <main className="main">
+      <div className="content">
+        <header className="header">
+          <div className="logo">
+            <img src="https://i.postimg.cc/LXPRwz4v/3dgifmaker25228.gif" alt="Store Logo" className="logoImage" />
           </div>
 
-          <div className={styles.headerLinks}>
+          <div className="headerLinks">
             <main>
               <DigitalClock />
             </main>
 
-            <Link href="/cartpage" className={styles.cartLink}>
+            <Link href="/cartpage" className="cartLink">
               <span>🛒</span> Carrinho ({cartItems.reduce((sum, item) => sum + item.quantity, 0)})
               
             </Link>
@@ -92,26 +92,26 @@ export default function Home() {
           </div>
         </header>
 
-        <div className={styles.mainContent}>
-          <nav className={styles.sidebar}>
-            <ul className={styles.navList}>
+        <div className="mainContent">
+          <nav className="sidebar">
+            <ul className="navList">
               {[
                 "Roupas", "Ténis"
               ].map((item, index) => (
                 <li key={index}>
-                  <Link href="#" className={styles.navLink}>{item}</Link>
+                  <Link href="#" className="navLink">{item}</Link>
                 </li>
               ))}
             </ul>
           </nav>
 
-          <div className={styles.productsContainer}>
-            <div className={styles.productsGrid}>
+          <div className="productsContainer">
+            <div className="productsGrid">
               {products.map((product) => (
                 <div key={product.id}>
                   <ProductCard name={product.name} price={product.price} image={product.image} />
                   <button
-                    className={styles.addToCartBtn}
+                    className="addToCartBtn"
                     onClick={() => handleOpenModal(product)}
                   >
                     Abrir

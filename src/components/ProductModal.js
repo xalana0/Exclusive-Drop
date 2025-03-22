@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import styles from '../styles/ProductModal.module.css';
+
+
+import styles from '../styles/ProductModal.css';
 
 const ProductModal = ({ product, onClose, onAdd }) => {
   const [selectedSize, setSelectedSize] = useState("");
@@ -21,15 +23,15 @@ const ProductModal = ({ product, onClose, onAdd }) => {
   };
 
   return (
-    <div className={styles.overlay}>
-      <div className={styles.modal}>
-        <button className={styles.closeBtn} onClick={onClose}>✖</button>
-        <img src={product.image} alt={product.name} className={styles.image} />
+    <div className="overlay">
+      <div className="modal">
+        <button className="closeBtn" onClick={onClose}>✖</button>
+        <img src={product.image} alt={product.name} className="image" />
         <h2>{product.name}</h2>
         <p>Preço: €{product.price.toFixed(2)}</p>
 
         <select
-          className={styles.dropdown}
+          className="dropdown"
           value={selectedSize}
           onChange={(e) => setSelectedSize(e.target.value)}
         >
@@ -41,7 +43,7 @@ const ProductModal = ({ product, onClose, onAdd }) => {
           <option>EU 43</option>
         </select>
 
-        <button className={styles.addBtn} onClick={handleAdd}>
+        <button className="addBtn" onClick={handleAdd}>
          Adiconar ao carrinho
         </button>
       </div>

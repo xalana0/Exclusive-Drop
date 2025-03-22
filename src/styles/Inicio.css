@@ -1,18 +1,4 @@
-/* Reset and base styles */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
 
-:root {
-  --red-primary: #FF0000;
-  --red-dark: #990000;
-  --red-light: #FF3333;
-  --white: #FFFFFF;
-  --black: #000000;
-  --gray-light: #F5F5F5;
-}
 
 body {
   font-family: 'Inter', sans-serif;
@@ -28,23 +14,26 @@ body {
 }
 
 .btn {
+  font-family: "Roboto Mono", serif;
+  font-weight: 400;
+
   padding: 10px 20px;
   border: none;
   cursor: pointer;
-  font-size: 0.9rem;
+ 
   font-weight: 600;
-  transition: all 0.3s ease;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  border-radius: 4px;
+ 
 }
 
 .btn-primary {
+  font-family: "Roboto Mono", serif;
+  font-weight: 400;
   
   color: white;
 }
 
 .btn-primary:hover {
+  
   
   color: red;
 }
@@ -68,6 +57,9 @@ body {
   text-decoration: none;
   font-weight: 500;
   transition: color 0.3s ease;
+  font-family: "Roboto Mono", serif;
+  font-weight: 400;
+  font-style: normal;
 }
 
 .nav-link:hover {
@@ -173,11 +165,11 @@ body {
     flex-direction: column;
     align-items: center;
   }
-  
+
   .products-grid {
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   }
-  
+
   .product-image {
     height: 250px;
   }
