@@ -1,62 +1,70 @@
-'use client'
+'use client';
 
-import { useState } from "react"
-import Link from "next/link"
-import ProductCard from "@/components/product-card"
-import styles from "../styles/page.css"
-import DigitalClock from "./DigitalClock"
-import { useCart } from "@/components/cartcontext"
-import ProductModal from "@/components/ProductModal" // 🆕 Importa o modal
-
-import {
-  ClerkProvider,
-  SignInButton,
-  SignUpButton,
-  SignedIn,
-  SignedOut,
-  UserButton,
-} from '@clerk/nextjs'
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import ProductCard from "@/components/product-card";
+import DigitalClock from "./DigitalClock";
+import { useCart } from "@/components/cartcontext";
+import ProductModal from "@/components/ProductModal";
+import '../styles/page.css';
+import { useSession, signOut } from 'next-auth/react';
+import { useRouter } from 'next/router';
+import { db } from '../lib/firebase';
+import { collection, getDocs } from 'firebase/firestore';
 
 export default function Home() {
-  const { cartItems, addToCart } = useCart()
+  const { cartItems, addToCart } = useCart();
+  const { data: session, status } = useSession();
+  const router = useRouter();
 
-  // 🆕 Gerenciamento do modal
-  const [selectedProduct, setSelectedProduct] = useState(null)
+  const [products, setProducts] = useState([]);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/login');
+    }
+  }, [status, router]);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const productsCollection = collection(db, 'products');
+        const querySnapshot = await getDocs(productsCollection);
+        const productsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setProducts(productsData);
+      } catch (error) {
+        console.error('Erro ao buscar produtos: ', error);
+      }
+    };
+
+    fetchProducts();
+  }, []); // Executa apenas uma vez ao montar o componente
 
   const handleOpenModal = (product) => {
-    setSelectedProduct(product)
-  }
+    setSelectedProduct(product);
+  };
 
   const handleCloseModal = () => {
-    setSelectedProduct(null)
-  }
+    setSelectedProduct(null);
+  };
 
   const handleAddToCart = (product) => {
-    addToCart(product)
-    setSelectedProduct(null)
+    addToCart(product);
+    setSelectedProduct(null);
+  };
+
+  const handleLogout = async () => {
+    await signOut({ redirect: '/login' });
+  };
+
+  if (status === 'loading') {
+    return <p>A carregar...</p>;
   }
 
-  const products = [
-    {
-      id: 1,
-      name: "Air Force 1 [WHITE]",
-      price: 120.00,
-      image: "https://i.postimg.cc/vm5yZ58g/af1.webp",
-    },
-    {
-      id: 2,
-      name: "Jordan 4 Retro - Midnight Navy",
-     price: 385.00 ,
-      image: "https://i.postimg.cc/6qfC8d6h/aj4-midnightnavy-back-removebg-preview.png",
-    },
-    {
-      id: 3,
-      name: "Air Jordan 3 Retro Green Glow",
-      price: 200.00,
-      image: "https://i.postimg.cc/W4qrGRbz/zapatilla-jordan-air-jordan-3-retro-green-glow-black-green-glow-wolf-grey-white-0-removebg-preview.png",
-    },
-   
-  ]
+  if (status === 'unauthenticated') {
+    return null;
+  }
 
   return (
     <main className="main">
@@ -73,22 +81,12 @@ export default function Home() {
 
             <Link href="/cartpage" className="cartLink">
               <span>🛒</span> Carrinho ({cartItems.reduce((sum, item) => sum + item.quantity, 0)})
-              
+            </Link>
+            <Link href="/conta" className="cartLink">
+              <span>👤</span> Conta
             </Link>
 
-            
-
-            <ClerkProvider>
-              <header className="flex justify-end items-center p-4 gap-4 h-16">
-                <SignedOut>
-                  <SignInButton />
-                  <SignUpButton />
-                </SignedOut>
-                <SignedIn>
-                  <UserButton />
-                </SignedIn>
-              </header>
-            </ClerkProvider>
+            <button onClick={handleLogout} className="button2">Logout</button>
           </div>
         </header>
 
@@ -108,13 +106,17 @@ export default function Home() {
           <div className="productsContainer">
             <div className="productsGrid">
               {products.map((product) => (
-                <div key={product.id}>
-                  <ProductCard name={product.name} price={product.price} image={product.image} />
+                <div key={product.id} className="productWrapper">
+                  <ProductCard
+                    name={product.name}
+                    price={product.price}
+                    image={product.image}
+                  />
                   <button
                     className="addToCartBtn"
                     onClick={() => handleOpenModal(product)}
                   >
-                    Abrir
+                    Ver Detalhes
                   </button>
                 </div>
               ))}
@@ -123,12 +125,13 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 🆕 Modal de Produto */}
-      <ProductModal
-        product={selectedProduct}
-        onClose={handleCloseModal}
-        onAdd={handleAddToCart}
-      />
+      {selectedProduct && (
+        <ProductModal
+          product={selectedProduct}
+          onClose={handleCloseModal}
+          onAdd={handleAddToCart}
+        />
+      )}
     </main>
-  )
+  );
 }

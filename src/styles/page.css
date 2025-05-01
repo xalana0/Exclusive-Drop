@@ -1,37 +1,40 @@
 @import url('https://fonts.googleapis.com/css2?family=Carattere&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Carattere&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap');
 
+
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  /* Usar a fonte Roboto Mono como padrão, a menos que especificado de outra forma */
+  font-family: "Roboto Mono", serif;
+  font-style: normal;
 }
 
-.html, .body {
-  width: 100%;
-  height: 100%;
-  overflow-x: hidden;
-  margin: 0;
-  padding: 0;
+body {
+  /* Definir a cor de fundo do body para preencher toda a viewport */
+  background-color: #00000065; /* Cor de fundo do container */
 }
-
 .main {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: #000;
+  background-color: #00000065; /* Fundo preto semi-transparente, como no carrinho */
 }
 
 .nome {
   color: white;
-  font-family: "Carattere", serif;
+  font-family: "Carattere", cursive;
   font-weight: 400;
   font-size: 50px;
   font-style: normal;
-  }
+  text-align: center; /* Centralizei o nome */
+  padding: 2rem 0; /* Adicionei um pouco de padding vertical */
+}
 
 .content {
-  background-color: #000000;
+  background-color: transparent; /* Deixei transparente para mostrar o fundo do main */
   color: #ffffff;
   flex: 1;
   display: flex;
@@ -42,15 +45,16 @@
   max-width: 1200px;
   margin: 0 auto;
   width: 100%;
-  padding: 16px;
+  padding: 1rem 16px; /* Reduzi o padding vertical */
   display: flex;
   justify-content: space-between;
   align-items: center;
+  border-bottom: 1px solid #ddd; /* Borda mais clara */
 }
 
 .logo {
-  width: 150px;
-  height: 80px;
+  width: 120px; /* Reduzi um pouco o tamanho do logo */
+  height: auto;
   display: flex;
   align-items: center;
 }
@@ -58,31 +62,36 @@
 .logoImage {
   width: 100%;
   height: auto;
-  filter: invert(1);
+  filter: invert(0.8); /* Inversão mais suave */
 }
 
 .headerLinks {
   display: flex;
   align-items: center;
-  gap: 24px;
-  font-family: "Roboto Mono", serif;
+  gap: 1.5rem; /* Reduzi o espaçamento */
+  font-family: "Roboto Mono", monospace;
   font-weight: 400;
   font-style: normal;
 }
 
-
 .cartLink,
 .checkoutLink {
-  color: #ffffff;
+  color: #fff;
   text-decoration: none;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 0.5rem;
+  padding: 0.5rem 0; /* Adicionei um pouco de padding vertical */
+}
+
+.cartLink:hover,
+.checkoutLink:hover {
+  text-decoration: underline;
 }
 
 .mainContent {
   max-width: 1200px;
-  margin: 0 auto;
+  margin: 2rem auto 0; /* Adicionei margem superior */
   width: 100%;
   padding: 0 16px;
   display: flex;
@@ -90,32 +99,32 @@
 }
 
 .sidebar {
-  width: 192px;
-  padding-top: 32px;
-  font-family: "Roboto Mono", serif;
+  width: 200px; /* Largura ligeiramente maior */
+  padding-top: 1rem;
+  font-family: "Roboto Mono", monospace;
   font-weight: 400;
   font-style: normal;
-  
+  border-right: 1px solid #ddd; /* Borda mais clara */
+  padding-right: 1rem;
 }
 
 .addToCartBtn {
-  background-color: transparent;
-  border: 2px solid #ffffff;
-  color: #ffffff;
-  padding: 8px 16px;
+  background-color: white; /* Fundo branco, como os itens do carrinho */
+  border: 1px solid #ddd; /* Borda similar */
+  color: #333;
+  padding: 0.5rem 1rem;
   font-weight: bold;
-  border-radius: 6px;
+  border-radius: 0.375rem; /* Bordas mais suaves */
   cursor: pointer;
-  margin-top: 10px;
+  margin-top: 1rem;
   display: block;
   margin-left: auto;
   margin-right: auto;
-  transition: all 0.3s ease;
+  transition: background-color 0.3s ease;
 }
 
 .addToCartBtn:hover {
-  background: white;
-  color: rgb(0, 0, 0);
+  background: #eee; /* Hover mais suave */
 }
 
 .navList {
@@ -124,31 +133,30 @@
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 1rem; /* Espaçamento similar */
 }
 
 .navLink {
-  color: #ffffff;
+  color: #fff;
   text-decoration: none;
-}
-.navLink:hover{
- 
-  font-style:oblique;
+  padding: 0.5rem 0; /* Adicionei um pouco de padding vertical */
 }
 
 .navLink:hover {
+  font-style: normal; /* Removi o estilo oblíquo */
   text-decoration: underline;
 }
 
 .productsContainer {
   flex: 1;
-  padding: 32px 0;
+  padding: 1rem 0; /* Reduzi o padding vertical */
+  padding-left: 1rem; /* Adicionei padding esquerdo */
 }
 
 .productsGrid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 32px;
+  gap: 2rem; /* Espaçamento similar */
 }
 
 @media (min-width: 768px) {
@@ -162,9 +170,35 @@
     grid-template-columns: repeat(3, 1fr);
   }
 }
+
 .productWrapper {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.5rem;
+  background: white; /* Fundo branco para os cards de produto */
+  border-radius: 1rem;
+  padding: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); /* Sombra suave */
+}
+
+/* Estilos para o botão de logout */
+.button2 {
+  background-color: #f44336; /* Vermelho similar ao botão de remover */
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 1rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-family: "Roboto Mono", monospace;
+  font-weight: bold;
+}
+
+.button2:hover {
+  background-color: #d32f2f;
 }

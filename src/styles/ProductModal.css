@@ -1,64 +1,354 @@
+/* styles/ProductModal.css */
+
 .overlay {
-    position: fixed;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* Garante que o modal está por cima de outros elementos */
+}
+
+.modal {
+  background: #000000c7;
+  padding: 20px;
+  border-radius: 10px;
+  position: relative;
+  width: 90%; /* Largura do modal */
+  max-width: 900px; /* Largura máxima */
+  max-height: 90vh; /* Altura máxima para evitar overflow */
+  overflow-y: auto; /* Adiciona scroll se o conteúdo for muito alto */
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  display: flex; /* Usar flexbox para o layout interno */
+  flex-direction: column; /* Itens empilhados verticalmente */
+}
+
+.closeBtn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #555;
+}
+
+.modalContent {
+  display: flex; /* Layout flexbox para a imagem/3D e detalhes */
+  gap: 20px; /* Espaço entre as colunas */
+  flex-wrap: wrap; /* Permite quebra de linha em telas pequenas */
+}
+
+/* Novo contentor para a mídia (imagem ou 3D) */
+.media-container {
+    flex: 1; /* Permite que o contentor de mídia ocupe o espaço disponível */
+    min-width: 300px; /* Largura mínima para o contentor de mídia */
+    display: flex;
+    flex-direction: column; /* Botões de toggle em cima, mídia em baixo */
+    align-items: center;
+}
+
+/* Estilos para os botões de alternar visualização */
+.view-toggle-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px; /* Espaço abaixo dos botões */
+}
+
+.view-toggle-btn {
+    padding: 8px 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #f0f0f0;
+    color: #333;
+    font-weight: bold;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.view-toggle-btn.active {
+    background-color: #007bff; /* Cor para o botão ativo */
+    color: white;
+    border-color: #007bff;
+}
+
+.view-toggle-btn:hover:not(.active) {
+    background-color: #e0e0e0;
+}
+
+
+/* Estilos para o Carrossel de Imagens (mantido, mas dentro do media-container) */
+.imageCarousel {
+  position: relative;
+  width: 100%; /* Ocupa a largura total do media-container */
+  max-width: 500px; /* Largura máxima para a imagem */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.productImageLarge {
+  width: 100%;
+  height: auto;
+  max-height: 400px; /* Altura máxima para a imagem */
+  object-fit: contain; /* Garante que a imagem se ajusta sem distorcer */
+  border-radius: 8px;
+}
+
+.prevImageBtn,
+.nextImageBtn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+  z-index: 10;
+  border-radius: 50%;
+  font-size: 1.2rem;
+}
+
+.prevImageBtn {
+  left: 10px;
+}
+
+.nextImageBtn {
+  right: 10px;
+}
+
+.thumbnails {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+  gap: 5px;
+}
+
+.thumbnail {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border: 2px solid transparent;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: border-color 0.3s ease;
+}
+
+.thumbnail.active {
+  border-color: #007bff;
+}
+
+/* --- Estilos para o contentor do Sketchfab iframe --- */
+.sketchfab-container {
+    width: 100%; /* Ocupa a largura total do media-container */
+    /* Defina uma altura ou use proporção para o iframe */
+    /* Exemplo: usando padding-top para manter proporção 16:9 */
+    position: relative;
+    padding-top: 56.25%; /* 16:9 Aspect Ratio (altura / largura * 100) */
+    overflow: hidden;
+    border-radius: 8px; /* Borda arredondada */
+}
+
+.sketchfab-iframe {
+    position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.7);
+    border: none; /* Remover borda padrão do iframe */
+}
+
+
+/* Estilos para os Detalhes do Produto (mantido, mas ajustado para flexbox) */
+.productDetails {
+  flex: 1; /* Permite que os detalhes ocupem o espaço restante */
+  min-width: 300px; /* Largura mínima para os detalhes */
+  display: flex;
+  flex-direction: column;
+}
+
+.productName {
+  font-size: 1.8rem;
+  margin-bottom: 10px;
+  color: white;
+}
+
+.productPrice {
+  font-size: 1.5rem;
+  color: #007bff;
+  margin-bottom: 15px;
+}
+
+.productDescription {
+  margin-bottom: 20px;
+  color: #555;
+}
+
+.sizeSelection {
+  margin-bottom: 15px;
+}
+
+.sizeSelection label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.sizeDropdown {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1rem;
+  width: 100%; /* Ocupa a largura total disponível */
+  box-sizing: border-box;
+}
+
+.stockInfo {
+    margin-top: 5px;
+    font-size: 0.9rem;
+    color: #777;
+}
+
+.sizeGuideBtn {
+  display: block; /* Torna o botão um bloco para ocupar a largura */
+  width: 100%; /* Ocupa a largura total disponível */
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f0f0f0;
+  cursor: pointer;
+  margin-bottom: 15px;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.sizeGuideBtn:hover {
+  background-color: #e0e0e0;
+}
+
+
+/* Estilos para o Guia de Tamanhos (modal/overlay separado) */
+.sizeGuideOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 9999;
-  }
-  
-  .modal {
-    background: #111;
-    padding: 30px;
+    z-index: 1010; /* Maior que o modal principal */
+    overflow-y: auto; /* Adiciona scroll se o guia for muito grande */
+}
+
+.sizeGuideContent {
+    background: white;
+    padding: 20px;
     border-radius: 10px;
-    color: white;
-    text-align: center;
-    width: 320px;
-    position: relative;
-    font-family: "Roboto Mono", serif;
-    font-style: normal;
-  }
-  
-  .closeBtn {
-    position: absolute;
-    top: 8px;
-    right: 12px;
-    background: none;
-    color: white;
-    font-size: 18px;
-    border: none;
-    cursor: pointer;
-  }
-  
-  .image {
-    width: 100%;
-    height: auto;
-    border-radius: 8px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    position: relative; /* Para posicionar o botão de fechar */
+}
+
+.sizeGuideContent h3 {
+    margin-top: 0;
     margin-bottom: 15px;
-  }
-  
-  .dropdown {
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.sizeGuideContent table {
     width: 100%;
-    margin-top: 10px;
-    padding: 8px;
-    font-size: 16px;
-    font-family: "Roboto Mono", serif;
-    font-style: normal;
-  }
-  
-  .addBtn {
-    margin-top: 15px;
-    padding: 10px 20px;
-    background: none;
-    border: 2px solid white;
-    color: white;
-    cursor: pointer;
+    border-collapse: collapse;
+    margin-bottom: 15px;
+}
+
+.sizeGuideContent th,
+.sizeGuideContent td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+}
+
+.sizeGuideContent th {
+    background-color: #f2f2f2;
+}
+
+.closeSizeGuideBtn {
+    display: block; /* Torna o botão um bloco */
+    width: 100%; /* Ocupa a largura total */
+    padding: 10px;
+    border: none;
     border-radius: 5px;
-    font-family: "Roboto Mono", serif;
-    font-style: normal;
+    background-color: #dc3545; /* Vermelho */
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.closeSizeGuideBtn:hover {
+    background-color: #c82333;
+}
+
+
+.addToCartBtn {
+  display: block; /* Torna o botão um bloco */
+  width: 100%; /* Ocupa a largura total disponível */
+  padding: 12px;
+  background-color: #28a745; /* Verde */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: background-color 0.3s ease;
+}
+
+.addToCartBtn:hover {
+  background-color: #218838;
+}
+
+/* Placeholder styles */
+.no-image-placeholder,
+.no-3d-placeholder {
+    width: 100%;
+    height: 300px; /* Altura similar à da imagem/iframe */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #e9ecef; /* Cor de fundo clara */
+    color: #6c757d; /* Cor de texto */
+    border-radius: 8px;
+    text-align: center;
+    font-style: italic;
+}
+
+
+/* Responsividade básica */
+@media (max-width: 768px) {
+  .modalContent {
+    flex-direction: column; /* Empilha imagem/3D e detalhes em telas menores */
   }
-  
+
+  .media-container,
+  .productDetails {
+    width: 100%; /* Ocupam a largura total */
+    min-width: auto; /* Remove largura mínima */
+  }
+
+   .imageCarousel,
+   .sketchfab-container {
+       max-width: 100%; /* Ocupam a largura total do container */
+   }
+}
