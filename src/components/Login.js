@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import { signIn } from 'next-auth/react'; // Importe signIn
-import '../styles/LoginRegister.css';
+
 import BackgroundAnimation from './Background';
 
 const Login = () => {

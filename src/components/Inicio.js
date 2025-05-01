@@ -1,6 +1,6 @@
-import '../styles/Inicio.css';
-import '../styles/page.css';
-import '../styles/LoginRegister.css';
+
+
+
 
 import { useState } from 'react';
 import Link from 'next/link';

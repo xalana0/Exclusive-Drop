@@ -6,7 +6,7 @@ import ProductCard from "@/components/product-card";
 import DigitalClock from "./DigitalClock";
 import { useCart } from "@/components/cartcontext";
 import ProductModal from "@/components/ProductModal";
-import '../styles/page.css';
+
 import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import { db } from '../lib/firebase';

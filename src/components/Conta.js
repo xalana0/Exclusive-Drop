@@ -13,8 +13,7 @@ import {
   getDocs,
   updateDoc
 } from 'firebase/firestore';
-import '../styles/account.css';
-import '../styles/add-product-inline.css'; // Make sure this file exists for product form styles
+ // Make sure this file exists for product form styles
 
 const Conta = () => {
   const { data: session, status } = useSession();

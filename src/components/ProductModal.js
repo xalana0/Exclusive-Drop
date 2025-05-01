@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import '../styles/ProductModal.css';
+// Removida a importação global de CSS
+// import '../styles/ProductModal.css';
 
 const ProductModal = ({ product, onClose, onAdd }) => {
   const [selectedSize, setSelectedSize] = useState("");
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showSizeGuide, setShowSizeGuide] = useState(false);
   const [stockForSelectedSize, setStockForSelectedSize] = useState(null);
-  // Novo estado para controlar a visualização (imagem ou 3D)
+  // Estado para controlar a visualização (imagem ou 3D)
   const [show3DView, setShow3DView] = useState(false);
 
   if (!product) return null;

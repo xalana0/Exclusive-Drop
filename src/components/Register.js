@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router';
 import { collection, addDoc, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import '../styles/LoginRegister.css';
+
 import { useState } from 'react';
 import BackgroundAnimation from './Background';
 import bcrypt from 'bcryptjs'; // Importe bcrypt
