@@ -1,47 +1,118 @@
+/* product-card.module.css */
+.modal-media-and-toggle-container {
+  position: relative; /* Importante para o z-index dos filhos */
+  /* Ajuste a largura conforme necessário, talvez 50% ou 60% do modal */
+  width: 50%; /* Exemplo, ajuste conforme seu layout */
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Centraliza o conteúdo horizontalmente */
+  justify-content: flex-start; /* Alinha o conteúdo ao topo */
+  padding-bottom: 50px; /* Garante espaço para os botões se estiverem no fundo */
+}
+
+.toggle-view-buttons {
+  position: absolute; /* Posiciona os botões de forma absoluta */
+  bottom: 10px; /* Distância do fundo do modal-media-and-toggle-container */
+  left: 50%; /* Centraliza horizontalmente */
+  transform: translateX(-50%); /* Ajuste para o centro exato */
+  z-index: 10; /* Garante que estejam acima de outros elementos */
+  display: flex;
+  gap: 10px; /* Espaçamento entre os botões */
+  background-color: rgba(
+    255,
+    255,
+    255,
+    0.9
+  ); /* Fundo semi-transparente para visibilidade */
+  padding: 8px 15px;
+  border-radius: 5px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-view-buttons button {
+  background: none;
+  border: none;
+  color: #333;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 5px 10px;
+  border-radius: 3px;
+  transition: background-color 0.3s ease;
+}
+
+.toggle-view-buttons button:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
 .productLink {
-    display: block;
-    text-decoration: none;
-  }
-  
-  .productCard {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .imageContainer {
-    margin-bottom: 16px;
-    background-color: #000000;
-    width: 100%;
-    position: relative;
-    aspect-ratio: 1 / 1;
-    overflow: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  .productImage {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-  }
-  
-  .productName {
-    color: #000000;
-    font-family: "Roboto Mono", serif;
-    font-style: normal;
-    text-align: center;
-    margin-bottom: 4px;
-    font-size: 1rem;
-    font-weight: normal;
-  }
-  
-  .productPrice {
-    color: #ffffff;
-    font-family: "Roboto Mono", serif;
-    text-align: center;
-    margin: 0;
-  }
-  
-  
+  text-decoration: none;
+  color: inherit;
+}
+
+.productCard {
+  background-color: rgba(0, 0, 0, 0.7); /* Fundo mais escuro e semi-transparente */
+  border-radius: 10px; /* Cantos mais arredondados */
+  padding: 1.5rem; /* Aumentar padding */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); /* Sombra mais forte */
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Transição suave */
+  height: 100%; /* Garante que o cartão ocupe a altura total no grid */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* Espaça o conteúdo */
+  border: 1px solid rgba(255, 255, 255, 0.1); /* Borda subtil */
+  position: relative; /* Necessário para posicionar o botão da wishlist */
+}
+
+.productCard:hover {
+  transform: translateY(-8px); /* Elevação mais pronunciada */
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7); /* Sombra mais intensa */
+}
+
+.imageContainer {
+  margin-bottom: 1rem; /* Mais espaçamento */
+  background-color: rgba(
+    255,
+    255,
+    255,
+    0.1
+  ); /* Fundo mais claro para a imagem */
+  width: 100%;
+  /* Correção para proporção de imagem: usar aspect-ratio ou padding-bottom */
+  aspect-ratio: 1 / 1; /* Força uma proporção 1:1 (quadrado) */
+  position: relative;
+  overflow: hidden; /* Garante que a imagem não saia do contêiner */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 5px; /* Levemente arredondado */
+}
+
+.productImage {
+  max-width: 100%; /* Garante que a imagem não ultrapasse a largura do contêiner */
+  max-height: 100%; /* Garante que a imagem não ultrapasse a altura do contêiner */
+  object-fit: contain; /* Redimensiona a imagem para caber no contêiner, mantendo a proporção */
+  transition: transform 0.4s ease; /* Transição mais lenta para o zoom */
+}
+
+.productCard:hover .productImage {
+  transform: scale(1.1); /* Efeito de zoom mais pronunciado na imagem */
+}
+
+.productName {
+  color: white; /* Texto branco */
+  font-size: 1.3rem; /* Tamanho da fonte maior */
+  margin-bottom: 0.5rem; /* Espaçamento menor */
+  font-weight: 600;
+}
+
+.productPrice {
+  color: #007bff; /* Cor de destaque para o preço */
+  font-size: 1.1rem; /* Tamanho da fonte maior */
+  font-weight: bold;
+}
+
+/* Removido: Estilos para o botão da Lista de Desejos */
+/* .wishlistBtn { ... } */
+/* .wishlistBtn:hover { ... } */
+/* .wishlistBtn.wishlisted { ... } */

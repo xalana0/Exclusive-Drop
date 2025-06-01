@@ -1,13 +1,13 @@
 // pages/_app.js
 // Importe TODOS os seus ficheiros CSS globais aqui e APENAS aqui.
-import '../styles/account.css';
+
 import '../styles/add-product-inline.css';
 import '../styles/Inicio.css';
 import '../styles/LoginRegister.css';
 import '../styles/ProductModal.css';
 import '../styles/cart.css';
 import '../styles/page.css';
-
+import '../styles/account.css';
 import { CartProvider } from '@/components/cartcontext'; // Já está importado
 
 // Importe outros ficheiros CSS globais que possa ter

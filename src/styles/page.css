@@ -1,204 +1,466 @@
+/* page.css */
 @import url('https://fonts.googleapis.com/css2?family=Carattere&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Carattere&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap');
-
-
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  /* Usar a fonte Roboto Mono como padrão, a menos que especificado de outra forma */
-  font-family: "Roboto Mono", serif;
+  font-family: "Roboto Mono", serif; /* Definir Roboto Mono como padrão */
   font-style: normal;
 }
 
 body {
-  /* Definir a cor de fundo do body para preencher toda a viewport */
-  background-color: #00000065; /* Cor de fundo do container */
+  background-color: #000; /* Fundo escuro para contrastar com o GIF */
 }
+
 .main {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: #00000065; /* Fundo preto semi-transparente, como no carrinho */
+  position: relative; /* Para o z-index do conteúdo */
+  z-index: 2; /* Garante que o conteúdo fique acima do GIF */
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 3rem; /* Aumentar padding */
+  background-color: rgba(0, 0, 0, 0.6); /* Fundo semi-transparente para o cabeçalho */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Linha divisória sutil */
+  position: sticky; /* Fixar cabeçalho no topo */
+  top: 0;
+  width: 100%;
+  z-index: 10; /* Acima do conteúdo principal */
+}
+
+/* Estilo para o link do título no cabeçalho */
+.nome-link {
+  text-decoration: none; /* Remove o sublinhado do link do título */
+  color: inherit; /* Garante que a cor do texto seja herdada */
 }
 
 .nome {
   color: white;
   font-family: "Carattere", cursive;
   font-weight: 400;
-  font-size: 50px;
+  font-size: 3rem; /* Tamanho adequado para cabeçalho */
   font-style: normal;
-  text-align: center; /* Centralizei o nome */
-  padding: 2rem 0; /* Adicionei um pouco de padding vertical */
+  text-align: center;
+  padding: 0; /* Remover padding aqui, já tratado no header */
 }
 
-.content {
-  background-color: transparent; /* Deixei transparente para mostrar o fundo do main */
-  color: #ffffff;
-  flex: 1;
+.header-links {
   display: flex;
-  flex-direction: column;
-}
-
-.header {
-  max-width: 1200px;
-  margin: 0 auto;
-  width: 100%;
-  padding: 1rem 16px; /* Reduzi o padding vertical */
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid #ddd; /* Borda mais clara */
-}
-
-.logo {
-  width: 120px; /* Reduzi um pouco o tamanho do logo */
-  height: auto;
-  display: flex;
+  gap: 2rem; /* Espaçamento entre os links */
   align-items: center;
 }
 
-.logoImage {
-  width: 100%;
-  height: auto;
-  filter: invert(0.8); /* Inversão mais suave */
-}
-
-.headerLinks {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem; /* Reduzi o espaçamento */
-  font-family: "Roboto Mono", monospace;
-  font-weight: 400;
-  font-style: normal;
-}
-
-.cartLink,
-.checkoutLink {
-  color: #fff;
+.cartLink, .logout-button {
+  color: white;
   text-decoration: none;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0; /* Adicionei um pouco de padding vertical */
+  font-size: 1rem;
+  font-weight: 500;
+  transition: color 0.3s ease, background-color 0.3s ease, transform 0.3s ease; /* Transições adicionadas */
+  padding: 0.5rem 1rem; /* Padding para a área de clique */
+  border-radius: 5px;
 }
 
-.cartLink:hover,
-.checkoutLink:hover {
-  text-decoration: underline;
+.cartLink:hover, .logout-button:hover {
+  color: #aaa; /* Cor mais clara ao passar o mouse */
+  background-color: rgba(255, 255, 255, 0.1); /* Fundo sutil */
+  transform: translateY(-2px); /* Leve elevação */
+}
+
+.logout-button {
+  background-color: transparent;
+  border: 1px solid white; /* Borda branca fina */
+  cursor: pointer;
 }
 
 .mainContent {
-  max-width: 1200px;
-  margin: 2rem auto 0; /* Adicionei margem superior */
-  width: 100%;
-  padding: 0 16px;
   display: flex;
-  flex: 1;
+  flex: 1; /* Ocupa o espaço restante */
+  padding: 2rem 0; /* Padding vertical para o conteúdo principal */
 }
 
 .sidebar {
-  width: 200px; /* Largura ligeiramente maior */
-  padding-top: 1rem;
-  font-family: "Roboto Mono", monospace;
-  font-weight: 400;
-  font-style: normal;
-  border-right: 1px solid #ddd; /* Borda mais clara */
-  padding-right: 1rem;
-}
-
-.addToCartBtn {
-  background-color: white; /* Fundo branco, como os itens do carrinho */
-  border: 1px solid #ddd; /* Borda similar */
-  color: #333;
-  padding: 0.5rem 1rem;
-  font-weight: bold;
-  border-radius: 0.375rem; /* Bordas mais suaves */
-  cursor: pointer;
-  margin-top: 1rem;
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-  transition: background-color 0.3s ease;
-}
-
-.addToCartBtn:hover {
-  background: #eee; /* Hover mais suave */
+  width: 200px;
+  padding: 0 2rem;
+  border-right: 1px solid rgba(255, 255, 255, 0.1); /* Borda sutil */
 }
 
 .navList {
-  list-style-type: none;
+  list-style: none;
   padding: 0;
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 1rem; /* Espaçamento similar */
+  gap: 1rem; /* Espaçamento entre itens da lista */
+}
+
+.navList li {
+  margin: 0;
 }
 
 .navLink {
-  color: #fff;
+  color: white;
   text-decoration: none;
-  padding: 0.5rem 0; /* Adicionei um pouco de padding vertical */
+  padding: 0.8rem 0; /* Mais padding para os links */
+  display: block; /* Para ocupar toda a largura e o padding funcionar */
+  font-size: 1rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
 }
 
 .navLink:hover {
-  font-style: normal; /* Removi o estilo oblíquo */
-  text-decoration: underline;
+  color: #aaa;
+  transform: translateX(8px); /* Efeito sutil de deslizamento ao passar o mouse, um pouco mais pronunciado */
 }
+
+/* ------------------------------------- */
+/* Seção de Destaque/Hero Banner */
+.hero-banner {
+  width: 100%;
+  height: 400px; /* Altura do banner */
+  
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  color: white;
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+  margin-bottom: 3rem; /* Espaçamento abaixo do banner */
+}
+
+.hero-banner h1 {
+  font-family: "Carattere", cursive;
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.hero-banner p {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+  max-width: 600px;
+}
+
+.hero-banner-btn {
+  background-color: transparent;
+  border: 2px solid white;
+  color: white;
+  padding: 15px 30px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 50px; /* Botão arredondado */
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.hero-banner-btn:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-5px) scale(1.03);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* Container e botão para alternar filtros */
+.filter-toggle-container {
+  text-align: center;
+  margin-bottom: 1.5rem; /* Espaçamento abaixo do botão */
+}
+
+.toggle-filters-btn {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  display: inline-flex; /* Para alinhar ícone/texto */
+  align-items: center;
+  gap: 8px;
+}
+
+.toggle-filters-btn:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+
+/* Filtros */
+.filters-container {
+  padding: 0 3rem 2rem; /* Espaçamento abaixo dos filtros */
+  display: flex;
+  flex-wrap: wrap; /* Para responsividade */
+  gap: 1.5rem; /* Espaçamento entre os filtros */
+  justify-content: center;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 2rem;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.filter-group label {
+  color: #ccc;
+  font-size: 0.9rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.filter-group select,
+.filter-group input[type="number"] {
+  padding: 8px 12px;
+  border-radius: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background-color: rgba(0, 0, 0, 0.4);
+  color: white;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.filter-group select:focus,
+.filter-group input[type="number"]:focus {
+  border-color: #8A2BE2; /* Roxo */
+  box-shadow: 0 0 0 2px rgba(138, 43, 226, 0.2); /* Sombra roxa */
+}
+
+.filter-group input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #8A2BE2; /* Cor do checkbox - Roxo */
+  cursor: pointer;
+}
+
+/* Destaque de Categorias na Home */
+.category-highlights {
+  padding: 2rem 3rem;
+  margin-bottom: 3rem;
+}
+
+.category-highlights h2 {
+  font-size: 2.2rem;
+  color: white;
+  text-align: center;
+  margin-bottom: 2.5rem;
+  font-weight: bold;
+  text-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
+}
+
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 2rem;
+}
+
+.category-card {
+  background-color: rgba(0, 0, 0, 0.6);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  text-decoration: none; /* Remove underline do link */
+  color: white; /* Cor do texto padrão */
+}
+
+.category-card:hover {
+  transform: translateY(-10px) scale(1.02);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.7);
+}
+
+.category-image-wrapper {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.category-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.category-card:hover .category-image {
+  transform: scale(1.15); /* Zoom maior na imagem da categoria */
+}
+
+.category-name {
+  padding: 1rem;
+  font-size: 1.3rem;
+  font-weight: 600;
+  text-align: center;
+  color: white;
+  background-color: rgba(0, 0, 0, 0.7); /* Fundo para o nome */
+}
+
+
+/* ------------------------------------- */
 
 .productsContainer {
   flex: 1;
-  padding: 1rem 0; /* Reduzi o padding vertical */
-  padding-left: 1rem; /* Adicionei padding esquerdo */
+  padding: 0 3rem; /* Padding horizontal para a área de produtos */
 }
 
 .productsGrid {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 2rem; /* Espaçamento similar */
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Mais flexibilidade */
+  gap: 2.5rem; /* Aumentar o espaçamento entre produtos */
 }
 
-@media (min-width: 768px) {
-  .productsGrid {
-    grid-template-columns: repeat(2, 1fr);
+/* Animação de entrada para os produtos */
+@keyframes fadeInSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-@media (min-width: 1024px) {
-  .productsGrid {
-    grid-template-columns: repeat(3, 1fr);
-  }
+.productWrapper.animate-in {
+  animation: fadeInSlideUp 0.8s ease-out forwards; /* Ajuste a duração e easing conforme desejar */
 }
+
 
 .productWrapper {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
-  background: white; /* Fundo branco para os cards de produto */
-  border-radius: 1rem;
-  padding: 1rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); /* Sombra suave */
+  gap: 1rem; /* Espaçamento entre o card e o botão */
+  background-color: rgba(0, 0, 0, 0.5); /* Fundo semi-transparente para o wrapper do produto */
+  border-radius: 10px; /* Bordas arredondadas */
+  padding: 1.5rem; /* Padding interno */
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3); /* Sombra sutil */
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Adicionado box-shadow na transição */
+  opacity: 0; /* Escondido por padrão para a animação */
+  transform: translateY(20px); /* Posição inicial para a animação */
 }
 
-/* Estilos para o botão de logout */
-.button2 {
-  background-color: #f44336; /* Vermelho similar ao botão de remover */
+.productWrapper:hover {
+  transform: translateY(-8px) scale(1.02); /* Efeito de elevação mais pronunciado e leve escala ao passar o mouse */
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.6); /* Sombra mais forte no hover */
+}
+
+.addToCartBtn {
+  background-color: transparent;
+  border: 1px solid white;
   color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 1rem;
-  border-radius: 0.375rem;
+  padding: 12px 25px;
+  font-size: 0.95rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.3s ease;
-  font-family: "Roboto Mono", monospace;
-  font-weight: bold;
+  border-radius: 5px;
+  transition: all 0.3s ease; /* Transição para todas as propriedades */
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  position: relative; /* Para o efeito de "estrelas" ou "brilho" */
+  overflow: hidden; /* Para esconder o que está fora */
+  z-index: 1;
 }
 
-.button2:hover {
-  background-color: #d32f2f;
+.addToCartBtn:hover {
+  background-color: rgba(255, 255, 255, 0.2); /* Fundo ligeiramente mais claro */
+  transform: translateY(-3px) scale(1.03); /* Elevação e escala um pouco maiores */
+  border-color: #eee; /* Borda mais clara no hover */
+}
+
+/* Efeito de brilho/overlay para o addToCartBtn no hover */
+.addToCartBtn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.6s ease;
+  z-index: -1;
+}
+
+.addToCartBtn:hover::before {
+  left: 100%;
+}
+
+
+/* Responsividade básica */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    padding: 1rem;
+    gap: 1rem;
+  }
+  .header-links {
+    gap: 1rem;
+  }
+  .mainContent {
+    flex-direction: column;
+    padding: 1rem 0;
+  }
+  .sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 1rem 0;
+    text-align: center;
+  }
+  .navList {
+    flex-direction: row;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .productsContainer {
+    padding: 1rem;
+  }
+  .productsGrid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  }
+  .nome {
+    font-size: 3rem;
+  }
+  .hero-banner {
+    height: 300px;
+  }
+  .hero-banner h1 {
+    font-size: 3rem;
+  }
+  .hero-banner p {
+    font-size: 1rem;
+  }
+  .filters-container {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1rem;
+    gap: 1rem;
+  }
+  .category-grid {
+    grid-template-columns: 1fr; /* Uma coluna em telas menores */
+  }
+  
 }

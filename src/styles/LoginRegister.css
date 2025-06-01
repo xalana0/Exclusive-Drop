@@ -1,136 +1,193 @@
+/* LoginRegister.css */
 @import url('https://fonts.googleapis.com/css2?family=Carattere&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Carattere&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap');
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-
 }
 
+/* Removido o estilo .static-background */
 
-
-
+/* O título "Exclusive Drop" */
 .nome {
   color: white;
   font-family: "Carattere", serif;
   font-weight: 400;
-  font-size: 50px;
+  font-size: 5rem; /* Aumentar o tamanho do título */
   font-style: normal;
+  margin-bottom: 0;
+  letter-spacing: 2px;
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  position: relative; /* Para garantir que o título fique acima do GIF */
+  z-index: 5; /* Aumentado para garantir que fique acima do background GIF */
+  
+}
+
+/* Animação de pulsação/flutuação (mantida e aplicada a botões) */
+@keyframes floatingText {
+  0% {
+    transform: translateY(0px);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(-10px); /* Move 10px para cima */
+    opacity: 0.9; /* Pequena pulsação na opacidade */
+  }
+  100% {
+    transform: translateY(0px);
+    opacity: 1;
+  }
 }
 
 .container {
-  height: 100vh;
-  /* Certifique-se de que não há duplicação da propriedade height */
+  height: 100vh; /* GARANTE QUE O CONTENTOR OCUPA A ALTURA TOTAL DA VIEWPORT */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2rem;
-  
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  gap: 2.5rem; /* Aumentar o espaçamento */
   position: relative;
+  z-index: 5; /* Aumentado para garantir que o conteúdo do container fique acima do GIF */
+  text-align: center;
+  padding: 2rem; /* Adicionar algum padding para o conteúdo */
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .card {
-  font-family: "Roboto Mono", serif;
-  font-weight: 400;
-  font-style: normal;
+  background-color: rgba(0, 0, 0, 0.7); /* Fundo semi-transparente para o card */
   padding: 40px;
   border-radius: 10px;
-  box-shadow: 0px 10px 30px rgba(255, 255, 255, 0.164);
-  width: 400px;
-  text-align: center;
+  box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.5); /* Sombra mais discreta */
+  width: 90%;
+  max-width: 400px; /* Limitar largura máxima do card */
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem; /* Espaçamento entre os elementos do card */
+  box-sizing: border-box;
 }
 
 .input-container {
-  margin-bottom: 15px;
-  text-align: left;
+  margin-bottom: 1rem; /* Espaçamento entre os grupos de input */
 }
 
 .input-container label {
   display: block;
-  margin-bottom: 5px;
-  color: #555;
+  margin-bottom: 8px; /* Espaçamento entre label e input */
+  color: white; /* Labels brancas */
+  font-family: "Roboto Mono", serif;
+  font-weight: 400;
+  font-size: 0.95rem;
+  text-align: left; /* Alinhar labels à esquerda */
 }
 
 .input-container input {
   width: 100%;
-  padding: 10px;
-  border: 1px solid #ddd;
+  padding: 12px 15px; /* Mais padding para inputs */
+  border: 1px solid rgba(255, 255, 255, 0.3); /* Borda branca transparente */
   border-radius: 5px;
+  background-color: rgba(255, 255, 255, 0.05); /* Fundo transparente sutil */
+  color: white; /* Texto do input branco */
   box-sizing: border-box;
-  transition: border-color 0.3s;
+  transition: border-color 0.3s, background-color 0.3s;
+  font-family: "Roboto Mono", serif;
+  font-weight: 300; /* Fonte mais leve */
+  font-size: 1rem;
 }
 
 .input-container input:focus {
-  border-color: #007bff;
+  border-color: white; /* Borda branca sólida ao focar */
+  background-color: rgba(255, 255, 255, 0.1); /* Fundo um pouco mais visível ao focar */
   outline: none;
 }
 
-.button {
-  background-color: #000000;
-  border-style: double;
-  border-color: white;
-  color: white;
-  padding: 12px 20px;
-  font-size: 16px;
-  font-weight: bold;
-  margin-top: 10px;
-  cursor: pointer;
-  border-radius: 5px;
-  transition: background-color 0.3s ease, transform 0.3s ease;
-  width: 100%;
-  font-family: "Roboto Mono", serif;
-  font-weight: 400;
-  font-style: normal;
+.input-container input::placeholder {
+  color: rgba(255, 255, 255, 0.5); /* Cor do placeholder */
 }
 
-.button2 {
-  background-color: #000000;
-  border-style: none;
-  border-color: white;
+.button {
+  background-color: transparent;
+  border: none; /* Borda */
   color: white;
-  padding: 12px 20px;
-  font-size: 16px;
-  font-weight: bold;
-  margin-top: 10px;
+  padding: 15px 20px;
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-top: 1.5rem; /* Mais margem superior */
   cursor: pointer;
-  border-radius: 5px;
-  transition: background-color 0.3s ease, transform 0.3s ease;
+  border-radius: 5px; /* Bordas levemente arredondadas */
+  transition: all 0.3s ease;
   width: 100%;
   font-family: "Roboto Mono", serif;
-  font-weight: 400;
-  font-style: normal;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+ 
 }
 
 .button:hover {
-  color: #2b0000;
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px); /* Efeito sutil ao passar o mouse */
 }
 
 .error-message {
-  color: red;
-  font-size: 14px;
+  color: #ff6b6b; /* Vermelho mais suave para erros */
   margin-top: 10px;
+  font-family: "Roboto Mono", serif;
+  font-size: 0.9rem;
 }
 
-.logo {
-  width: 100px;
-  /* Smaller logo para telas pequenas */
+.register-link {
+  color: white;
+  font-family: "Roboto Mono", serif;
+  font-size: 0.9rem;
+  margin-top: 1.5rem;
+}
+
+.register-link a {
+  color: white; /* Link branco */
+  text-decoration: underline; /* Sublinhado para links */
+  transition: color 0.3s ease;
+}
+
+.register-link a:hover {
+  color: #aaa; /* Cor mais clara ao passar o mouse */
 }
 
 .success-section {
+  text-align: center;
+  color: white;
+  font-family: "Roboto Mono", serif;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  gap: 1rem;
 }
 
 .success-msg {
-  color: #00ff88;
-  font-weight: bold;
-  margin-bottom: 20px;
-  text-align: center;
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
 }
 
+.button2 { /* Botão para 'Entrar' após o registro */
+  background-color: transparent;
+  border: none; /* Borda */
+  color: white;
+  padding: 15px 20px;
+  font-size: 1.1rem;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+  width: 100%;
+  font-family: "Roboto Mono", serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
   
+}
+
+.button2:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}

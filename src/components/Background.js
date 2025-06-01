@@ -1,47 +1,33 @@
+'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
+import React from 'react';
 
-const BackgroundAnimation = ({ gifUrl }) => {
-  const router = useRouter();
-  const [key, setKey] = useState(0); // Estado para forçar a re-renderização
-
-  useEffect(() => {
-    const handleRouteChangeComplete = () => {
-      setKey(prevKey => prevKey + 1);
-    };
-
-    router.events.on('routeChangeComplete', handleRouteChangeComplete);
-
-    return () => {
-      router.events.off('routeChangeComplete', handleRouteChangeComplete);
-    };
-  }, [router]);
-
+function BackgroundAnimation({ gifUrl }) {
   return (
     <div
-      key={key}
       style={{
         position: 'fixed',
         top: 0,
         left: 0,
-        width: '100%',
-        height: '100%',
+        width: '100vw',
+        height: '100vh',
         overflow: 'hidden',
-        zIndex: -1,
+        zIndex: 0, // Garante que o GIF fica no fundo
+        pointerEvents: 'none', // Permite que cliques passem para elementos abaixo
       }}
     >
       <img
-        src={'https://i.pinimg.com/originals/45/98/6d/45986d3cf4d64299869db2be4704719e.gif'}
-        alt="Fundo Animado"
+        src={gifUrl}
+        alt="Animação de Fundo"
         style={{
           width: '100%',
           height: '100%',
-          objectFit: 'cover',
+          objectFit: 'cover', // Cobre a área total, cortando se necessário
+          filter: 'brightness(0.6) contrast(1.2)', // Ajusta brilho/contraste para melhor leitura do texto
         }}
       />
     </div>
   );
-};
+}
 
 export default BackgroundAnimation;

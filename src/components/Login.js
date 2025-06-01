@@ -1,21 +1,22 @@
-import { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
-import { signIn } from 'next-auth/react'; // Importe signIn
-
-import BackgroundAnimation from './Background';
+import { signIn } from 'next-auth/react';
+import Link from 'next/link';
+import BackgroundAnimation from '@/components/Background'; // Importa o componente do GIF
 
 const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const router = useRouter();
+  const containerRef = useRef(null);
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setErrorMessage('');
 
-    const result = await signIn('credentials', { // Use o nome do seu provider 'credentials'
-      redirect: false, // Não redirecionar automaticamente
+    const result = await signIn('credentials', {
+      redirect: false,
       username: username,
       password: password,
     });
@@ -23,15 +24,24 @@ const Login = () => {
     if (result?.error) {
       setErrorMessage(result.error);
     } else {
-      router.push('/home'); // Redirecionar para a página principal após o login bem-sucedido
+      router.push('/home');
     }
   };
 
+  useEffect(() => {
+    if (containerRef.current) {
+      // Este código será executado após a primeira renderização
+    }
+  }, []);
+
+  const gifUrl = "https://i.pinimg.com/originals/45/98/6d/45986d3cf4d64299869db2be4704719e.gif";
+
   return (
     <>
-      <BackgroundAnimation gifUrl="https://i.pinimg.com/originals/45/98/6d/45986d3cf4d64299869db2be4704719e.gif" />
-      <div className="container">
-        <h2 className="nome">Exclusive Drop</h2>
+      <BackgroundAnimation gifUrl={gifUrl} /> {/* Usa o componente de fundo com o GIF */}
+      
+      <div className="container" ref={containerRef}>
+      <h2 className="nome">Exclusive Drop</h2> 
         <div className="card">
           <form onSubmit={handleLogin}>
             <div className="input-container">
@@ -58,7 +68,7 @@ const Login = () => {
             <button type="submit" className="button">Entrar</button>
           </form>
           <p className="register-link">
-            Não tem uma conta? <a href="/register">Registar</a>
+            Ainda não tem conta? <Link href="/register">Registar</Link>
           </p>
         </div>
       </div>

@@ -3,8 +3,8 @@ import { collection, addDoc, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
 import { useState } from 'react';
-import BackgroundAnimation from './Background';
-import bcrypt from 'bcryptjs'; // Importe bcrypt
+import BackgroundAnimation from '@/components/Background'; // Importa o componente do GIF
+import bcrypt from 'bcryptjs';
 
 const Register = () => {
   const [username, setUsername] = useState('');
@@ -35,14 +35,13 @@ const Register = () => {
         return;
       }
 
-      // Hash da password antes de armazenar
       const hashedPassword = await bcrypt.hash(password, 10);
 
       await addDoc(collection(db, 'users'), {
         username,
         email,
         telemovel,
-        password: hashedPassword, // Armazene a password hasheada
+        password: hashedPassword,
         isUser: true,
         isAdmin: false,
       });
@@ -53,9 +52,12 @@ const Register = () => {
     }
   };
 
+  const gifUrl = "https://i.pinimg.com/originals/45/98/6d/45986d3cf4d64299869db2be4704719e.gif";
+
   return (
     <>
-      <BackgroundAnimation gifUrl="https://i.pinimg.com/originals/45/98/6d/45986d3cf4d64299869db2be4704719e.gif" />
+      <BackgroundAnimation gifUrl={gifUrl} /> {/* Usa o componente de fundo com o GIF */}
+      
       <div className="container">
         <h2 className="nome">Exclusive Drop</h2>
 

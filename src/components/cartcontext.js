@@ -1,12 +1,32 @@
 'use client';
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 
 const CartContext = createContext();
 
 export function CartProvider({ children }) {
   const [cartItems, setCartItems] = useState([]);
 
-  // 🔁 Adicionar ao carrinho (considerando ID + tamanho)
+  // Função para carregar o carrinho do localStorage ao iniciar
+  useEffect(() => {
+    try {
+      const storedCartItems = localStorage.getItem('cartItems');
+      if (storedCartItems) {
+        setCartItems(JSON.parse(storedCartItems));
+      }
+    } catch (error) {
+      console.error("Failed to load cart from localStorage:", error);
+    }
+  }, []);
+
+  // Função para salvar o carrinho no localStorage sempre que cartItems mudar
+  useEffect(() => {
+    try {
+      localStorage.setItem('cartItems', JSON.stringify(cartItems));
+    } catch (error) {
+      console.error("Failed to save cart to localStorage:", error);
+    }
+  }, [cartItems]);
+
   const addToCart = (product) => {
     setCartItems((prev) => {
       const existing = prev.find(
@@ -21,18 +41,17 @@ export function CartProvider({ children }) {
         );
       }
 
-      return [...prev, { ...product, quantity: 1 }];
+      // Garante que price é um número ao adicionar um novo item
+      return [...prev, { ...product, price: parseFloat(product.price), quantity: 1 }];
     });
   };
 
-  // ❌ Remover do carrinho (por id e tamanho)
   const removeFromCart = (productId, size) => {
     setCartItems((prev) =>
       prev.filter((item) => !(item.id === productId && item.size === size))
     );
   };
 
-  // 🔼 Aumentar quantidade
   const increaseQuantity = (productId, size) => {
     setCartItems((prev) =>
       prev.map((item) =>
@@ -43,7 +62,6 @@ export function CartProvider({ children }) {
     );
   };
 
-  // 🔽 Diminuir quantidade
   const decreaseQuantity = (productId, size) => {
     setCartItems((prev) =>
       prev.map((item) =>
@@ -54,22 +72,25 @@ export function CartProvider({ children }) {
     );
   };
 
-  // 🧹 Limpar carrinho
   const clearCart = () => {
     setCartItems([]);
   };
 
+  // Calcular o subtotal aqui no contexto
+  const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+
+  const cartContextValue = {
+    cartItems,
+    addToCart,
+    removeFromCart,
+    increaseQuantity,
+    decreaseQuantity,
+    clearCart,
+    subtotal,
+  };
+
   return (
-    <CartContext.Provider
-      value={{
-        cartItems,
-        addToCart,
-        removeFromCart,
-        increaseQuantity,
-        decreaseQuantity,
-        clearCart,
-      }}
-    >
+    <CartContext.Provider value={cartContextValue}>
       {children}
     </CartContext.Provider>
   );

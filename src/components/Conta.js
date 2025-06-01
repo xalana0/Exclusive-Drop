@@ -11,884 +11,993 @@ import {
   setDoc,
   deleteDoc,
   getDocs,
-  updateDoc
+  updateDoc,
+  query,
+  where,
+  orderBy
 } from 'firebase/firestore';
- // Make sure this file exists for product form styles
+
+import { FaPlus, FaEdit, FaTrash, FaSearch } from 'react-icons/fa'; // Removido FaTimes
+// Removido: import ProductCard from '@/components/product-card'; // Removido se não for mais usado
+
+
 
 const Conta = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [userData, setUserData] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [activeTab, setActiveTab] = useState('conta'); // 'conta', 'utilizadores', 'produtos'
+  const [activeTab, setActiveTab] = useState(router.query.tab || 'conta');
 
   // State for Account Tab
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [editName, setEditName] = useState('');
   const [editEmail, setEditEmail] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
+  const [passwordMessage, setPasswordMessage] = useState('');
 
   // State for Users Tab (Admin)
   const [userList, setUserList] = useState([]);
   const [selectedUserToEdit, setSelectedUserToEdit] = useState(null);
   const [editUserData, setEditUserData] = useState({ username: '', email: '', isAdmin: false });
   const [isCreatingUser, setIsCreatingUser] = useState(false);
-  const [newUser, setNewUser] = useState({ username: '', email: '', password: '', isAdmin: false });
-  const [userManagementError, setUserManagementError] = useState(''); // Renamed for clarity
-  const [userManagementSuccess, setUserManagementSuccess] = useState(''); // Renamed for clarity
+  const [newUserForm, setNewUserForm] = useState({ username: '', email: '', password: '', isAdmin: false });
+  const [userSearchTerm, setUserSearchTerm] = useState(''); // New state for user search
 
   // State for Products Tab (Admin)
-  const [productList, setProductList] = useState([]); // State to hold fetched products
-  const [selectedProductToEdit, setSelectedProductToEdit] = useState(null); // State for product being edited
-  // Adicionado sketchfabUrl ao estado de edição
-  const [editProductData, setEditProductData] = useState({ name: '', price: '', description: '', image: '', sketchfabUrl: '', sizes: [{ size: '', stock: 0 }] });
-  const [showAddProductForm, setShowAddProductForm] = useState(false); // State to show/hide add product form
-  const [newProductName, setNewProductName] = useState('');
-  const [newProductPrice, setNewProductPrice] = useState('');
-  const [newProductDescription, setNewProductDescription] = useState('');
-  const [newProductImageURL, setNewProductImageURL] = useState('');
-  // Novo estado para o URL do Sketchfab no formulário de adição
-  const [newProductSketchfabUrl, setNewProductSketchfabUrl] = useState('');
-  const [newProductSizes, setNewProductSizes] = useState([{ size: '', stock: 0 }]); // Sizes/stock for adding
-  const [productManagementError, setProductManagementError] = useState(''); // Renamed for clarity
-  const [productManagementSuccess, setProductManagementSuccess] = useState(''); // Renamed for clarity
+  const [productData, setProductData] = useState([]); // Products fetched from Firebase
+  const [selectedProductToEdit, setSelectedProductToEdit] = useState(null);
+  const [editProductForm, setEditProductForm] = useState({
+    name: '',
+    description: '',
+    price: '',
+    category: '',
+    image: '',
+    stock: {},
+    sku: '',
+    sketchfabUrl: '',
+  });
+  const [isCreatingProduct, setIsCreatingProduct] = useState(false);
+  const [newProductForm, setNewProductForm] = useState({
+    name: '',
+    description: '',
+    price: '',
+    category: '',
+    image: '',
+    stock: { S: 0, M: 0, L: 0, XL: 0 },
+    sku: '',
+    sketchfabUrl: '',
+  });
+  const [productSearchTerm, setProductSearchTerm] = useState(''); // New state for product search
 
 
-  // --- Fetch Data Functions ---
+  // State for Purchase History Tab
+  const [userOrders, setUserOrders] = useState([]);
 
-  const fetchUserData = useCallback(async (userId) => {
-    try {
-      const userDocRef = doc(db, 'users', userId);
-      const docSnap = await getDoc(userDocRef);
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        setUserData(data);
-        setIsAdmin(data.isAdmin || false);
-      } else {
-        console.log('No such user document!');
-      }
-    } catch (error) {
-      console.error('Error fetching user data:', error);
-    }
-  }, [db]);
+  // State for All Orders History Tab (Admin)
+  const [allOrders, setAllOrders] = useState([]);
+  const [usersMap, setUsersMap] = useState({}); // To map user IDs to names/emails
 
-  const fetchAllUsers = useCallback(async () => {
-    try {
-      const usersCollection = collection(db, 'users');
-      const querySnapshot = await getDocs(usersCollection);
-      const usersData = querySnapshot.docs.map(doc => ({ id: doc.id, data: doc.data() }));
-      setUserList(usersData);
-      setUserManagementError(''); // Clear errors on successful fetch
-    } catch (error) {
-      console.error('Error fetching all users:', error);
-      setUserManagementError('Erro ao buscar a lista de utilizadores.');
-    }
-  }, [db]);
+  // State for Addresses Tab
+  const [activeAddress, setActiveAddress] = useState(null); // Para editar
+  const [isAddingAddress, setIsAddingAddress] = useState(false);
+  const [addressForm, setAddressForm] = useState({
+    street: '',
+    city: '',
+    postalCode: '',
+    country: '',
+    isDefault: false
+  });
 
-  const fetchAllProducts = useCallback(async () => {
-    try {
-      const productsCollection = collection(db, 'products');
-      const querySnapshot = await getDocs(productsCollection);
-      const productsData = querySnapshot.docs.map(doc => ({ id: doc.id, data: doc.data() }));
-      setProductList(productsData);
-      setProductManagementError(''); // Clear errors on successful fetch
-    } catch (error) {
-      console.error('Error fetching all products:', error);
-      setProductManagementError('Erro ao buscar a lista de produtos.');
-    }
-  }, [db]);
+  // Removido: State for Wishlist Tab
+  // const [wishlistProducts, setWishlistProducts] = useState([]);
+
+  // Global product list for product management (still needed for product management)
+  const [allProducts, setAllProducts] = useState([]);
 
 
-  // --- Effects ---
-
+  // Fetch All Products (still needed for product management)
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/login');
-    } else if (status === 'authenticated' && session?.user?.id) {
-      fetchUserData(session.user.id);
-    }
-  }, [status, router, session, fetchUserData]);
-
-  useEffect(() => {
-    if (isAdmin && activeTab === 'utilizadores') {
-      fetchAllUsers();
-    }
-  }, [isAdmin, activeTab, fetchAllUsers]);
-
-  useEffect(() => {
-    if (isAdmin && activeTab === 'produtos') {
-      fetchAllProducts();
-    }
-  }, [isAdmin, activeTab, fetchAllProducts]);
-
-
-  // --- Navigation Handlers ---
-
-  const handleLogout = async () => {
-    await signOut({ redirect: '/login' });
-  };
-
-  const handleGoHome = () => {
-    router.push('/home'); // Redireciona para a página principal (home)
-  };
-
-  const handleEditProfileToggle = () => {
-    setIsEditingProfile(!isEditingProfile);
-    if (!isEditingProfile && userData) {
-      setEditName(userData.username);
-      setEditEmail(userData.email);
-    }
-  };
-
-  const handleSaveProfile = async () => {
-    console.log('Saving profile:', { name: editName, email: editEmail });
-    // IMPORTANT: Implement actual save logic to Firebase here.
-    // Example:
-    // if (session?.user?.id) {
-    //   try {
-    //     const userDocRef = doc(db, 'users', session.user.id);
-    //     await updateDoc(userDocRef, { username: editName, email: editEmail });
-    //     setSuccessMessage('Perfil atualizado com sucesso!'); // You'd need state for this message specifically for profile
-    //     fetchUserData(session.user.id); // Re-fetch to show updated data
-    //   } catch (error) {
-    //     console.error('Error saving profile:', error);
-    //     setErrorMessage('Erro ao salvar o perfil.'); // You'd need state for this message
-    //   }
-    // }
-    setIsEditingProfile(false);
-    // For now, just toggle editing off. Actual save needs Firebase update.
-  };
-
-
-  // --- Admin Tabs Navigation ---
-
-  const handleManageUsersTab = () => {
-    setActiveTab('utilizadores');
-    // Reset other tab states
-    setIsCreatingUser(false);
-    setSelectedUserToEdit(null);
-    setShowAddProductForm(false);
-    setSelectedProductToEdit(null);
-    setUserManagementError('');
-    setUserManagementSuccess('');
-    setProductManagementError(''); // Also clear product messages
-    setProductManagementSuccess(''); // Also clear product messages
-  };
-
-  const handleManageProductsTab = () => {
-    setActiveTab('produtos');
-    // Reset other tab states
-    setIsCreatingUser(false);
-    setSelectedUserToEdit(null);
-    setShowAddProductForm(false); // Ensure add form is initially hidden
-    setSelectedProductToEdit(null); // Ensure edit product form is initially hidden
-    setUserManagementError(''); // Also clear user messages
-    setUserManagementSuccess(''); // Also clear user messages
-    setProductManagementError('');
-    setProductManagementSuccess('');
-  };
-
-
-  // --- User Management Handlers (Admin) ---
-
-  const handleCreateUserToggle = () => {
-    setIsCreatingUser(true);
-    setSelectedUserToEdit(null);
-    setShowAddProductForm(false);
-    setSelectedProductToEdit(null);
-    setNewUser({ username: '', email: '', password: '', isAdmin: false });
-    setUserManagementError('');
-    setUserManagementSuccess('');
-  };
-
-  const handleEditUserToggle = (userId) => {
-    const userToEdit = userList.find(user => user.id === userId);
-    if (userToEdit) {
-      setSelectedUserToEdit(userId);
-      setIsCreatingUser(false);
-      setShowAddProductForm(false);
-      setSelectedProductToEdit(null);
-      // Incluir sketchfabUrl ao carregar dados para edição
-      setEditUserData({ ...userToEdit.data, id: userToEdit.id });
-      setUserManagementError('');
-      setUserManagementSuccess('');
-    }
-  };
-
-  const handleEditUserInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setEditUserData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
-  };
-
-  const handleSaveEditedUser = async () => {
-    if (!selectedUserToEdit) return;
-    setUserManagementError('');
-    setUserManagementSuccess('');
-    try {
-      const userDocRef = doc(db, 'users', selectedUserToEdit);
-      // Use updateDoc or setDoc with merge for clarity on partial updates
-      await updateDoc(userDocRef, {
-        username: editUserData.username,
-        email: editUserData.email,
-        isAdmin: editUserData.isAdmin
-      });
-      setUserManagementSuccess('Utilizador atualizado com sucesso!');
-      await fetchAllUsers(); // Refresh the list
-      setSelectedUserToEdit(null); // Close the edit form
-    } catch (error) {
-      console.error('Error updating user:', error);
-      setUserManagementError('Erro ao atualizar o utilizador.');
-    }
-  };
-
-  const handleRemoveUser = async (userIdToRemove) => {
-    if (window.confirm('Tem certeza que deseja remover este utilizador?')) {
-      setUserManagementError('');
-      setUserManagementSuccess('');
+    const fetchAllProducts = async () => {
       try {
-        await deleteDoc(doc(db, 'users', userIdToRemove));
-        setUserManagementSuccess('Utilizador removido com sucesso!');
-        await fetchAllUsers(); // Refresh the list
-        if (selectedUserToEdit === userIdToRemove) {
-           setSelectedUserToEdit(null); // Close edit form if the deleted user was being edited
+        const productsCollectionRef = collection(db, 'products');
+        const productSnapshot = await getDocs(productsCollectionRef);
+        const productsData = productSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setAllProducts(productsData);
+      } catch (error) {
+        console.error("Erro ao buscar todos os produtos:", error);
+      }
+    };
+
+    fetchAllProducts();
+  }, []); // Run once on component mount
+
+
+  const fetchUserData = useCallback(async () => {
+    if (session?.user?.id) {
+      try {
+        const userDocRef = doc(db, 'users', session.user.id);
+        const userDocSnap = await getDoc(userDocRef);
+        if (userDocSnap.exists()) {
+          setUserData({ id: userDocSnap.id, ...userDocSnap.data() });
+          setIsAdmin(userDocSnap.data().isAdmin || false);
+          setEditName(userDocSnap.data().username || '');
+          setEditEmail(userDocSnap.data().email || '');
         }
       } catch (error) {
-        console.error('Error removing user:', error);
-        setUserManagementError('Erro ao remover o utilizador.');
+        console.error("Erro ao buscar dados do utilizador:", error);
       }
     }
-  };
+  }, [session?.user?.id]);
 
-  const handleNewUserInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setNewUser(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
-  };
-
-  const handleCreateNewUser = async () => {
-    if (!newUser.username || !newUser.email || !newUser.password) {
-      setUserManagementError('Por favor, preencha todos os campos.');
-      setUserManagementSuccess('');
-      return;
-    }
-    setUserManagementError('');
-    setUserManagementSuccess('');
-    try {
-      // IMPORTANT: Em um ambiente de produção, você NUNCA deve salvar a senha diretamente.
-      // Você precisa usar uma biblioteca de hash como bcrypt para armazenar hashes seguros das senhas.
-      await addDoc(collection(db, 'users'), {
-        username: newUser.username,
-        email: newUser.email,
-        password: newUser.password, // AVISO: Inseguro em produção
-        isAdmin: newUser.isAdmin || false,
-      });
-      setUserManagementSuccess('Utilizador criado com sucesso!');
-      setNewUser({ username: '', email: '', password: '', isAdmin: false }); // Clear form
-      await fetchAllUsers(); // Refresh the list
-      setIsCreatingUser(false); // Hide create form
-    } catch (error) {
-      console.error('Error creating user:', error);
-      setUserManagementError('Erro ao criar o utilizador.');
-    }
-  };
-
-  // --- Add Product Handlers (Admin) ---
-
-  const handleToggleAddProductForm = () => {
-    setShowAddProductForm(!showAddProductForm);
-    setSelectedProductToEdit(null); // Hide edit form if showing add form
-    setProductManagementError('');
-    setProductManagementSuccess('');
-    // Clear add product form state
-    setNewProductName('');
-    setNewProductPrice('');
-    setNewProductDescription('');
-    setNewProductImageURL('');
-    setNewProductSketchfabUrl(''); // Limpar o novo campo do Sketchfab
-    setNewProductSizes([{ size: '', stock: 0 }]);
-  };
-
-  const handleAddProductSize = () => {
-    setNewProductSizes([...newProductSizes, { size: '', stock: 0 }]);
-  };
-
-  const handleRemoveProductSize = (index) => {
-    const newSizes = [...newProductSizes];
-    newSizes.splice(index, 1);
-    setNewProductSizes(newSizes);
-  };
-
-  const handleNewProductSizeChange = (index, event) => {
-    const newSizes = [...newProductSizes];
-    newSizes[index].size = event.target.value;
-    setNewProductSizes(newSizes);
-  };
-
-  const handleNewProductStockChange = (index, event) => {
-    const newSizes = [...newProductSizes];
-    newSizes[index].stock = parseInt(event.target.value, 10) || 0;
-    setNewProductSizes(newSizes);
-  };
-
-  // Handler para o novo campo do Sketchfab na adição
-  const handleNewProductSketchfabUrlChange = (e) => {
-    setNewProductSketchfabUrl(e.target.value);
-  };
-
-
-  const handleAddNewProduct = async (e) => {
-    e.preventDefault();
-    setProductManagementError('');
-    setProductManagementSuccess('');
-
-    if (!newProductName || !newProductPrice || !newProductDescription || !newProductImageURL || newProductSizes.some(s => !s.size)) {
-      setProductManagementError('Por favor, preencha todos os campos obrigatórios (Nome, Preço, Descrição, URL da Imagem, e pelo menos um Tamanho).');
-      return;
-    }
-
-    // Convert sizes array to stock object { size: stock }
-    const stockObject = newProductSizes.reduce((acc, curr) => {
-       if (curr.size) { // Only include if size is not empty
-          acc[curr.size] = curr.stock;
-       }
-       return acc;
-    }, {});
-
-    const productData = {
-      name: newProductName,
-      price: parseFloat(newProductPrice),
-      description: newProductDescription,
-      image: newProductImageURL,
-      sketchfabUrl: newProductSketchfabUrl || null, // Incluir o URL do Sketchfab (ou null se vazio)
-      stock: stockObject, // Save as object
-      createdAt: new Date(), // Optional: add timestamp
-      updatedAt: new Date(), // Optional: add timestamp
-    };
-
-    try {
-      const docRef = await addDoc(collection(db, 'products'), productData);
-      console.log('Produto adicionado com ID: ', docRef.id);
-      setProductManagementSuccess('Produto adicionado com sucesso!');
-      setShowAddProductForm(false); // Hide form
-      // Clear form state
-      setNewProductName('');
-      setNewProductPrice('');
-      setNewProductDescription('');
-      setNewProductImageURL('');
-      setNewProductSketchfabUrl(''); // Limpar o novo campo
-      setNewProductSizes([{ size: '', stock: 0 }]);
-      fetchAllProducts(); // Refresh the list
-    } catch (error) {
-      console.error('Erro ao adicionar produto: ', error);
-      setProductManagementError('Erro ao adicionar o produto.');
-    }
-  };
-
-
-  // --- Product Management Handlers (Admin) ---
-
-  const handleEditProductToggle = (productId) => {
-      const productToEdit = productList.find(product => product.id === productId);
-      if (productToEdit) {
-        setSelectedProductToEdit(productId);
-        setShowAddProductForm(false); // Hide add form
-        // Prepare data for the edit form, converting stock object to sizes array
-        // Incluir sketchfabUrl ao carregar dados para edição
-        setEditProductData({
-          ...productToEdit.data,
-          id: productToEdit.id,
-          // Convert the stock object { 'EU 40': 5, 'EU 42': 10 } into an array [{ size: 'EU 40', stock: 5 }, ...]
-          sizes: Object.entries(productToEdit.data.stock || {}).map(([size, stock]) => ({ size, stock: stock || 0 })),
-          sketchfabUrl: productToEdit.data.sketchfabUrl || '' // Carregar o URL Sketchfab para edição
-        });
-        setProductManagementError('');
-        setProductManagementSuccess('');
-      }
-  };
-
-  const handleEditProductInputChange = (e) => {
-    const { name, value, type } = e.target;
-    setEditProductData(prev => ({
-      ...prev,
-      [name]: type === 'number' ? parseFloat(value) : value, // Handle price as number
-    }));
-  };
-
-  // Handlers for sizes/stock within the edit form
-  const handleEditProductSizeChange = (index, event) => {
-      setEditProductData(prev => {
-          const newSizes = [...prev.sizes];
-          newSizes[index].size = event.target.value;
-          return { ...prev, sizes: newSizes };
-      });
-  };
-
-  const handleEditProductStockChange = (index, event) => {
-      setEditProductData(prev => {
-          const newSizes = [...prev.sizes];
-          newSizes[index].stock = parseInt(event.target.value, 10) || 0;
-          return { ...prev, sizes: newSizes };
-      });
-  };
-
-   const handleAddEditProductSize = () => {
-      setEditProductData(prev => ({
-        ...prev,
-        sizes: [...prev.sizes, { size: '', stock: 0 }]
-      }));
-    };
-
-    const handleRemoveEditProductSize = (index) => {
-      setEditProductData(prev => {
-        const newSizes = [...prev.sizes];
-        newSizes.splice(index, 1);
-        return { ...prev, sizes: newSizes };
-      });
-    };
-
-    // Handler para o novo campo do Sketchfab na edição
-    const handleEditProductSketchfabUrlChange = (e) => {
-        setEditProductData(prev => ({
-            ...prev,
-            sketchfabUrl: e.target.value
-        }));
-    };
-
-
-  const handleSaveEditedProduct = async () => {
-    if (!selectedProductToEdit || !editProductData) return;
-
-    setProductManagementError('');
-    setProductManagementSuccess('');
-
-    if (!editProductData.name || !editProductData.price || !editProductData.description || !editProductData.image || editProductData.sizes.some(s => !s.size)) {
-         setProductManagementError('Por favor, preencha todos os campos obrigatórios (Nome, Preço, Descrição, URL da Imagem, e pelo menos um Tamanho).');
-         return;
-    }
-
-
-    // Convert sizes array back to stock object { size: stock }
-    const stockObject = editProductData.sizes.reduce((acc, curr) => {
-       if (curr.size) { // Only include if size is not empty
-          acc[curr.size] = curr.stock;
-       }
-       return acc;
-    }, {});
-
-    const updatedProductData = {
-       name: editProductData.name,
-       price: editProductData.price,
-       description: editProductData.description,
-       image: editProductData.image,
-       sketchfabUrl: editProductData.sketchfabUrl || null, // Incluir o URL do Sketchfab (ou null se vazio)
-       stock: stockObject, // Save back as object
-       updatedAt: new Date(), // Optional: update timestamp
-    };
-
-    try {
-      const productDocRef = doc(db, 'products', selectedProductToEdit);
-      // Use updateDoc for partial updates, or setDoc with merge: true
-      await updateDoc(productDocRef, updatedProductData);
-      setProductManagementSuccess('Produto atualizado com sucesso!');
-      await fetchAllProducts(); // Refresh the list
-      setSelectedProductToEdit(null); // Close the edit form
-    } catch (error) {
-      console.error('Error updating product:', error);
-      setProductManagementError('Erro ao atualizar o produto.');
-    }
-  };
-
-  const handleRemoveProduct = async (productIdToRemove) => {
-    if (window.confirm('Tem certeza que deseja remover este produto?')) {
-      setProductManagementError('');
-      setProductManagementSuccess('');
+  const fetchUsers = useCallback(async () => {
+    if (isAdmin) {
       try {
-        await deleteDoc(doc(db, 'products', productIdToRemove));
-        setProductManagementSuccess('Produto removido com sucesso!');
-        await fetchAllProducts(); // Refresh the list
-         if (selectedProductToEdit === productIdToRemove) {
-            setSelectedProductToEdit(null); // Close edit form if the deleted product was being edited
-         }
+        const usersCollectionRef = collection(db, 'users');
+        const usersSnapshot = await getDocs(usersCollectionRef);
+        const usersData = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setUserList(usersData);
+
+        const usersMapData = {};
+        usersData.forEach(user => {
+          usersMapData[user.id] = user.username || user.email;
+        });
+        setUsersMap(usersMapData);
+
       } catch (error) {
-        console.error('Error removing product:', error);
-        setProductManagementError('Erro ao remover o produto.');
+        console.error("Erro ao buscar lista de utilizadores:", error);
+      }
+    }
+  }, [isAdmin]);
+
+  const fetchProducts = useCallback(async () => {
+    if (isAdmin) {
+      try {
+        const productsCollectionRef = collection(db, 'products');
+        const productsSnapshot = await getDocs(productsCollectionRef);
+        const productsData = productsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setProductData(productsData);
+      } catch (error) {
+        console.error("Erro ao buscar produtos:", error);
+      }
+    }
+  }, [isAdmin]);
+
+  const fetchUserOrders = useCallback(async () => {
+    if (session?.user?.id) {
+      try {
+        const ordersCollectionRef = collection(db, 'orders');
+        const q = query(ordersCollectionRef, where('userId', '==', session.user.id), orderBy('orderDate', 'desc'));
+        const orderSnapshot = await getDocs(q);
+        const ordersData = orderSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setUserOrders(ordersData);
+      } catch (error) {
+        console.error("Erro ao buscar pedidos do utilizador:", error);
+      }
+    }
+  }, [session?.user?.id]);
+
+  const fetchAllOrders = useCallback(async () => {
+    if (isAdmin) {
+      try {
+        const ordersCollectionRef = collection(db, 'orders');
+        const q = query(ordersCollectionRef, orderBy('orderDate', 'desc'));
+        const orderSnapshot = await getDocs(q);
+        const ordersData = orderSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setAllOrders(ordersData);
+      } catch (error) {
+        console.error("Erro ao buscar todos os pedidos:", error);
+      }
+    }
+  }, [isAdmin]);
+
+
+  useEffect(() => {
+    if (status === 'loading') return;
+    if (status === 'unauthenticated') {
+      router.push('/login');
+    } else {
+      fetchUserData();
+    }
+  }, [status, router, fetchUserData]);
+
+  useEffect(() => {
+    fetchUsers();
+    fetchProducts();
+    fetchUserOrders();
+    fetchAllOrders();
+  }, [isAdmin, fetchUsers, fetchProducts, fetchUserOrders, fetchAllOrders]);
+
+
+  // Removido: Update wishlistProducts whenever userData or allProducts changes
+  // useEffect(() => { ... }, [userData, allProducts]);
+
+
+  // Handlers for Account Tab
+  const handleProfileUpdate = async (e) => {
+    e.preventDefault();
+    if (!session?.user?.id) return;
+    try {
+      const userDocRef = doc(db, 'users', session.user.id);
+      await updateDoc(userDocRef, {
+        username: editName,
+        email: editEmail,
+      });
+      setUserData(prev => ({ ...prev, username: editName, email: editEmail }));
+      setIsEditingProfile(false);
+      alert('Perfil atualizado com sucesso!');
+    } catch (error) {
+      console.error("Erro ao atualizar perfil:", error);
+      alert('Erro ao atualizar perfil.');
+    }
+  };
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    if (newPassword !== confirmNewPassword) {
+      setPasswordMessage('As novas senhas não coincidem.');
+      return;
+    }
+    if (newPassword.length < 6) {
+      setPasswordMessage('A senha deve ter pelo menos 6 caracteres.');
+      return;
+    }
+    // No ambiente real, aqui você chamaria uma função de autenticação do Firebase para atualizar a senha.
+    // Para este projeto escolar, vamos apenas simular ou ignorar a atualização real da senha
+    // devido a questões de segurança e complexidade.
+    setPasswordMessage('Alteração de senha simulada com sucesso (requer integração com Firebase Auth em produção)!');
+    setNewPassword('');
+    setConfirmNewPassword('');
+  };
+
+  // Handlers for Users Tab (Admin)
+  const handleEditUser = (user) => {
+    setSelectedUserToEdit(user);
+    setEditUserData({ username: user.username, email: user.email, isAdmin: user.isAdmin });
+  };
+
+  const handleUpdateUser = async (e) => {
+    e.preventDefault();
+    if (!selectedUserToEdit) return;
+    try {
+      const userDocRef = doc(db, 'users', selectedUserToEdit.id);
+      await updateDoc(userDocRef, editUserData);
+      setSelectedUserToEdit(null);
+      setEditUserData({ username: '', email: '', isAdmin: false });
+      fetchUsers(); // Refresh the user list
+      alert('Utilizador atualizado com sucesso!');
+    } catch (error) {
+      console.error("Erro ao atualizar utilizador:", error);
+      alert('Erro ao atualizar utilizador.');
+    }
+  };
+
+  const handleDeleteUser = async (userId) => {
+    if (window.confirm('Tem certeza que quer eliminar este utilizador?')) {
+      try {
+        await deleteDoc(doc(db, 'users', userId));
+        fetchUsers(); // Refresh the user list
+        alert('Utilizador eliminado com sucesso!');
+      } catch (error) {
+        console.error("Erro ao eliminar utilizador:", error);
+        alert('Erro ao eliminar utilizador.');
       }
     }
   };
 
+  const handleCreateUser = async (e) => {
+    e.preventDefault();
+    try {
+      // Em um ambiente real, você usaria o Firebase Auth para criar o utilizador com email/senha
+      // e depois guardaria os dados no Firestore. Para este projeto, apenas guardamos no Firestore.
+      await addDoc(collection(db, 'users'), {
+        username: newUserForm.username,
+        email: newUserForm.email,
+        password: newUserForm.password, // Em produção, a senha deve ser hashada no backend
+        isAdmin: newUserForm.isAdmin,
+      });
+      setIsCreatingUser(false);
+      setNewUserForm({ username: '', email: '', password: '', isAdmin: false });
+      fetchUsers(); // Refresh the user list
+      alert('Utilizador criado com sucesso!');
+    } catch (error) {
+      console.error("Erro ao criar utilizador:", error);
+      alert('Erro ao criar utilizador.');
+    }
+  };
 
-  // --- Loading and Authentication States ---
+  // Handlers for Products Tab (Admin)
+  const handleEditProduct = (product) => {
+    setSelectedProductToEdit(product);
+    setEditProductForm({
+      name: product.name,
+      description: product.description,
+      price: product.price,
+      category: product.category,
+      image: product.image,
+      stock: product.stock || {}, // Ensure stock is an object
+      sku: product.sku || '',
+      sketchfabUrl: product.sketchfabUrl || '',
+    });
+  };
 
-  if (status === 'loading') {
-    return <div className="account-container">A carregar dados da conta...</div>;
+  const handleUpdateProduct = async (e) => {
+    e.preventDefault();
+    if (!selectedProductToEdit) return;
+    try {
+      const productDocRef = doc(db, 'products', selectedProductToEdit.id);
+      await updateDoc(productDocRef, editProductForm);
+      setSelectedProductToEdit(null);
+      setEditProductForm({ name: '', description: '', price: '', category: '', image: '', stock: {}, sku: '', sketchfabUrl: '' });
+      fetchProducts(); // Refresh the product list
+      alert('Produto atualizado com sucesso!');
+    } catch (error) {
+      console.error("Erro ao atualizar produto:", error);
+      alert('Erro ao atualizar produto.');
+    }
+  };
+
+  const handleDeleteProduct = async (productId) => {
+    if (window.confirm('Tem certeza que quer eliminar este produto?')) {
+      try {
+        await deleteDoc(doc(db, 'products', productId));
+        fetchProducts(); // Refresh the product list
+        alert('Produto eliminado com sucesso!');
+      } catch (error) {
+        console.error("Erro ao eliminar produto:", error);
+        alert('Erro ao eliminar produto.');
+      }
+    }
+  };
+
+  const handleCreateProduct = async (e) => {
+    e.preventDefault();
+    try {
+      await addDoc(collection(db, 'products'), newProductForm);
+      setIsCreatingProduct(false);
+      setNewProductForm({ name: '', description: '', price: '', category: '', image: '', stock: { S: 0, M: 0, L: 0, XL: 0 }, sku: '', sketchfabUrl: '' });
+      fetchProducts(); // Refresh the product list
+      alert('Produto criado com sucesso!');
+    } catch (error) {
+      console.error("Erro ao criar produto:", error);
+      alert('Erro ao criar produto.');
+    }
+  };
+
+  // Handlers for Addresses Tab
+  const handleAddressFormChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setAddressForm(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
+  };
+
+  const handleAddAddress = async (e) => {
+    e.preventDefault();
+    if (!session?.user?.id) return;
+    try {
+      const userRef = doc(db, 'users', session.user.id);
+      const currentAddresses = userData.addresses || [];
+      
+      let updatedAddresses = [...currentAddresses, addressForm];
+      // If the new address is set as default, ensure only it is default
+      if (addressForm.isDefault) {
+          updatedAddresses = updatedAddresses.map(addr => ({ ...addr, isDefault: false }));
+          updatedAddresses[updatedAddresses.length - 1].isDefault = true;
+      }
+
+      await updateDoc(userRef, {
+        addresses: updatedAddresses
+      });
+      setUserData(prev => ({
+        ...prev,
+        addresses: updatedAddresses
+      }));
+      setAddressForm({ street: '', city: '', postalCode: '', country: '', isDefault: false });
+      setIsAddingAddress(false);
+      alert('Endereço adicionado com sucesso!');
+    } catch (error) {
+      console.error("Erro ao adicionar endereço:", error);
+      alert('Erro ao adicionar endereço.');
+    }
+  };
+
+  const handleEditAddress = (address, index) => {
+    setActiveAddress(index);
+    setAddressForm(address);
+  };
+
+  const handleUpdateAddress = async (e) => {
+    e.preventDefault();
+    if (!session?.user?.id || activeAddress === null) return;
+    try {
+      const userRef = doc(db, 'users', session.user.id);
+      const updatedAddresses = [...userData.addresses];
+      updatedAddresses[activeAddress] = addressForm;
+
+      // If this address is set as default, clear default from others
+      if (addressForm.isDefault) {
+          updatedAddresses.forEach((addr, i) => {
+              if (i !== activeAddress) addr.isDefault = false;
+          });
+      }
+
+      await updateDoc(userRef, { addresses: updatedAddresses });
+      setUserData(prev => ({ ...prev, addresses: updatedAddresses }));
+      setActiveAddress(null);
+      setAddressForm({ street: '', city: '', postalCode: '', country: '', isDefault: false });
+      alert('Endereço atualizado com sucesso!');
+    } catch (error) {
+      console.error("Erro ao atualizar endereço:", error);
+      alert('Erro ao atualizar endereço.');
+    }
+  };
+
+  const handleDeleteAddress = async (index) => {
+    if (!session?.user?.id || !window.confirm('Tem certeza que quer eliminar este endereço?')) return;
+    try {
+      const userRef = doc(db, 'users', session.user.id);
+      const filteredAddresses = userData.addresses.filter((_, i) => i !== index);
+      await updateDoc(userRef, { addresses: filteredAddresses });
+      setUserData(prev => ({ ...prev, addresses: filteredAddresses }));
+      alert('Endereço eliminado com sucesso!');
+    } catch (error) {
+      console.error("Erro ao eliminar endereço:", error);
+      alert('Erro ao eliminar endereço.');
+    }
+  };
+
+  const handleSetDefaultAddress = async (index) => {
+      if (!session?.user?.id) return;
+      try {
+          const userRef = doc(db, 'users', session.user.id);
+          const updatedAddresses = userData.addresses.map((addr, i) => ({
+              ...addr,
+              isDefault: i === index // Define este como padrão, os outros como não padrão
+          }));
+          await updateDoc(userRef, { addresses: updatedAddresses });
+          setUserData(prev => ({ ...prev, addresses: updatedAddresses }));
+          alert('Endereço padrão atualizado!');
+      } catch (error) {
+          console.error("Erro ao definir endereço padrão:", error);
+          alert('Erro ao definir endereço padrão.');
+      }
+  };
+
+  // Removido: Handlers for Wishlist Tab
+  // const handleRemoveFromWishlist = async (productId) => { ... };
+
+
+  const filteredUsers = userList.filter(user =>
+    user.username?.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
+    user.email?.toLowerCase().includes(userSearchTerm.toLowerCase())
+  );
+
+  const filteredProductsList = productData.filter(product =>
+    product.name?.toLowerCase().includes(productSearchTerm.toLowerCase()) ||
+    product.category?.toLowerCase().includes(productSearchTerm.toLowerCase()) ||
+    product.sku?.toLowerCase().includes(productSearchTerm.toLowerCase())
+  );
+
+
+  if (status === 'loading' || !userData) {
+    return <div className="loading-container">A Carregar...</div>;
   }
-
-  if (status === 'unauthenticated') {
-    return <div className="account-container">Não autenticado. Redirecionando para o login...</div>;
-  }
-
-  // --- Render Component ---
 
   return (
-    <div className="account-container">
-      {/* Header-like bar container */}
-      <div className="header-bar">
-        {/* Welcome message */}
-        <div className="welcome-message">
-          Bem-vindo, {userData?.username || 'Utilizador'}!
-        </div>
+    <>
+      <div className="account-container">
+        <h1 className="account-title">A Minha Conta</h1>
 
-        {/* Navigation Tabs and Back Button */}
-        <div className="header-actions"> {/* New container for tabs and back button */}
-           {/* Tabs - Keeping the existing tabs div and buttons */}
-           <div className="tabs">
-             <button
-               className={`${activeTab === 'conta' ? 'active' : ''} admin-btn`} // Added admin-btn
-               onClick={() => setActiveTab('conta')}
-             >
-               Conta
-             </button>
-             {isAdmin && (
-               <>
-                 <button
-                   className={`${activeTab === 'utilizadores' ? 'active' : ''} admin-btn`} // Added admin-btn
-                   onClick={handleManageUsersTab}
-                 >
-                   Utilizadores
-                 </button>
-                 <button
-                   className={`${activeTab === 'produtos' ? 'active' : ''} admin-btn`} // Added admin-btn
-                   onClick={handleManageProductsTab}
-                 >
-                   Produtos
-                 </button>
-               </>
-             )}
-           </div>
+        <div className="account-tabs">
+          <button
+            className={`tab-button ${activeTab === 'conta' ? 'active' : ''}`}
+            onClick={() => setActiveTab('conta')}
+          >
+            A Minha Conta
+          </button>
+          <button
+            className={`tab-button ${activeTab === 'historico' ? 'active' : ''}`}
+            onClick={() => setActiveTab('historico')}
+          >
+            Histórico de Compras
+          </button>
+          <button
+            className={`tab-button ${activeTab === 'addresses' ? 'active' : ''}`}
+            onClick={() => setActiveTab('addresses')}
+          >
+            Endereços
+          </button>
+          {/* Removido: Botão da Lista de Desejos */}
+          {/* <button
+            className={`tab-button ${activeTab === 'wishlist' ? 'active' : ''}`}
+            onClick={() => setActiveTab('wishlist')}
+          >
+            Lista de Desejos
+          </button> */}
 
-           {/* Back to Home Button - Using admin-btn for consistent style */}
-           <button className="admin-btn" onClick={handleGoHome}>
-             Voltar para o Menu Principal
-           </button>
-        </div>
-      </div>
-
-
-      {/* --- Account Tab Content --- */}
-      {activeTab === 'conta' && (
-        <div className="account-card">
-          <h2 className="card-title">Informações da Conta</h2>
-          <div className="card-content">
-            <div className="info-row">
-              <span className="info-label">Nome:</span>
-              {isEditingProfile ? (
-                <input
-                  type="text"
-                  className="edit-input"
-                  value={editName}
-                  onChange={(e) => setEditName(e.target.value)}
-                />
-              ) : (
-                <span className="info-value">{userData?.username}</span>
-              )}
-            </div>
-            <div className="info-row">
-              <span className="info-label">Email:</span>
-              {isEditingProfile ? (
-                <input
-                  type="email"
-                  className="edit-input"
-                  value={editEmail}
-                  onChange={(e) => setEditEmail(e.target.value)}
-                />
-              ) : (
-                <span className="info-value">{userData?.email}</span>
-              )}
-            </div>
-            <div className="info-row">
-              <span className="info-label">Password:</span>
-              <span className="info-value">********</span> {/* Passwords should not be editable directly here */}
-            </div>
-            <div className="actions">
-              {isEditingProfile ? (
-                <>
-                    <button className="save-btn" onClick={handleSaveProfile}>Salvar Perfil</button>
-                    <button className="cancel-btn" onClick={handleEditProfileToggle}>Cancelar</button>
-                </>
-              ) : (
-                <button className="edit-btn" onClick={handleEditProfileToggle}>Editar Perfil</button>
-              )}
-              <button className="logout-btn" onClick={handleLogout}>Logout</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* --- User Management Tab Content (Admin) --- */}
-      {activeTab === 'utilizadores' && isAdmin && (
-        <div className="admin-section">
-          <h2 className="admin-title">Gerenciar Utilizadores</h2>
-           {userManagementError && <p className="error-message">{userManagementError}</p>}
-           {userManagementSuccess && <p className="success-message">{userManagementSuccess}</p>}
-
-          <ul className="admin-options">
-            <li className="admin-item">
-              <button className="admin-btn" onClick={handleCreateUserToggle}>Criar Novo Utilizador</button>
-            </li>
-          </ul>
-
-          <div className="manage-users-section">
-            <h3 className="admin-subtitle">Lista de Utilizadores</h3>
-
-            {userList.length === 0 && <p>Nenhum utilizador encontrado.</p>}
-
-            {userList.map(user => (
-              <div key={user.id} className="list-item"> {/* Using generic list-item class */}
-                <span>{user.data.username} ({user.data.email}) {user.data.isAdmin && <strong>(Admin)</strong>}</span>
-                <div className="actions"> {/* Group buttons for better alignment */}
-                    <button className="edit-btn small" onClick={() => handleEditUserToggle(user.id)}>Editar</button>
-                    {session?.user?.id !== user.id && ( // Prevent user from deleting themselves
-                        <button className="remove-btn small" onClick={() => handleRemoveUser(user.id)}>Remover</button>
-                    )}
-                </div>
-              </div>
-            ))}
-
-            {/* Edit User Form */}
-            {selectedUserToEdit && (
-              <div className="edit-form"> {/* Using generic edit-form class */}
-                <h4 className="admin-subtitle">Editar Utilizador</h4>
-                 {userManagementError && <p className="error-message">{userManagementError}</p>}
-                 {userManagementSuccess && <p className="success-message">{userManagementSuccess}</p>}
-                <div className="form-group">
-                  <label>Username:</label>
-                  <input type="text" name="username" value={editUserData.username} onChange={handleEditUserInputChange} />
-                </div>
-                <div className="form-group">
-                  <label>Email:</label>
-                  <input type="email" name="email" value={editUserData.email} onChange={handleEditUserInputChange} />
-                </div>
-                <div className="form-group">
-                  <label>Admin:</label>
-                  <input type="checkbox" name="isAdmin" checked={editUserData.isAdmin || false} onChange={handleEditUserInputChange} />
-                </div>
-                <div className="actions">
-                   <button className="save-btn" onClick={handleSaveEditedUser}>Salvar Utilizador</button>
-                   <button className="cancel-btn" onClick={() => setSelectedUserToEdit(null)}>Cancelar</button>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Create User Form */}
-          {isCreatingUser && (
-            <div className="create-form"> {/* Using generic create-form class */}
-              <h3 className="admin-subtitle">Criar Novo Utilizador</h3>
-               {userManagementError && <p className="error-message">{userManagementError}</p>}
-               {userManagementSuccess && <p className="success-message">{userManagementSuccess}</p>}
-              <div className="form-group">
-                <label>Username:</label>
-                <input type="text" name="username" value={newUser.username} onChange={handleNewUserInputChange} />
-              </div>
-              <div className="form-group">
-                <label>Email:</label>
-                <input type="email" name="email" value={newUser.email} onChange={handleNewUserInputChange} />
-              </div>
-              <div className="form-group">
-                <label>Password:</label>
-                <input type="password" name="password" value={newUser.password} onChange={handleNewUserInputChange} />
-              </div>
-              <div className="form-group">
-                <label>Admin:</label>
-                <input type="checkbox" name="isAdmin" checked={newUser.isAdmin || false} onChange={handleNewUserInputChange} />
-              </div>
-               <div className="actions">
-                  <button className="create-btn" onClick={handleCreateNewUser}>Criar Utilizador</button>
-                  <button className="cancel-btn" onClick={handleCreateUserToggle}>Cancelar</button>
-               </div>
-            </div>
+          {isAdmin && (
+            <>
+              <button
+                className={`tab-button ${activeTab === 'users' ? 'active' : ''}`}
+                onClick={() => setActiveTab('users')}
+              >
+                Gerir Utilizadores
+              </button>
+              <button
+                className={`tab-button ${activeTab === 'products' ? 'active' : ''}`}
+                onClick={() => setActiveTab('products')}
+              >
+                Gerir Produtos
+              </button>
+              <button
+                className={`tab-button ${activeTab === 'all-orders' ? 'active' : ''}`}
+                onClick={() => setActiveTab('all-orders')}
+              >
+                Todos os Pedidos
+              </button>
+            </>
           )}
+          <button
+            onClick={() => signOut({ callbackUrl: '/login' })}
+            className="logout-button"
+          >
+            Sair
+          </button>
         </div>
-      )}
 
-      {/* --- Product Management Tab Content (Admin) --- */}
-      {activeTab === 'produtos' && isAdmin && (
-        <div className="admin-section">
-          <h2 className="admin-title">Gerenciar Produtos</h2>
-          {productManagementError && <p className="error-message">{productManagementError}</p>}
-          {productManagementSuccess && <p className="success-message">{productManagementSuccess}</p>}
+        <div className="account-content">
+          {/* A Minha Conta Tab */}
+          {activeTab === 'conta' && (
+            <div className="tab-content-section profile-tab">
+              <h2>Detalhes da Conta</h2>
+              {!isEditingProfile ? (
+                <div className="profile-info">
+                  <p><strong>Username:</strong> <span>{userData.username}</span></p>
+                  <p><strong>Email:</strong> <span>{userData.email}</span></p>
+                  {userData.telemovel && <p><strong>Telemóvel:</strong> <span>{userData.telemovel}</span></p>}
+                  <div className="profile-actions">
+                    <button className="edit-btn" onClick={() => setIsEditingProfile(true)}>
+                      <FaEdit /> Editar Perfil
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <form onSubmit={handleProfileUpdate} className="profile-edit-form">
+                  <div className="input-group">
+                    <label>Username:</label>
+                    <input
+                      type="text"
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="input-group">
+                    <label>Email:</label>
+                    <input
+                      type="email"
+                      value={editEmail}
+                      onChange={(e) => setEditEmail(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="form-buttons">
+                    <button type="submit" className="save-btn">
+                      Guardar Alterações
+                    </button>
+                    <button type="button" className="cancel-btn" onClick={() => setIsEditingProfile(false)}>
+                      Cancelar
+                    </button>
+                  </div>
+                </form>
+              )}
 
-          <ul className="admin-options">
-             <li className="admin-item">
-               <button className="admin-btn" onClick={handleToggleAddProductForm}>
-                 {showAddProductForm ? 'Ocultar Formulário de Produto' : 'Adicionar Novo Produto'}
-               </button>
-             </li>
-           </ul>
-
-          {/* Add Product Form (Inline) */}
-          {showAddProductForm && (
-            <div className="add-product-inline-container">
-              <h3 className="admin-subtitle">Adicionar Novo Produto</h3>
-              {productManagementError && <p className="error-message">{productManagementError}</p>}
-              {productManagementSuccess && <p className="success-message">{productManagementSuccess}</p>}
-              <form onSubmit={handleAddNewProduct} className="add-product-inline-form">
-                <div className="form-group">
-                  <label htmlFor="newProductName">Nome:</label>
-                  <input type="text" id="newProductName" value={newProductName} onChange={(e) => setNewProductName(e.target.value)} required />
+              <h2 style={{marginTop: '3rem'}}>Alterar Password</h2>
+              <form onSubmit={handleChangePassword} className="password-change-form">
+                <div className="input-group">
+                  <label>Nova Password:</label>
+                  <input
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    required
+                  />
                 </div>
-                <div className="form-group">
-                  <label htmlFor="newProductPrice">Preço:</label>
-                  <input type="number" id="newProductPrice" value={newProductPrice} onChange={(e) => setNewProductPrice(e.target.value)} step="0.01" required />
+                <div className="input-group">
+                  <label>Confirmar Nova Password:</label>
+                  <input
+                    type="password"
+                    value={confirmNewPassword}
+                    onChange={(e) => setConfirmNewPassword(e.target.value)}
+                    required
+                  />
                 </div>
-                <div className="form-group">
-                  <label htmlFor="newProductDescription">Descrição:</label>
-                  <textarea id="newProductDescription" value={newProductDescription} onChange={(e) => setNewProductDescription(e.target.value)} required />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="newProductImageURL">URL da Imagem:</label>
-                  <input type="url" id="newProductImageURL" value={newProductImageURL} onChange={(e) => setNewProductImageURL(e.target.value)} required />
-                </div>
-
-                {/* Novo campo para URL do Sketchfab */}
-                <div className="form-group">
-                  <label htmlFor="newProductSketchfabUrl">URL do Modelo 3D (Sketchfab):</label>
-                  <input type="url" id="newProductSketchfabUrl" value={newProductSketchfabUrl} onChange={handleNewProductSketchfabUrlChange} />
-                </div>
-
-                {/* Sizes and Stock for Add Form */}
-                <div className="form-group">
-                  <label>Tamanhos e Stock:</label>
-                  {newProductSizes.map((sizeObj, index) => (
-                    <div key={index} className="size-stock-row">
-                      <input
-                        type="text"
-                        placeholder="Tamanho (ex: EU 40)"
-                        value={sizeObj.size}
-                        onChange={(e) => handleNewProductSizeChange(index, e)}
-                        required
-                      />
-                      <input
-                        type="number"
-                        placeholder="Stock"
-                        value={sizeObj.stock}
-                        onChange={(e) => handleNewProductStockChange(index, e)}
-                        required
-                      />
-                      {newProductSizes.length > 1 && (
-                        <button type="button" className="remove-size-btn" onClick={() => handleRemoveProductSize(index)}>
-                          Remover
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                    {/* Adicionar Tamanho button - Added admin-btn small */}
-                  <button type="button" className="admin-btn small" onClick={handleAddProductSize}>
-                    Adicionar Tamanho
+                {passwordMessage && <p className="error-message">{passwordMessage}</p>}
+                <div className="form-buttons">
+                  <button type="submit" className="save-btn">
+                    Alterar Password
                   </button>
                 </div>
-
-                <button type="submit" className="submit-btn"> {/* Using submit-btn class */}
-                  Adicionar Produto
-                </button>
-                <button type="button" className="cancel-btn" onClick={handleToggleAddProductForm}>Cancelar</button> {/* Added cancel button */}
               </form>
             </div>
           )}
 
-          {/* List Products Section */}
-          <div className="manage-products-section"> {/* Using generic manage-section class */}
-            <h3 className="admin-subtitle">Lista de Produtos</h3>
-             {productManagementError && <p className="error-message">{productManagementError}</p>}
-             {productManagementSuccess && <p className="success-message">{productManagementSuccess}</p>}
-
-            {productList.length === 0 && <p>Nenhum produto encontrado.</p>}
-
-            {productList.map(product => (
-              <div key={product.id} className="list-item"> {/* Using generic list-item class */}
-                <span>{product.data.name} - €{product.data.price?.toFixed(2)}</span> {/* Added optional chaining for price */}
-                <div className="actions"> {/* Group buttons for better alignment */}
-                    <button className="edit-btn small" onClick={() => handleEditProductToggle(product.id)}>Editar</button>
-                    <button className="remove-btn small" onClick={() => handleRemoveProduct(product.id)}>Remover</button>
+          {/* Histórico de Compras Tab (User) */}
+          {activeTab === 'historico' && (
+            <div className="tab-content-section purchase-history-tab">
+              <h2>O Seu Histórico de Compras</h2>
+              {userOrders.length === 0 ? (
+                <p className="no-items-message">Não tem nenhum pedido no seu histórico.</p>
+              ) : (
+                <div className="orders-list">
+                  {userOrders.map(order => (
+                    <div key={order.id} className="order-item">
+                      <h3>Pedido ID: {order.id}</h3>
+                      <p><strong>Data:</strong> {new Date(order.orderDate.toDate()).toLocaleString()}</p>
+                      <p><strong>Total:</strong> €{order.totalAmount.toFixed(2)}</p>
+                      <h4>Produtos:</h4>
+                      <ul>
+                        {order.items.map((item, index) => (
+                          <li key={index} className="order-product-item">
+                            <img src={item.image} alt={item.name} className="order-product-image" />
+                            <span>{item.name} ({item.size}) x {item.quantity} - €{(item.price * item.quantity).toFixed(2)}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
                 </div>
+              )}
+            </div>
+          )}
+
+          {/* Endereços Tab */}
+          {activeTab === 'addresses' && (
+              <div className="tab-content-section addresses-tab">
+                  <h2>Os Seus Endereços</h2>
+                  <button className="create-btn" onClick={() => { setIsAddingAddress(true); setActiveAddress(null); setAddressForm({ street: '', city: '', postalCode: '', country: '', isDefault: false }); }}>
+                      <FaPlus /> Adicionar Novo Endereço
+                  </button>
+
+                  {isAddingAddress || activeAddress !== null ? (
+                      <form onSubmit={activeAddress !== null ? handleUpdateAddress : handleAddAddress} className="address-form">
+                          <div className="input-group">
+                              <label>Rua:</label>
+                              <input type="text" name="street" value={addressForm.street} onChange={handleAddressFormChange} required />
+                          </div>
+                          <div className="input-group">
+                              <label>Cidade:</label>
+                              <input type="text" name="city" value={addressForm.city} onChange={handleAddressFormChange} required />
+                          </div>
+                          <div className="input-group">
+                              <label>Código Postal:</label>
+                              <input type="text" name="postalCode" value={addressForm.postalCode} onChange={handleAddressFormChange} required />
+                          </div>
+                          <div className="input-group">
+                              <label>País:</label>
+                              <input type="text" name="country" value={addressForm.country} onChange={handleAddressFormChange} required />
+                          </div>
+                          <div className="input-group checkbox-group">
+                              <input type="checkbox" id="isDefaultAddress" name="isDefault" checked={addressForm.isDefault} onChange={handleAddressFormChange} />
+                              <label htmlFor="isDefaultAddress">Definir como Endereço Padrão</label>
+                          </div>
+                          <div className="form-buttons">
+                              <button type="submit" className="save-btn">{activeAddress !== null ? 'Atualizar Endereço' : 'Guardar Endereço'}</button>
+                              <button type="button" className="cancel-btn" onClick={() => { setIsAddingAddress(false); setActiveAddress(null); setAddressForm({ street: '', city: '', postalCode: '', country: '', isDefault: false }); }}>
+                                  Cancelar
+                              </button>
+                          </div>
+                      </form>
+                  ) : (
+                      <div className="addresses-list">
+                          {userData?.addresses && userData.addresses.length > 0 ? (
+                              userData.addresses.map((address, index) => (
+                                  <div key={index} className="address-item">
+                                      <p><strong>Rua:</strong> {address.street}</p>
+                                      <p><strong>Cidade:</strong> {address.city}</p>
+                                      <p><strong>Código Postal:</strong> {address.postalCode}</p>
+                                      <p><strong>País:</strong> {address.country}</p>
+                                      {address.isDefault && <p className="default-address-tag">Endereço Padrão</p>}
+                                      <div className="address-actions">
+                                          <button className="edit-btn" onClick={() => handleEditAddress(address, index)}><FaEdit /> Editar</button>
+                                          <button className="delete-btn" onClick={() => handleDeleteAddress(index)}><FaTrash /> Eliminar</button>
+                                          {!address.isDefault && (
+                                              <button className="save-btn" onClick={() => handleSetDefaultAddress(index)}>Definir como Padrão</button>
+                                          )}
+                                      </div>
+                                  </div>
+                              ))
+                          ) : (
+                              <p className="no-items-message">Nenhum endereço guardado. Adicione um novo!</p>
+                          )}
+                      </div>
+                  )}
               </div>
-            ))}
+          )}
 
-            {/* Edit Product Form */}
-             {selectedProductToEdit && editProductData && ( // Ensure editProductData is loaded
-                <div className="edit-form"> {/* Using generic edit-form class */}
-                   <h4 className="admin-subtitle">Editar Produto</h4>
-                   {productManagementError && <p className="error-message">{productManagementError}</p>}
-                   {productManagementSuccess && <p className="success-message">{productManagementSuccess}</p>}
-                   <div className="form-group">
-                      <label htmlFor="editProductName">Nome:</label>
-                      <input type="text" id="editProductName" name="name" value={editProductData.name} onChange={handleEditProductInputChange} required />
-                   </div>
-                   <div className="form-group">
-                      <label htmlFor="editProductPrice">Preço:</label>
-                      <input type="number" id="editProductPrice" name="price" value={editProductData.price} onChange={handleEditProductInputChange} step="0.01" required />
-                   </div>
-                   <div className="form-group">
-                      <label htmlFor="editProductDescription">Descrição:</label>
-                      <textarea id="editProductDescription" name="description" value={editProductData.description} onChange={handleEditProductInputChange} required />
-                   </div>
-                   <div className="form-group">
-                      <label htmlFor="editProductImageURL">URL da Imagem:</label>
-                      <input type="url" id="editProductImageURL" name="image" value={editProductData.image} onChange={handleEditProductInputChange} required />
-                   </div>
+          {/* Removido: Lista de Desejos Tab */}
+          {/* {activeTab === 'wishlist' && ( ... )} */}
 
-                   {/* Novo campo para URL do Sketchfab na edição */}
-                   <div className="form-group">
-                      <label htmlFor="editProductSketchfabUrl">URL do Modelo 3D (Sketchfab):</label>
-                      <input type="url" id="editProductSketchfabUrl" name="sketchfabUrl" value={editProductData.sketchfabUrl} onChange={handleEditProductSketchfabUrlChange} />
-                   </div>
 
-                   {/* Sizes and Stock for Edit Form */}
-                   <div className="form-group">
-                     <label>Tamanhos e Stock:</label>
-                     {editProductData.sizes.map((sizeObj, index) => (
-                       <div key={index} className="size-stock-row"> {/* Reusing size-stock-row class */}
-                         <input
-                           type="text"
-                           placeholder="Tamanho (ex: EU 40)"
-                           value={sizeObj.size}
-                           onChange={(e) => handleEditProductSizeChange(index, e)}
-                           required
-                         />
-                         <input
-                           type="number"
-                           placeholder="Stock"
-                           value={sizeObj.stock}
-                           onChange={(e) => handleEditProductStockChange(index, e)}
-                           required
-                         />
-                         {editProductData.sizes.length > 1 && (
-                           <button type="button" className="remove-size-btn" onClick={() => handleRemoveEditProductSize(index)}>
-                             Remover
-                           </button>
-                         )}
-                       </div>
-                     ))}
-                       {/* Adicionar Tamanho button - Added admin-btn small */}
-                     <button type="button" className="admin-btn small" onClick={handleAddEditProductSize}>
-                       Adicionar Tamanho
-                     </button>
-                   </div>
+          {/* Gerir Utilizadores Tab (Admin Only) */}
+          {isAdmin && activeTab === 'users' && (
+            <div className="tab-content-section user-management-tab">
+              <div className="section-header-with-search">
+                  <h2>Gerir Utilizadores</h2>
+                  <div className="search-input-group">
+                      <FaSearch className="search-icon" />
+                      <input
+                          type="text"
+                          placeholder="Pesquisar utilizador por nome ou email..."
+                          value={userSearchTerm}
+                          onChange={(e) => setUserSearchTerm(e.target.value)}
+                          className="search-input"
+                      />
+                  </div>
+              </div>
 
-                   <div className="actions">
-                      <button className="save-btn" onClick={handleSaveEditedProduct}>Salvar Produto</button>
-                      <button className="cancel-btn" onClick={() => setSelectedProductToEdit(null)}>Cancelar</button>
-                   </div>
+              <button className="create-btn" onClick={() => { setIsCreatingUser(true); setSelectedUserToEdit(null); setNewUserForm({ username: '', email: '', password: '', isAdmin: false }); }}>
+                <FaPlus /> Criar Novo Utilizador
+              </button>
+
+              {isCreatingUser ? (
+                <form onSubmit={handleCreateUser} className="user-form-container">
+                  <h3>Criar Novo Utilizador</h3>
+                  <div className="input-group">
+                    <label>Username:</label>
+                    <input type="text" value={newUserForm.username} onChange={(e) => setNewUserForm({ ...newUserForm, username: e.target.value })} required />
+                  </div>
+                  <div className="input-group">
+                    <label>Email:</label>
+                    <input type="email" value={newUserForm.email} onChange={(e) => setNewUserForm({ ...newUserForm, email: e.target.value })} required />
+                  </div>
+                  <div className="input-group">
+                    <label>Password:</label>
+                    <input type="password" value={newUserForm.password} onChange={(e) => setNewUserForm({ ...newUserForm, password: e.target.value })} required />
+                  </div>
+                  <div className="input-group checkbox-group">
+                    <input type="checkbox" id="newUserAdmin" checked={newUserForm.isAdmin} onChange={(e) => setNewUserForm({ ...newUserForm, isAdmin: e.target.checked })} />
+                    <label htmlFor="newUserAdmin">É Admin?</label>
+                  </div>
+                  <div className="form-buttons">
+                    <button type="submit" className="save-btn">Guardar</button>
+                    <button type="button" className="cancel-btn" onClick={() => setIsCreatingUser(false)}>Cancelar</button>
+                  </div>
+                </form>
+              ) : selectedUserToEdit ? (
+                <form onSubmit={handleUpdateUser} className="user-form-container">
+                  <h3>Editar Utilizador</h3>
+                  <div className="input-group">
+                    <label>Username:</label>
+                    <input type="text" value={editUserData.username} onChange={(e) => setEditUserData({ ...editUserData, username: e.target.value })} required />
+                  </div>
+                  <div className="input-group">
+                    <label>Email:</label>
+                    <input type="email" value={editUserData.email} onChange={(e) => setEditUserData({ ...editUserData, email: e.target.value })} required />
+                  </div>
+                  <div className="input-group checkbox-group">
+                    <input type="checkbox" id="isAdmin" checked={editUserData.isAdmin} onChange={(e) => setEditUserData({ ...editUserData, isAdmin: e.target.checked })} />
+                    <label htmlFor="isAdmin">É Admin?</label>
+                  </div>
+                  <div className="form-buttons">
+                    <button type="submit" className="save-btn">Atualizar</button>
+                    <button type="button" className="cancel-btn" onClick={() => setSelectedUserToEdit(null)}>Cancelar</button>
+                  </div>
+                </form>
+              ) : (
+                <div className="user-list">
+                  {filteredUsers.length > 0 ? (
+                    filteredUsers.map((user) => (
+                      <div key={user.id} className="user-item">
+                        <p><strong>ID:</strong> {user.id}</p>
+                        <p><strong>Username:</strong> {user.username}</p>
+                        <p><strong>Email:</strong> {user.email}</p>
+                        <p><strong>Admin:</strong> {user.isAdmin ? 'Sim' : 'Não'}</p>
+                        <div className="actions">
+                          <button className="edit-btn" onClick={() => handleEditUser(user)}><FaEdit /> Editar</button>
+                          <button className="delete-btn" onClick={() => handleDeleteUser(user.id)}><FaTrash /> Eliminar</button>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="no-items-message">Nenhum utilizador encontrado.</p>
+                  )}
                 </div>
-             )}
-          </div>
+              )}
+            </div>
+          )}
+
+          {/* Gerir Produtos Tab (Admin Only) */}
+          {isAdmin && activeTab === 'products' && (
+            <div className="tab-content-section product-management-tab">
+              <div className="section-header-with-search">
+                  <h2>Gerir Produtos</h2>
+                  <div className="search-input-group">
+                      <FaSearch className="search-icon" />
+                      <input
+                          type="text"
+                          placeholder="Pesquisar produto por nome, categoria ou SKU..."
+                          value={productSearchTerm}
+                          onChange={(e) => setProductSearchTerm(e.target.value)}
+                          className="search-input"
+                      />
+                  </div>
+              </div>
+
+              <button className="create-btn" onClick={() => { setIsCreatingProduct(true); setSelectedProductToEdit(null); setNewProductForm({ name: '', description: '', price: '', category: '', image: '', stock: { S: 0, M: 0, L: 0, XL: 0 }, sku: '', sketchfabUrl: '' }); }}>
+                <FaPlus /> Criar Novo Produto
+              </button>
+
+              {isCreatingProduct ? (
+                <form onSubmit={handleCreateProduct} className="product-form">
+                  <h3>Criar Novo Produto</h3>
+                  <div className="input-group">
+                    <label>Nome:</label>
+                    <input type="text" value={newProductForm.name} onChange={(e) => setNewProductForm({ ...newProductForm, name: e.target.value })} required />
+                  </div>
+                  <div className="input-group">
+                    <label>Descrição:</label>
+                    <textarea value={newProductForm.description} onChange={(e) => setNewProductForm({ ...newProductForm, description: e.target.value })} required></textarea>
+                  </div>
+                  <div className="input-group">
+                    <label>Preço:</label>
+                    <input type="number" step="0.01" value={newProductForm.price} onChange={(e) => setNewProductForm({ ...newProductForm, price: parseFloat(e.target.value) })} required />
+                  </div>
+                  <div className="input-group">
+                    <label>Categoria:</label>
+                    <input type="text" value={newProductForm.category} onChange={(e) => setNewProductForm({ ...newProductForm, category: e.target.value })} required />
+                  </div>
+                  <div className="input-group">
+                    <label>URL Imagem:</label>
+                    <input type="url" value={newProductForm.image} onChange={(e) => setNewProductForm({ ...newProductForm, image: e.target.value })} required />
+                  </div>
+                  <div className="input-group">
+                    <label>SKU:</label>
+                    <input type="text" value={newProductForm.sku} onChange={(e) => setNewProductForm({ ...newProductForm, sku: e.target.value })} />
+                  </div>
+                  <div className="input-group">
+                    <label>URL Sketchfab (3D Model):</label>
+                    <input type="url" value={newProductForm.sketchfabUrl} onChange={(e) => setNewProductForm({ ...newProductForm, sketchfabUrl: e.target.value })} />
+                  </div>
+                  {/* Stock por Tamanho */}
+                  <div className="input-group">
+                      <label>Stock por Tamanho:</label>
+                      {['S', 'M', 'L', 'XL'].map(size => (
+                          <div key={size} style={{display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '5px'}}>
+                              <label style={{minWidth: '30px'}}>{size}:</label>
+                              <input
+                                  type="number"
+                                  value={newProductForm.stock[size] || 0}
+                                  onChange={(e) => setNewProductForm(prev => ({
+                                      ...prev,
+                                      stock: { ...prev.stock, [size]: parseInt(e.target.value) || 0 }
+                                  }))}
+                                  style={{width: '80px'}}
+                              />
+                          </div>
+                      ))}
+                  </div>
+                  <div className="actions">
+                    <button type="submit" className="save-btn">Guardar</button>
+                    <button type="button" className="cancel-btn" onClick={() => setIsCreatingProduct(false)}>Cancelar</button>
+                  </div>
+                </form>
+              ) : selectedProductToEdit ? (
+                <form onSubmit={handleUpdateProduct} className="product-form">
+                  <h3>Editar Produto</h3>
+                  <div className="input-group">
+                    <label>Nome:</label>
+                    <input type="text" value={editProductForm.name} onChange={(e) => setEditProductForm({ ...editProductForm, name: e.target.value })} required />
+                  </div>
+                  <div className="input-group">
+                    <label>Descrição:</label>
+                    <textarea value={editProductForm.description} onChange={(e) => setEditProductForm({ ...editProductForm, description: e.target.value })} required></textarea>
+                  </div>
+                  <div className="input-group">
+                    <label>Preço:</label>
+                    <input type="number" step="0.01" value={editProductForm.price} onChange={(e) => setEditProductForm({ ...editProductForm, price: parseFloat(e.target.value) })} required />
+                  </div>
+                  <div className="input-group">
+                    <label>Categoria:</label>
+                    <input type="text" value={editProductForm.category} onChange={(e) => setEditProductForm({ ...editProductForm, category: e.target.value })} required />
+                  </div>
+                  <div className="input-group">
+                    <label>URL Imagem:</label>
+                    <input type="url" value={editProductForm.image} onChange={(e) => setEditProductForm({ ...editProductForm, image: e.target.value })} required />
+                  </div>
+                   <div className="input-group">
+                    <label>SKU:</label>
+                    <input type="text" value={editProductForm.sku} onChange={(e) => setEditProductForm({ ...editProductForm, sku: e.target.value })} />
+                  </div>
+                  <div className="input-group">
+                    <label>URL Sketchfab (3D Model):</label>
+                    <input type="url" value={editProductForm.sketchfabUrl} onChange={(e) => setEditProductForm({ ...editProductForm, sketchfabUrl: e.target.value })} />
+                  </div>
+                  {/* Stock por Tamanho para Edição */}
+                  <div className="input-group">
+                      <label>Stock por Tamanho:</label>
+                      {['S', 'M', 'L', 'XL'].map(size => (
+                          <div key={size} style={{display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '5px'}}>
+                              <label style={{minWidth: '30px'}}>{size}:</label>
+                              <input
+                                  type="number"
+                                  value={editProductForm.stock[size] || 0}
+                                  onChange={(e) => setEditProductForm(prev => ({
+                                      ...prev,
+                                      stock: { ...prev.stock, [size]: parseInt(e.target.value) || 0 }
+                                  }))}
+                                  style={{width: '80px'}}
+                              />
+                          </div>
+                      ))}
+                  </div>
+                  <div className="actions">
+                    <button type="submit" className="save-btn">Atualizar</button>
+                    <button type="button" className="cancel-btn" onClick={() => setSelectedProductToEdit(null)}>Cancelar</button>
+                  </div>
+                </form>
+              ) : (
+                <div className="product-list">
+                  {filteredProductsList.length > 0 ? (
+                    filteredProductsList.map((product) => (
+                      <div key={product.id} className="product-item">
+                        <img src={product.image} alt={product.name} className="product-item-image" />
+                        <div>
+                          <p><strong>Nome:</strong> {product.name}</p>
+                          <p><strong>Preço:</strong> €{product.price.toFixed(2)}</p>
+                          <p><strong>Categoria:</strong> {product.category}</p>
+                          <p><strong>SKU:</strong> {product.sku || 'N/A'}</p>
+                          <p><strong>Stock Total:</strong> {Object.values(product.stock || {}).reduce((acc, curr) => acc + curr, 0)}</p>
+                        </div>
+                        <div className="actions">
+                          <button className="edit-btn" onClick={() => handleEditProduct(product)}><FaEdit /> Editar</button>
+                          <button className="delete-btn" onClick={() => handleDeleteProduct(product.id)}><FaTrash /> Eliminar</button>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="no-items-message">Nenhum produto encontrado.</p>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Todos os Pedidos Tab (Admin Only) */}
+          {isAdmin && activeTab === 'all-orders' && (
+            <div className="tab-content-section all-orders-history-tab">
+              <h2>Histórico de Compras de Todos os Utilizadores</h2>
+              {allOrders.length === 0 ? (
+                <p className="no-items-message">Nenhum pedido encontrado.</p>
+              ) : (
+                <div className="orders-list">
+                  {allOrders.map(order => (
+                    <div key={order.id} className="order-item">
+                      <h3>Pedido ID: {order.id}</h3>
+                      <p><strong>Utilizador:</strong> {usersMap[order.userId] || order.userEmail || order.userId}</p>
+                      <p><strong>Data:</strong> {new Date(order.orderDate.toDate()).toLocaleString()}</p>
+                      <p><strong>Total:</strong> €{order.totalAmount.toFixed(2)}</p>
+                      <h4>Produtos:</h4>
+                      <ul>
+                        {order.items.map((item, index) => (
+                          <li key={index} className="order-product-item">
+                            <img src={item.image} alt={item.name} className="order-product-image" />
+                            <span>{item.name} ({item.size}) x {item.quantity} - €{(item.price * item.quantity).toFixed(2)}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
-      )}
-    </div>
+      </div>
+    </>
   );
 };
 

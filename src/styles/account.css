@@ -1,418 +1,726 @@
 /* styles/account.css */
+
 @import url('https://fonts.googleapis.com/css2?family=Carattere&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Carattere&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap');
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    /* Usar a fonte Roboto Mono como padrão, a menos que especificado de outra forma */
-    font-family: "Roboto Mono", serif;
-    font-style: normal;
-}
 
-body {
-    /* Definir a cor de fundo do body para preencher toda a viewport */
-    background-color: #00000065; /* Cor de fundo do container */
-}
-
+/* General Styling */
 .account-container {
-    padding: 2rem;
-    /* Removido background-color daqui para que o body defina a cor */
-    /* Removido font-family e font-style daqui para usar o * */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100vw;
-    min-height: 100vh;
-    /* Removido account-title daqui */
+  padding: 3rem 2rem; /* Aumentado o padding */
+  min-height: 100vh;
+  font-family: "Roboto Mono", serif;
+  font-style: normal;
+  color: white; /* Cor de texto padrão branco */
+  position: relative;
+  z-index: 2; /* Acima do GIF */
+  max-width: 1200px; /* Aumentado a largura máxima */
+  margin: 0 auto; /* Centraliza o container */
 }
 
-/* Removido .account-title, pois será substituído pelo layout do header */
-/* .account-title { ... } */
-
-
-/* --- Estilos para a nova barra de header --- */
-.header-bar {
-  display: flex; /* Ativa o layout flexbox */
-  align-items: center; /* Alinha itens verticalmente ao centro */
-  justify-content: space-between; /* Distribui o espaço: mensagem à esquerda, ações à direita */
-  width: 100%; /* Ocupa a largura total disponível */
-  padding: 10px 20px; /* Padding interno (ajuste conforme necessário) */
-  /* background-color: #f8f9fa; /* Opcional: cor de fundo para a barra */
-  /* border-bottom: 1px solid #dee2e6; /* Opcional: borda inferior */
-  margin-bottom: 20px; /* Espaço abaixo da barra */
-  box-sizing: border-box; /* Inclui padding na largura total */
-  flex-wrap: wrap; /* Permite quebra de linha em telas pequenas */
-  gap: 10px; /* Espaço entre a mensagem e o grupo de ações */
+.account-title {
+  font-size: 2.8rem; /* Ligeiramente maior */
+  font-weight: bold;
+  margin-bottom: 3rem; /* Aumentado a margem */
+  text-align: center;
+  color: white;
+  text-shadow: 0 0 15px rgba(0, 0, 0, 0.7); /* Sombra mais forte */
+  font-family: "Carattere", cursive; /* Usar Carattere para o título principal */
 }
 
-.welcome-message {
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: #fff; /* Cor do texto da mensagem (branco para contraste com fundo escuro) */
-    /* Adicione estilos adicionais se necessário */
+/* Tab Navigation */
+.account-tabs {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2.5rem; /* Aumentado a margem */
+  gap: 1.5rem; /* Mais espaço entre as abas */
+  flex-wrap: wrap;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Separador subtil */
+  padding-bottom: 1rem; /* Espaço abaixo do separador */
 }
 
-.header-actions {
-    display: flex; /* Ativa flexbox para alinhar tabs e botão Voltar */
-    align-items: center; /* Alinha itens verticalmente */
-    gap: 10px; /* Espaço entre os tabs e o botão Voltar */
-    flex-wrap: wrap; /* Permite quebra de linha em telas pequenas */
+.tab-button {
+  background-color: rgba(255, 255, 255, 0.08); /* Fundo mais claro para os botões */
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2); /* Borda subtil */
+  padding: 12px 25px; /* Mais padding */
+  border-radius: 8px; /* Ligeiramente mais arredondado */
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
 }
 
-/* --- Estilos para os Tabs dentro da barra de header --- */
-.header-actions .tabs {
-    display: flex; /* Mantém os botões de tab alinhados */
-    gap: 5px; /* Espaço entre os botões de tab */
-    flex-wrap: wrap; /* Permite quebra de linha para os tabs */
-    margin-bottom: 0; /* Remove a margem inferior anterior dos tabs */
+.tab-button:hover {
+  background-color: rgba(255, 255, 255, 0.15); /* Hover mais proeminente */
+  transform: translateY(-2px); /* Efeito de elevação */
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); /* Sombra suave */
 }
 
-.header-actions .tabs button.admin-btn {
-   /* Estilos base para os botões de tab, herdando de admin-btn */
-   padding: 8px 12px; /* Ajuste o padding para caber no header */
-   margin: 0; /* Remove margem se usar gap */
-   cursor: pointer;
-   border: 1px solid #ccc;
-   background-color: #f0f0f0; /* Cor de fundo padrão (clara) */
-   color: #333; /* Cor do texto padrão */
-   border-radius: 0.375rem; /* Borda arredondada */
-   font-size: 0.9rem; /* Tamanho de fonte ajustado */
-   font-weight: bold;
-   /* Transição suave */
-   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-   flex-shrink: 0; /* Evita que os botões encolham */
+.tab-button.active {
+  background-color: #007bff; /* Azul primário para a aba ativa */
+  border-color: #007bff;
+  box-shadow: 0 3px 10px rgba(0, 123, 255, 0.4);
+  transform: translateY(-1px); /* Ligeira elevação */
 }
 
-.header-actions .tabs button.admin-btn.active {
-   /* Estilos para o tab ativo */
-   background-color: #007bff; /* Azul (exemplo) */
-   color: white;
-   border-color: #007bff;
+.logout-button {
+  background-color: rgba(220, 53, 69, 0.7); /* Red for logout */
+  border-color: rgba(220, 53, 69, 0.7);
+  color: white; /* Garante que o texto seja branco */
+  padding: 12px 25px; /* Consistente com tab-button */
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  border: none; /* Garante que não tenha borda */
 }
 
-.header-actions .tabs button.admin-btn:hover:not(.active) {
-    background-color: #e0e0e0; /* Cor de fundo ao passar o mouse (exceto no ativo) */
+.logout-button:hover {
+  background-color: rgba(220, 53, 69, 0.9);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
-/* Estilos para o botão Voltar - Usando a classe admin-btn */
-.header-actions .admin-btn {
-    /* Já herda estilos base de .admin-btn */
-    padding: 8px 12px; /* Ajuste o padding para caber no header */
-    font-size: 0.9rem; /* Tamanho de fonte ajustado */
-    font-weight: bold;
-    flex-shrink: 0; /* Evita que o botão encolha */
+
+/* Tab Content - General */
+.tab-content-section {
+  background-color: rgba(0, 0, 0, 0.7); /* Fundo mais escuro para o conteúdo */
+  padding: 2.5rem; /* Aumentado o padding */
+  border-radius: 12px; /* Cantos mais arredondados */
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5); /* Sombra mais forte */
+  margin-top: 2rem; /* Espaço das abas */
+  border: 1px solid rgba(255, 255, 255, 0.1); /* Borda subtil */
 }
 
-/* --- Mantém os estilos existentes para o resto do conteúdo --- */
-
-.account-card {
-  background: white;
-  border-radius: 1rem;
-  padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  width: 80%;
-  max-width: 600px;
-  margin-bottom: 2rem;
+.tab-content-section h2 {
+  font-size: 2rem;
+  color: white;
+  margin-bottom: 2rem; /* Mais espaço abaixo do subtítulo */
+  text-align: center;
 }
 
-.card-title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  color: #333;
-  border-bottom: 2px solid #eee;
-  padding-bottom: 0.5rem;
+/* Profile Tab */
+.profile-info p {
+  font-size: 1.1rem;
+  margin-bottom: 1rem; /* Espaçamento consistente */
+  color: #eee;
+  display: flex;
+  justify-content: space-between; /* Alinha o valor à direita */
+  align-items: center;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.1); /* Separador tracejado */
+  padding-bottom: 0.8rem;
 }
 
-.card-content {
+.profile-info p strong {
+    color: #fff; /* Garante que o rótulo seja brilhante */
+    min-width: 120px; /* Alinha os rótulos */
+    text-align: left;
+}
+
+/* Form Styling (geral para todos os formulários) */
+.profile-edit-form,
+.password-change-form,
+.user-form-container, /* Renomeado de .user-form para .user-form-container para evitar conflito com .user-form .actions */
+.product-form, /* Adicionado .product-form para estilizar os inputs do formulário de produto */
+.address-form { /* Estilos para o formulário de endereço */
   display: flex;
   flex-direction: column;
+  gap: 1.5rem; /* Espaçamento consistente entre os grupos de formulário */
+  margin-top: 2rem; /* Espaço do conteúdo acima */
+  max-width: 500px; /* Limita a largura do formulário */
+  margin-left: auto;
+  margin-right: auto;
+  padding: 2rem; /* Padding interno do container do formulário */
+  background-color: rgba(255, 255, 255, 0.05); /* Fundo mais claro para os formulários */
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.info-row {
+.input-group {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.75rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid #eee;
-  font-size: 0.875rem;
+  flex-direction: column;
+  gap: 0.6rem; /* Espaço entre o rótulo e o input */
 }
 
-.info-label {
-  font-weight: bold;
-  color: #555;
+.input-group label {
+  font-size: 0.95rem;
+  color: #ccc;
+  font-weight: 500;
 }
 
-.info-value {
-  color: #777;
-  word-break: break-word;
+/* Input Styling (incluindo placeholder) - Alvo mais abrangente */
+.tab-content-section input:not([type="checkbox"]), /* Exclui checkboxes */
+.tab-content-section textarea,
+.tab-content-section select { /* Adicionado select para consistência */
+  width: 100%; /* Garante que os inputs ocupam a largura total do seu container */
+  padding: 12px 15px; /* Padding para melhor área de toque */
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.3); /* Borda branca subtil */
+  background-color: rgba(0, 0, 0, 0.4); /* Fundo escuro semi-transparente */
+  color: white; /* Texto branco */
+  font-size: 1rem;
+  outline: none; /* Remove a outline padrão ao focar */
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  font-family: "Roboto Mono", serif; /* Fonte consistente */
+  box-sizing: border-box; /* Inclui padding e borda na largura total */
 }
 
-.edit-input {
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 0.375rem;
-  margin-left: 1rem;
-  width: 60%;
+.tab-content-section input:not([type="checkbox"]):focus,
+.tab-content-section textarea:focus,
+.tab-content-section select:focus {
+  border-color: #8A2BE2; /* Roxo ao focar */
+  box-shadow: 0 0 0 3px rgba(138, 43, 226, 0.3); /* Sombra roxa ao focar */
 }
 
-.actions {
-  margin-top: 1.5rem;
+/* Estilo do Placeholder - Alvo mais abrangente */
+.tab-content-section input::placeholder,
+.tab-content-section textarea::placeholder {
+  color: rgba(255, 255, 255, 0.6); /* Cor do placeholder mais visível */
+  font-style: italic; /* Estilo itálico para o placeholder */
+}
+
+/* Estilo para Checkbox */
+.input-group input[type="checkbox"] {
+    width: 20px; /* Tamanho do checkbox */
+    height: 20px;
+    margin-right: 8px; /* Espaçamento à direita do checkbox */
+    accent-color: #8A2BE2; /* Cor do checkbox (se suportado pelo navegador) */
+    background-color: rgba(255, 255, 255, 0.1); /* Fundo do checkbox */
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    cursor: pointer;
+    vertical-align: middle; /* Alinha com o texto */
+}
+
+.input-group.checkbox-group {
+    flex-direction: row; /* Para alinhar o checkbox com o label */
+    align-items: center;
+    gap: 0.6rem;
+}
+
+
+/* Botões de Ação para Perfil e Formulários */
+.profile-actions, .user-form-container .form-buttons, .product-form .actions, .address-form .form-buttons { /* Removido .wishlist-product-actions */
   display: flex;
-  gap: 1rem;
-  justify-content: flex-end;
+  gap: 1rem; /* Espaço entre os botões */
+  justify-content: center; /* Centraliza os botões */
+  margin-top: 1rem;
+  flex-wrap: wrap; /* Permite que os botões quebrem a linha em telas pequenas */
 }
 
-.edit-btn,
-.save-btn,
-.logout-btn {
-  padding: 0.5rem 1rem;
+/* Estilos para os botões edit-btn, save-btn, cancel-btn, delete-btn, create-btn */
+.edit-btn, .save-btn, .cancel-btn, .delete-btn, .create-btn {
+  padding: 0.6rem 1.2rem; /* Diminuído o padding */
   border: none;
-  border-radius: 0.375rem;
+  border-radius: 5px;
   cursor: pointer;
-  font-weight: bold;
+  font-size: 0.9rem; /* Diminuído o tamanho da fonte */
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  color: white;
+  font-family: "Roboto Mono", serif;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  display: flex; /* Para alinhar ícone e texto */
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem; /* Espaço entre ícone e texto */
 }
 
 .edit-btn {
-  background-color: #007bff;
-  color: white;
+  background-color: #8A2BE2; /* Roxo */
+}
+.edit-btn:hover {
+  background-color: #6A0DAD; /* Roxo mais escuro no hover */
+  transform: translateY(-2px);
 }
 
 .save-btn {
-  background-color: #28a745;
-  color: white;
+  background-color: #4a4a4a; /* Cinza escuro */
+}
+.save-btn:hover {
+  background-color: #5a5a5a; /* Cinza mais claro no hover */
+  transform: translateY(-2px);
 }
 
-.logout-btn {
-  background-color: #dc3545;
-  color: white;
+.cancel-btn {
+  background-color: #6c757d; /* Cinzento */
+}
+.cancel-btn:hover {
+  background-color: #5a6268;
+  transform: translateY(-2px);
 }
 
-.edit-btn:hover,
-.save-btn:hover,
-.logout-btn:hover {
-  opacity: 0.9;
+.delete-btn {
+  background-color: #dc3545; /* Vermelho */
+}
+.delete-btn:hover {
+  background-color: #c82333;
+  transform: translateY(-2px);
 }
 
-/* Estilos para a seção de administração */
-.admin-section {
-  background: white;
-  border-radius: 1rem;
-  padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  width: 80%;
-  max-width: 800px;
-  margin-top: 2rem;
+.create-btn {
+  background-color: #8A2BE2; /* Roxo */
+  margin-bottom: 1.5rem;
+  display: block;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
 }
-
-.admin-title {
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  color: #333;
-  border-bottom: 2px solid #eee;
-  padding-bottom: 0.5rem;
+.create-btn:hover {
+  background-color: #6A0DAD; /* Roxo mais escuro no hover */
+  transform: translateY(-2px);
 }
-
-.admin-options {
-  list-style: none;
-  padding: 0;
-}
-
-.admin-item {
-  margin-bottom: 0.75rem;
-}
-
-.admin-btn {
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 0.375rem;
-  cursor: pointer;
-  background-color: #6c757d; /* Cor de fundo padrão dos botões admin */
-  color: white;
-  font-weight: bold;
-  /* Removido width: 100%; e text-align: left; para que funcionem inline */
-  /* width: 100%; */
-  /* text-align: left; */
-}
-
-.admin-btn.remove {
-  background-color: #dc3545;
-}
-
-.admin-btn:hover {
-  opacity: 0.9;
-}
-
-/* Estilos para listas de itens (utilizadores/produtos) */
-.list-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px;
-    border-bottom: 1px solid #eee;
-    margin-bottom: 5px;
-    background-color: #fff; /* Fundo branco para itens */
-    border-radius: 4px;
-    flex-wrap: wrap; /* Permite quebra de linha nos itens da lista */
-    gap: 10px; /* Espaço entre o texto e os botões */
-}
-
-.list-item .actions {
-    display: flex;
-    gap: 5px; /* Espaço entre os botões Editar e Remover */
-    flex-shrink: 0; /* Evita que os botões encolham */
-}
-
-
-.manage-users-section,
-.manage-products-section {
-  margin-top: 1.5rem;
-  padding: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 0.375rem;
-  background-color: #f9f9f9;
-}
-
-/* Estilos para formulários de edição/criação */
-.edit-form,
-.create-form {
-  margin-top: 1rem;
-  padding: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 0.375rem;
-  background-color: #fff;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 0.75rem;
-}
-
-.form-group label {
-  font-size: 0.875rem;
-  margin-bottom: 0.25rem;
-  color: #555;
-  font-weight: bold;
-}
-
-.form-group input[type="text"],
-.form-group input[type="email"],
-.form-group input[type="password"],
-.form-group input[type="number"],
-.form-group input[type="url"],
-.form-group textarea {
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 0.375rem;
-  width: 100%;
-  box-sizing: border-box; /* Garante que padding não aumenta a largura */
-  font-size: 1rem;
-}
-
-.form-group input[type="checkbox"] {
-  margin-top: 0.25rem;
-}
-
-/* Estilos para botões de ação dentro de formulários */
-.create-form .actions,
-.edit-form .actions {
-    margin-top: 1rem;
-    display: flex;
-    gap: 10px;
-    justify-content: flex-end; /* Alinha botões à direita */
-    flex-wrap: wrap; /* Permite quebra de linha */
-}
-
-
-.create-btn,
-.cancel-btn,
-.save-btn {
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 0.375rem;
-  cursor: pointer;
-  font-weight: bold;
-  /* Removido margin-top: 0.5rem; e width: auto; para funcionar no flexbox */
-  /* margin-top: 0.5rem; */
-  /* width: auto; */
-}
-
-/* Estilos para botões pequenos (Editar, Remover, Adicionar Tamanho) */
-.edit-btn.small,
-.remove-btn.small,
-.admin-btn.small { /* Adicionado admin-btn.small aqui */
-  padding: 0.3rem 0.6rem; /* Ajustado um pouco */
-  font-size: 0.8rem; /* Ajustado um pouco */
-  border-radius: 0.25rem; /* Ajustado um pouco */
-}
-
-.edit-btn.small,
-.remove-btn.small {
-    margin-left: 0.5rem; /* Mantém espaço entre Editar e Remover */
-}
-
-/* Ajuste a margem para o botão Adicionar Tamanho dentro da linha de tamanho/stock */
-.size-stock-row .admin-btn.small {
-    margin-left: 10px; /* Espaço à esquerda */
-    margin-top: 0; /* Remove margem superior se houver */
-}
-
 
 .error-message {
-  color: #dc3545; /* Vermelho */
-  background-color: #f8d7da;
-  border: 1px solid #f5c6cb;
-  padding: 10px;
-  margin-bottom: 15px;
-  border-radius: 4px;
-  font-size: 0.875rem;
+  color: #ff6b6b;
+  margin-top: 15px; /* Mais espaçamento */
+  text-align: center;
+  font-size: 0.9rem;
 }
 
 .success-message {
-  color: #28a745; /* Verde */
-  background-color: #d4edda;
-  border: 1px solid #c3e6cb;
-  padding: 10px;
-  margin-bottom: 15px;
-  border-radius: 4px;
-  font-size: 0.875rem;
+  color: #6eff6b;
+  margin-top: 15px;
+  text-align: center;
+  font-size: 0.9rem;
 }
 
-/* Estilos do add-product-inline (verifique se já existem no outro ficheiro) */
-/* Se add-product-inline.css já existe, estas regras podem ser removidas daqui */
-.add-product-inline-container {
-    margin-top: 1.5rem;
-    padding: 1rem;
-    border: 1px solid #ccc;
-    border-radius: 0.375rem;
-    background-color: #f9f9f9;
+/* User Management Tab (Admin) */
+.user-management-tab {
+  /* Herda de .tab-content-section */
 }
 
-.add-product-inline-form .form-group {
-    margin-bottom: 15px;
+.user-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Grid responsivo */
+  gap: 1.5rem; /* Espaço entre os cartões de utilizador */
+  margin-bottom: 2rem;
 }
 
-.add-product-inline-form .actions {
-    margin-top: 20px;
+.user-item {
+  background-color: rgba(255, 255, 255, 0.08);
+  padding: 1.5rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* Empurra os botões para baixo */
+  gap: 0.8rem; /* Espaço entre as linhas de informação */
+}
+
+.user-item p {
+  margin: 0;
+  font-size: 1rem;
+  color: #eee;
+}
+
+.user-item p strong {
+  color: white;
+}
+
+.user-item .actions {
+  display: flex;
+  gap: 0.8rem;
+  margin-top: 1rem; /* Espaço acima dos botões */
+  justify-content: flex-end; /* Alinha os botões à direita */
+  flex-wrap: wrap;
+}
+.user-item .actions button {
+    padding: 0.5rem 1rem; /* Ajuste para botões dentro do item */
+    font-size: 0.85rem;
+}
+
+.create-user-section {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+/* Styles for Product Management */
+.product-management-tab {
+    /* Herda de .tab-content-section */
+}
+
+.product-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* Grid responsivo para produtos */
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.product-item {
+    background-color: rgba(255, 255, 255, 0.08);
+    padding: 1.5rem;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     display: flex;
-    gap: 10px;
-    justify-content: flex-end;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center; /* Centraliza a imagem e os botões */
+    text-align: center; /* Centraliza o texto */
 }
 
-.submit-btn {
+.product-item-image {
+    width: 150px; /* Tamanho fixo para a imagem do produto */
+    height: 150px;
+    object-fit: contain; /* Garante que a imagem se ajuste sem cortar */
+    border-radius: 5px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    margin-bottom: 1rem;
+}
+
+.product-item div {
+    display: flex;
+    flex-direction: column; /* Informações do produto em coluna */
+    gap: 0.5rem;
+    align-items: flex-start; /* Alinha o texto à esquerda dentro do div */
+    width: 100%; /* Ocupa a largura total para alinhar o texto */
+    text-align: left; /* Garante alinhamento do texto */
+}
+
+.product-item p {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #eee;
+}
+
+.product-item p strong {
+    color: white;
+    min-width: 80px; /* Alinha rótulos */
+    display: inline-block; /* Permite min-width */
+}
+
+.product-item .actions {
+    display: flex;
+    gap: 0.8rem;
+    margin-top: 1rem;
+    justify-content: center; /* Centraliza os botões */
+    flex-wrap: wrap;
+    width: 100%; /* Ocupa a largura total para centralizar */
+}
+.product-item .actions button {
     padding: 0.5rem 1rem;
-    border: none;
-    border-radius: 0.375rem;
-    cursor: pointer;
-    font-weight: bold;
-    background-color: #007bff; /* Azul */
+    font-size: 0.85rem;
+}
+
+
+/* Styles for Purchase History */
+.orders-list {
+  display: grid;
+  gap: 2rem; /* Mais espaço entre os pedidos */
+}
+
+.order-item {
+  background-color: rgba(255, 255, 255, 0.07);
+  padding: 2rem; /* Mais padding */
+  border-radius: 12px; /* Mais arredondado */
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4); /* Sombra mais forte */
+}
+
+.order-item h3 {
+  font-size: 1.5rem; /* Ligeiramente maior */
+  color: #00bcd4; /* Azul claro para o ID do pedido */
+  margin-bottom: 1rem; /* Mais espaço */
+  text-align: center; /* Centraliza o ID do pedido */
+}
+
+.order-item p {
+  margin-bottom: 0.8rem; /* Espaçamento consistente */
+  font-size: 1.05rem;
+  color: #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+  padding-bottom: 0.6rem;
+}
+
+.order-item p strong {
     color: white;
 }
 
-.submit-btn:hover {
-    opacity: 0.9;
+.order-item h4 {
+  font-size: 1.3rem; /* Ligeiramente maior */
+  margin-top: 1.5rem; /* Mais espaço */
+  margin-bottom: 1rem;
+  color: #ccc;
+  text-align: center;
+}
+
+.order-item ul {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 1rem; /* Espaço entre os produtos */
+}
+
+.order-product-item {
+  display: flex;
+  align-items: center;
+  gap: 15px; /* Mais espaço entre imagem e texto */
+  background-color: rgba(0, 0, 0, 0.5); /* Fundo mais escuro para o item do produto */
+  padding: 0.8rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.order-product-image {
+  width: 70px; /* Tamanho fixo */
+  height: 70px;
+  object-fit: cover;
+  border-radius: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.order-product-item span {
+  flex: 1; /* Ocupa o espaço restante */
+  font-size: 1rem;
+  color: white;
+}
+
+/* --- New Styles for Addresses Tab --- */
+.addresses-tab {
+    /* Herda a maioria dos estilos de .tab-content-section */
+}
+
+.addresses-list {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.address-item {
+    background-color: rgba(255, 255, 255, 0.08);
+    padding: 1.5rem;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    position: relative; /* Para o tag de padrão */
+}
+
+.address-item p {
+    margin: 0.5rem 0;
+    font-size: 1rem;
+    color: #eee;
+}
+
+.address-item p strong {
+    color: white;
+}
+
+.default-address-tag {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #007bff; /* Cor de destaque */
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.address-actions {
+    display: flex;
+    gap: 0.8rem;
+    margin-top: 1rem;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+.address-actions button {
+    padding: 0.5rem 1rem; /* Ajuste para botões dentro do item */
+    font-size: 0.85rem;
+}
+
+.no-items-message {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1.1rem;
+    text-align: center;
+    padding: 2rem;
+}
+
+/* Removido: New Styles for Wishlist Tab */
+/* .wishlist-tab { ... } */
+
+.productsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 2rem;
+  padding: 1.5rem 0;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.productWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Removido: .wishlist-product-actions { ... } */
+/* Removido: .wishlist-product-actions button { ... } */
+/* Removido: .wishlist-product-actions .addToCartBtn { ... } */
+/* Removido: .wishlist-product-actions .addToCartBtn:hover { ... } */
+
+
+/* --- Search Input Styling --- */
+.section-header-with-search {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 2rem;
+    gap: 1rem;
+}
+
+.search-input-group {
+    position: relative;
+    width: 100%;
+    max-width: 400px; /* Limita a largura da pesquisa */
+}
+
+.search-input {
+    width: 100%;
+    padding: 10px 15px 10px 40px; /* Padding extra para o ícone */
+    border-radius: 5px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.search-input:focus {
+    border-color: #8A2BE2;
+    box-shadow: 0 0 0 3px rgba(138, 43, 226, 0.3);
+}
+
+.search-input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.search-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1rem;
+}
+
+/* Loading state */
+.loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    color: white;
+    font-size: 1.5rem;
+}
+
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .account-container {
+    padding: 2rem 1rem;
+  }
+
+  .account-title {
+    font-size: 2.2rem;
+    margin-bottom: 2rem;
+  }
+
+  .account-tabs {
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  .tab-button, .logout-button {
+    width: 100%; /* Botões de largura total */
+    padding: 10px 15px;
+  }
+
+  .tab-content-section {
+    padding: 1.5rem;
+  }
+
+  .tab-content-section h2 {
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .profile-info p {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding-bottom: 1rem;
+  }
+  .profile-info p strong {
+      min-width: unset; /* Remove o alinhamento fixo em telas pequenas */
+  }
+
+  .profile-edit-form,
+  .password-change-form,
+  .user-form-container,
+  .product-form,
+  .address-form {
+    padding: 1.5rem;
+    gap: 1rem;
+  }
+
+  .profile-actions, .user-form-container .form-buttons, .product-form .actions, .address-form .form-buttons {
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+  .profile-actions button, .user-form-container .form-buttons button, .product-form .actions button, .address-form .form-buttons button {
+      width: 100%;
+  }
+
+  .user-list, .addresses-list, .product-list {
+    grid-template-columns: 1fr; /* Uma única coluna em telas pequenas */
+  }
+
+  .user-item .actions, .address-actions, .product-item .actions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .user-item .actions button, .address-actions button, .product-item .actions button {
+      width: 100%;
+  }
+
+  .order-item {
+    padding: 1.5rem;
+  }
+
+  .order-item h3 {
+    font-size: 1.3rem;
+  }
+
+  .order-product-item {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 10px;
+  }
+
+  .section-header-with-search {
+      margin-bottom: 1.5rem;
+  }
+  .search-input-group {
+      max-width: 100%; /* Ocupa a largura total */
+  }
+
+  .product-item div {
+      align-items: center; /* Centraliza o texto do produto em mobile */
+      text-align: center;
+  }
+  .product-item p strong {
+      min-width: unset;
+  }
 }
