@@ -8,21 +8,22 @@ import { useRouter } from 'next/navigation';
 import { db } from '../lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useSession } from 'next-auth/react';
+import { doc, getDoc, runTransaction, updateDoc } from 'firebase/firestore'; // Adicionado updateDoc
 
 const CARD_ELEMENT_OPTIONS = {
   style: {
     base: {
-      color: '#32325d',
-      fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
+      color: '#FFFFFF', // White text for card input
+      fontFamily: '"Roboto Mono", Helvetica, sans-serif',
       fontSmoothing: 'antialiased',
       fontSize: '16px',
       '::placeholder': {
-        color: '#aab7c4',
+        color: '#CCCCCC', // Lighter gray placeholder text
       },
     },
     invalid: {
-      color: '#fa755a',
-      iconColor: '#fa755a',
+      color: '#FF0000', // Red for invalid input
+      iconColor: '#FF0000',
     },
   },
 };
@@ -37,89 +38,145 @@ function CheckoutForm() {
   const [succeeded, setSucceeded] = useState(false);
   const router = useRouter();
 
-  const totalAmount = subtotal * 100;
-
   const handleSubmit = async (event) => {
     event.preventDefault();
     setLoading(true);
     setErrorMessage(null);
 
-    if (!stripe || !elements) {
+    if (!stripe || !elements || subtotal <= 0) {
       setLoading(false);
       return;
     }
 
     const cardElement = elements.getElement(CardElement);
 
-    // Garante que userName e userEmail não são undefined
-    const currentUserName = session?.user?.name || null; // Se undefined, será null
-    const currentUserEmail = session?.user?.email || null; // Se undefined, será null
-
-    // 1. Chame sua API Route (backend) para criar um PaymentIntent E DECREMENTAR O STOCK
-    const response = await fetch('/api/create-payment-intent', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        amount: totalAmount,
-        cartItems: cartItems,
-        userId: session?.user?.id || 'guest_user', // Forneça um ID de fallback para usuários não logados, se permitido
-        userName: currentUserName, // Usando o valor tratado
-        userEmail: currentUserEmail, // Usando o valor tratado
-      }),
-    });
-
-    const { clientSecret, error: backendError } = await response.json();
-
-    if (backendError) {
-      setErrorMessage(backendError.message);
-      setLoading(false);
-      return;
-    }
-
-    // 2. Confirme o pagamento no frontend usando o clientSecret do PaymentIntent
-    const { paymentIntent, error } = await stripe.confirmCardPayment(clientSecret, {
-      payment_method: {
-        card: cardElement,
-        billing_details: {
-          name: currentUserName || 'Cliente Desconhecido', // Use o valor tratado
-          email: currentUserEmail || 'email@desconhecido.com', // Use o valor tratado
-        },
-      },
+    const { error, paymentMethod } = await stripe.createPaymentMethod({
+      type: 'card',
+      card: cardElement,
     });
 
     if (error) {
       setErrorMessage(error.message);
       setLoading(false);
-    } else if (paymentIntent.status === 'succeeded') {
-      setSucceeded(true);
-      setLoading(false);
-      clearCart(); // Limpa o carrinho após a compra
-
-      // Redireciona para uma página de sucesso
-      router.push('/success-page');
     } else {
-      setErrorMessage("O pagamento falhou ou foi cancelado.");
-      setLoading(false);
+      console.log('PaymentMethod:', paymentMethod);
+
+      try {
+        const userId = session?.user?.id || 'guest';
+        const userEmail = session?.user?.email || 'guest@example.com';
+
+        // START STOCK UPDATE LOGIC
+        await runTransaction(db, async (transaction) => {
+          for (const item of cartItems) {
+            const productRef = doc(db, 'products', item.id);
+            const productDoc = await transaction.get(productRef);
+
+            if (!productDoc.exists()) {
+              throw new Error(`Produto com ID ${item.id} não encontrado.`);
+            }
+
+            const currentStock = productDoc.data().stock || {}; // Assume 'stock' é um mapa de tamanhos
+            const currentQuantity = currentStock[item.size] || 0;
+
+            if (currentQuantity < item.quantity) {
+              throw new Error(`Stock insuficiente para o produto ${item.name} (Tamanho: ${item.size}). Stock disponível: ${currentQuantity}, Necessário: ${item.quantity}`);
+            }
+
+            const newStock = {
+              ...currentStock,
+              [item.size]: currentQuantity - item.quantity,
+            };
+            transaction.update(productRef, { stock: newStock });
+          }
+
+          // Se todas as atualizações de stock forem bem-sucedidas, adicione o pedido
+          await addDoc(collection(db, 'orders'), {
+            userId: userId,
+            userEmail: userEmail,
+            items: cartItems.map(item => ({
+              id: item.id,
+              name: item.name,
+              price: item.price,
+              quantity: item.quantity,
+              size: item.size,
+              image: item.image,
+            })),
+            totalAmount: subtotal,
+            orderDate: serverTimestamp(),
+            status: 'completed',
+          });
+        });
+        // END STOCK UPDATE LOGIC
+
+        setSucceeded(true);
+        clearCart();
+        router.push('/success-page');
+      } catch (e) {
+        console.error("Erro ao processar o pedido ou atualizar o stock: ", e);
+        setErrorMessage(`Erro: ${e.message || "Ocorreu um erro inesperado. Por favor, tente novamente."}`);
+        setSucceeded(false);
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
   return (
     <form onSubmit={handleSubmit} style={{
-      maxWidth: '500px',
-      margin: '2rem auto',
-      padding: '2rem',
-      background: 'rgba(0,0,0,0.7)',
-      borderRadius: '10px',
-      color: 'white',
-      fontFamily: '"Roboto Mono", serif'
+      maxWidth: '600px',
+      margin: '4rem auto',
+      padding: '2.5rem',
+      backgroundColor: 'rgba(10, 10, 10, 0.9)', // Dark background
+      borderRadius: '15px',
+      border: '1px solid #333333', // Dark gray border
+      color: '#FFFFFF', // White text
+      fontFamily: '"Roboto Mono", sans-serif'
     }}>
-      <h2>Finalizar Compra</h2>
-      <p style={{marginBottom: '1.5rem'}}>Total a pagar: €{subtotal?.toFixed(2)}</p>
+      <h2 style={{
+        fontSize: '2.2rem',
+        fontWeight: 'bold',
+        marginBottom: '2.5rem',
+        textAlign: 'center',
+        color: '#FFFFFF', // White title
+      }}>Checkout</h2>
 
-      <div style={{ marginBottom: '1.5rem', padding: '10px', border: '1px solid #ccc', borderRadius: '5px', backgroundColor: 'rgba(255,255,255,0.05)' }}>
-        <label htmlFor="card-element" style={{ display: 'block', marginBottom: '10px', fontWeight: 'bold' }}>
+      <div style={{ marginBottom: '1.5rem' }}>
+        <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#FFFFFF' }}>Detalhes do Pedido</h3> {/* White heading */}
+        {cartItems.length === 0 ? (
+          <p style={{ color: '#CCCCCC', textAlign: 'center' }}>O seu carrinho está vazio.</p>
+        ) : (
+          <ul style={{ listStyle: 'none', padding: 0 }}>
+            {cartItems.map((item) => (
+              <li key={item.id + item.size} style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                padding: '0.8rem 0',
+                borderBottom: '1px dashed #555555', // Subtle dashed dark gray line
+                fontSize: '1rem'
+              }}>
+                <span style={{ color: '#FFFFFF' }}>{item.name} ({item.size}) x {item.quantity}</span>
+                <span style={{ color: '#FFFFFF' }}>€{(item.price * item.quantity).toFixed(2)}</span> {/* White price */}
+              </li>
+            ))}
+          </ul>
+        )}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          marginTop: '1.5rem',
+          paddingTop: '1.5rem',
+          borderTop: '1px solid #555555', // Dark gray border
+          fontWeight: 'bold',
+          fontSize: '1.3rem',
+          color: '#FFFFFF' // White total
+        }}>
+          <span>Total</span>
+          <span>€{subtotal.toFixed(2)}</span>
+        </div>
+      </div>
+
+      <div style={{ marginBottom: '2rem', padding: '1.5rem', border: '1px solid #555555', borderRadius: '10px', backgroundColor: 'rgba(0,0,0,0.4)' }}> {/* Dark gray border and background */}
+        <label htmlFor="card-element" style={{ display: 'block', marginBottom: '1rem', fontWeight: 'bold', fontSize: '1.1rem', color: '#FFFFFF' }}>
           Detalhes do Cartão (Teste)
         </label>
         <CardElement id="card-element" options={CARD_ELEMENT_OPTIONS} />
@@ -129,24 +186,23 @@ function CheckoutForm() {
         type="submit"
         disabled={!stripe || loading || succeeded || subtotal <= 0}
         style={{
-          padding: '12px 20px',
-          backgroundColor: subtotal <= 0 ? '#555' : '#007bff',
+          padding: '15px 25px',
+          backgroundColor: subtotal <= 0 ? '#333333' : '#8A2BE2', // Purple for active, dark gray for disabled
           color: 'white',
           border: 'none',
-          borderRadius: '5px',
+          borderRadius: '10px',
           cursor: subtotal <= 0 ? 'not-allowed' : 'pointer',
-          fontSize: '1rem',
+          fontSize: '1.2rem',
           width: '100%',
           opacity: (loading || succeeded || subtotal <= 0) ? 0.7 : 1,
-          transition: 'background-color 0.3s ease, opacity 0.3s ease'
+          transition: 'background-color 0.3s ease, opacity 0.3s ease, transform 0.2s ease',
         }}
       >
         {loading ? 'Processando...' : succeeded ? 'Pagamento Aprovado!' : 'Pagar'}
       </button>
 
-      {errorMessage && <div style={{ color: '#fa755a', marginTop: '1rem', textAlign: 'center' }}>{errorMessage}</div>}
-      {succeeded && <div style={{ color: 'lightgreen', marginTop: '1rem', textAlign: 'center' }}>Pagamento realizado com sucesso!</div>}
-      {subtotal <= 0 && !succeeded && <div style={{ color: '#ffeb3b', marginTop: '1rem', textAlign: 'center' }}>Adicione produtos ao carrinho para prosseguir.</div>}
+      {errorMessage && <div style={{ color: '#FF0000', marginTop: '1.5rem', textAlign: 'center', fontSize: '1.1rem' }}>{errorMessage}</div>} {/* Red error message */}
+      {succeeded && <div style={{ color: '#8A2BE2', marginTop: '1.5rem', textAlign: 'center', fontSize: '1.1rem' }}>Pagamento processado com sucesso! Redirecionando...</div>} {/* Purple success message */}
     </form>
   );
 }

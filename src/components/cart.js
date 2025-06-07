@@ -1,12 +1,8 @@
 "use client";
 import { useCart } from "@/components/cartcontext";
 import Link from "next/link";
-import BackgroundAnimation from './Background'; // Importe o BackgroundAnimation
+// Removed: import BackgroundAnimation from './Background'; // Remove BackgroundAnimation
 import { useSession } from 'next-auth/react'; // Para obter o ID do utilizador
-// Removidas as importações do Firestore e useRouter relacionadas ao pagamento falso
-// import { db } from '../lib/firebase';
-// import { collection, addDoc, doc, updateDoc, getDoc, runTransaction } from 'firebase/firestore';
-// import { useRouter } from 'next/router';
 
 export default function CartPage() {
   const {
@@ -15,38 +11,34 @@ export default function CartPage() {
     clearCart,
     increaseQuantity,
     decreaseQuantity,
-    subtotal // Certifique-se de que subtotal é importado do contexto
+    subtotal
   } = useCart();
-  const { data: session } = useSession(); // Obter a sessão do usuário
-  // const router = useRouter(); // Não mais necessário se handleFakeCheckout for removido
-
-  // Remove a função handleFakeCheckout, pois vamos usar o Stripe
-  // const handleFakeCheckout = async () => { ... }
+  const { data: session } = useSession();
 
   return (
     <>
-      <BackgroundAnimation gifUrl="https://i.pinimg.com/originals/45/98/6d/45986d3cf4d64299869db2be4704719e.gif" />
+      {/* Removed BackgroundAnimation component */}
 
       <div className="cart-container">
         <h1 className="cart-title">Carrinho</h1>
 
         <div className="cart-grid">
-          <div>
+          <div className="cart-items-list">
             {cartItems.length === 0 ? (
               <>
-                <p style={{color: 'white', textAlign: 'center', fontSize: '1.1rem', marginBottom: '1.5rem'}}>O seu carrinho está vazio. Comece a explorar os nossos produtos!</p>
+                <p className="no-items-message">O seu carrinho está vazio. Comece a explorar os nossos produtos!</p>
                 <Link href="/home" style={{display: 'block', textAlign: 'center'}}>
                   <button className="cart-continue-btn">Continuar a Comprar</button>
                 </Link>
               </>
             ) : (
               cartItems.map((item) => (
-                <div key={`${item.id}-${item.size}`} className="cart-item">
+                <div key={item.id + item.size} className="cart-item">
                   <img src={item.image} alt={item.name} className="cart-item-image" />
                   <div className="cart-item-details">
                     <h3>{item.name}</h3>
                     <p>Tamanho: {item.size}</p>
-                    <p>Preço: €{(item.price * item.quantity).toFixed(2)}</p>
+                    <p>Preço: €{item.price ? item.price.toFixed(2) : '0.00'}</p>
                   </div>
                   <div className="cart-item-actions">
                     <div className="quantity-control">
@@ -84,16 +76,15 @@ export default function CartPage() {
               <span>IVA</span>
               <span>Calculado no checkout</span>
             </div>
-            <hr style={{borderColor: 'rgba(255,255,255,0.2)', margin: '1rem 0'}}/>
+            <hr style={{borderColor: '#555555', margin: '1rem 0'}}/> {/* Dark gray line */}
             <div className="summary-row summary-total">
               <span>Total</span>
               <span>€{subtotal.toFixed(2)}</span>
             </div>
-            {/* Botão de checkout que leva para a página real do Stripe */}
             <Link href="/checkout">
               <button
                   className="checkout-btn"
-                  disabled={cartItems.length === 0} // Desabilita se o carrinho estiver vazio
+                  disabled={cartItems.length === 0}
               >
                   Ir para Checkout (Stripe)
               </button>

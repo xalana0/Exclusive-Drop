@@ -19,9 +19,9 @@ const ProductModal = ({ product, onClose, onAdd }) => {
     }
   }, [selectedSize, product.stock]);
 
-  const sketchfabEmbedUrl = product.sketchfabUrl
-    ? `${product.sketchfabUrl}/embed?autostart=1&preload=1&ui_controls=1&ui_infos=1&ui_inspector=1&ui_settings=1&ui_help=1&ui_vr=1&ui_ar=1&ui_annotations=1&ui_watermark=0`
-    : '';
+const sketchfabEmbedUrl = product.sketchfabUrl
+  ? `${product.sketchfabUrl}/embed?autostart=1&preload=1&ui_controls=0&ui_infos=0&ui_inspector=0&ui_settings=0&ui_help=0&ui_vr=0&ui_ar=0&ui_annotations=0&ui_watermark=0&transparent=0&background=FFFFFF&ui_fullscreen=0&ui_tools=0&share_button=0`
+  : '';
 
   const handleAdd = () => {
     if (!selectedSize) {
@@ -87,7 +87,7 @@ const ProductModal = ({ product, onClose, onAdd }) => {
                   execution-while-not-rendered
                   web-share
                   src={sketchfabEmbedUrl}
-                  style={{ width: '100%', height: '100%', borderRadius: '5px' }}
+                  style={{ width: '100%', height: '222px' }} 
                 ></iframe>
               </div>
             ) : (

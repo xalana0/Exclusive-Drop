@@ -17,7 +17,7 @@ export default function CheckoutPage() {
     if (cartItems.length === 0) {
         return (
             <>
-                <BackgroundAnimation gifUrl="https://i.pinimg.com/originals/45/98/6d/45986d3cf4d64299869db2be4704719e.gif" />
+             
                 <div style={{
                     color: 'white',
                     textAlign: 'center',
@@ -42,7 +42,7 @@ export default function CheckoutPage() {
 
     return (
         <>
-            <BackgroundAnimation gifUrl="https://i.pinimg.com/originals/45/98/6d/45986d3cf4d64299869db2be4704719e.gif" />
+      
             <div style={{ zIndex: 2, position: 'relative' }}>
                 <Elements stripe={stripePromise}>
                     <CheckoutForm />
