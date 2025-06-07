@@ -21,8 +21,8 @@ export default function SuccessPage() {
         position: 'relative',
         padding: '2rem'
       }}>
-        <h1 style={{ fontSize: '3rem', color: '#00cc00', marginBottom: '1rem' }}>🎉 Pagamento Fictício Realizado com Sucesso! 🎉</h1>
-        <p style={{ fontSize: '1.2rem', marginBottom: '2rem' }}>Obrigado pela sua compra simulada! Seu pedido foi processado (em modo de teste).</p>
+        <h1 style={{ fontSize: '3rem', color: '#00cc00', marginBottom: '1rem' }}>🎉</h1>
+        <p style={{ fontSize: '1.2rem', marginBottom: '2rem' }}>Obrigado pela sua compra simulada!(em modo de teste).</p>
         <Link href="/home">
           <button style={{
             padding: '15px 30px',
@@ -41,7 +41,7 @@ export default function SuccessPage() {
           </button>
         </Link>
         <p style={{ fontSize: '0.9rem', marginTop: '2rem', color: '#ccc' }}>
-          Este é um pagamento de teste, nenhum valor real foi cobrado.
+          Este é um pagamento de teste.
         </p>
       </div>
     </>

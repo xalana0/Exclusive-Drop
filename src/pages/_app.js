@@ -10,8 +10,6 @@ import '../styles/page.css';
 import '../styles/account.css';
 import { CartProvider } from '@/components/cartcontext'; // Já está importado
 
-// Importe outros ficheiros CSS globais que possa ter
-// import '../styles/globals.css'; // Exemplo
 
 import { SessionProvider } from 'next-auth/react'; // Mantenha se estiver a usar next-auth
 
