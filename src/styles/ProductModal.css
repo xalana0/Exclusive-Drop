@@ -1,7 +1,5 @@
 /* styles/ProductModal.css */
 
-
-
 .overlay {
   position: fixed;
   top: 0;
@@ -21,7 +19,7 @@
   border-radius: 10px;
   position: relative;
   width: 90%;
-  max-width: 800px; /* Aumentado a largura máxima do modal */
+  max-width: 800px; /* Aumentado a largura máxima do modal padrão */
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5); /* Sombra mais forte */
@@ -29,6 +27,11 @@
   flex-direction: column;
   color: white; /* Texto branco padrão no modal */
   font-family: "Roboto Mono", serif;
+  transition: max-width 0.3s ease; /* Transição para o max-width */
+}
+
+.modal.large-3d-view {
+  max-width: 1200px; /* Nova largura máxima para 3D View */
 }
 
 .closeBtn {
@@ -70,12 +73,17 @@
   align-items: center;
   justify-content: flex-start;
   padding-bottom: 50px; /* Garante espaço para os botões se estiverem no fundo */
+  flex-shrink: 0; /* Impede que ele encolha */
+  flex-grow: 1; /* Permite que ele cresça */
 }
 
 @media (min-width: 768px) {
   .modal-media-and-toggle-container {
     width: 50%; /* Ocupa 50% em desktop */
     aspect-ratio: auto; /* Deixa o conteúdo definir a altura */
+  }
+  .modal.large-3d-view .modal-media-and-toggle-container {
+    width: 70%; /* Ocupa mais espaço no modo 3D maior */
   }
 }
 
@@ -182,45 +190,41 @@
   font-weight: 600;
 }
 
-.size-buttons-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.8rem;
-}
-
-.size-button {
-  background-color: transparent;
+/* Novo estilo para o dropdown de tamanhos */
+.size-dropdown {
+  width: 100%; /* Ocupa a largura total disponível */
+  padding: 10px 15px;
   border: 1px solid white;
-  color: white;
-  padding: 10px 18px;
   border-radius: 5px;
-  font-size: 0.95rem;
+  background-color: transparent; /* Fundo transparente */
+  color: white; /* Texto branco */
+  font-size: 1rem;
   cursor: pointer;
-  transition: all 0.3s ease; /* Transição para todos os estados */
+  appearance: none; /* Remove a seta padrão do navegador */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url('data:image/svg+xml;utf8,<svg fill="white" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>'); /* Seta branca personalizada */
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  margin-top: 0.5rem; /* Espaçamento superior */
 }
 
-.size-button:hover {
-  background-color: rgba(255, 255, 255, 0.1); /* Fundo mais claro */
-  transform: translateY(-2px); /* Elevação sutil */
-  border-color: #8A2BE2; /* Borda roxa no hover */
-  box-shadow: 0 0 5px rgba(138, 43, 226, 0.3); /* Sombra sutil arroxeada */
+.size-dropdown option {
+  background-color: #333; /* Fundo escuro para as opções */
+  color: white; /* Texto branco para as opções */
+  padding: 10px; /* Padding para melhor visualização */
 }
 
-.size-button.selected {
-  background-color: #8A2BE2; /* Roxo se selecionado */
-  border-color: #8A2BE2;
-  transform: scale(1.05); /* Leve zoom ao ser selecionado */
-  box-shadow: 0 2px 8px rgba(138, 43, 226, 0.5); /* Sombra arroxeada */
+.size-dropdown option:disabled {
+  color: #888; /* Cor para opções desabilitadas */
 }
 
-.size-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  background-color: rgba(255, 255, 255, 0.05); /* Fundo levemente visível */
-  border-color: rgba(255, 255, 255, 0.2);
-  transform: none; /* Sem transform no disabled */
-  box-shadow: none; /* Sem sombra no disabled */
+.size-dropdown:focus {
+  outline: none;
+  border-color: #8A2BE2; /* Borda roxa no foco */
+  box-shadow: 0 0 0 2px rgba(138, 43, 226, 0.5); /* Sombra de foco roxa */
 }
+
 
 .stockInfo {
   margin-top: 1rem;

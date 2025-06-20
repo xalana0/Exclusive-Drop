@@ -6,9 +6,9 @@ import { useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
 import { useCart } from '@/components/cartcontext';
 import { useRouter } from 'next/navigation';
 import { db } from '../lib/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore'; // addDoc será usado fora da transação para simplificar o exemplo, mas a intenção era que fosse transaction.set
+import { doc, getDoc, runTransaction, updateDoc } from 'firebase/firestore'; 
 import { useSession } from 'next-auth/react';
-import { doc, getDoc, runTransaction, updateDoc } from 'firebase/firestore'; // Adicionado updateDoc
 
 const CARD_ELEMENT_OPTIONS = {
   style: {
@@ -41,7 +41,7 @@ function CheckoutForm() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setLoading(true);
-    setErrorMessage(null);
+    setErrorMessage(null); // Limpar mensagens de erro anteriores
 
     if (!stripe || !elements || subtotal <= 0) {
       setLoading(false);
@@ -65,20 +65,31 @@ function CheckoutForm() {
         const userId = session?.user?.id || 'guest';
         const userEmail = session?.user?.email || 'guest@example.com';
 
-        // START STOCK UPDATE LOGIC
+        // INÍCIO DA LÓGICA DE ATUALIZAÇÃO DE STOCK COM TRANSAÇÃO
         await runTransaction(db, async (transaction) => {
+          // PASSO 1: Realizar TODAS as leituras primeiro
+          const productDocs = new Map(); // Para armazenar os snapshots dos produtos
+
           for (const item of cartItems) {
             const productRef = doc(db, 'products', item.id);
-            const productDoc = await transaction.get(productRef);
-
-            if (!productDoc.exists()) {
+            const productDocSnapshot = await transaction.get(productRef); // LEITURA
+            
+            if (!productDocSnapshot.exists()) {
               throw new Error(`Produto com ID ${item.id} não encontrado.`);
             }
+            productDocs.set(item.id, productDocSnapshot); // Armazenar o snapshot
+          }
 
-            const currentStock = productDoc.data().stock || {}; // Assume 'stock' é um mapa de tamanhos
+          // PASSO 2: Depois de TODAS as leituras, realizar TODAS as escritas
+          for (const item of cartItems) {
+            const productRef = doc(db, 'products', item.id);
+            const productDocSnapshot = productDocs.get(item.id); // Obter o snapshot lido anteriormente
+
+            const currentStock = productDocSnapshot.data().stock || {};
             const currentQuantity = currentStock[item.size] || 0;
 
             if (currentQuantity < item.quantity) {
+              // Lançar um erro para reverter a transação se o stock for insuficiente
               throw new Error(`Stock insuficiente para o produto ${item.name} (Tamanho: ${item.size}). Stock disponível: ${currentQuantity}, Necessário: ${item.quantity}`);
             }
 
@@ -86,11 +97,13 @@ function CheckoutForm() {
               ...currentStock,
               [item.size]: currentQuantity - item.quantity,
             };
-            transaction.update(productRef, { stock: newStock });
+            transaction.update(productRef, { stock: newStock }); // ESCRITA
           }
 
-          // Se todas as atualizações de stock forem bem-sucedidas, adicione o pedido
-          await addDoc(collection(db, 'orders'), {
+          // PASSO 3: Adicionar o pedido na mesma transação para garantir atomicidade
+          // É importante usar transaction.set para adicionar um novo documento dentro de uma transação
+          const orderRef = doc(collection(db, 'orders')); // Gera uma nova referência de documento com ID automático
+          transaction.set(orderRef, {
             userId: userId,
             userEmail: userEmail,
             items: cartItems.map(item => ({
@@ -102,17 +115,18 @@ function CheckoutForm() {
               image: item.image,
             })),
             totalAmount: subtotal,
-            orderDate: serverTimestamp(),
+            orderDate: serverTimestamp(), // Usa o timestamp do servidor
             status: 'completed',
           });
         });
-        // END STOCK UPDATE LOGIC
+        // FIM DA LÓGICA DE ATUALIZAÇÃO DE STOCK COM TRANSAÇÃO
 
         setSucceeded(true);
-        clearCart();
-        router.push('/success-page');
+        clearCart(); // Limpa o carrinho após o sucesso da transação
+        router.push('/success-page'); // Redireciona para uma página de sucesso
       } catch (e) {
         console.error("Erro ao processar o pedido ou atualizar o stock: ", e);
+        // O FirebaseError será e.message diretamente se for lançado na transação
         setErrorMessage(`Erro: ${e.message || "Ocorreu um erro inesperado. Por favor, tente novamente."}`);
         setSucceeded(false);
       } finally {

@@ -7,7 +7,7 @@ import BackgroundAnimation from '../components/Background'; // Ajuste o caminho 
 export default function SuccessPage() {
   return (
     <>
-      <BackgroundAnimation gifUrl="https://i.pinimg.com/originals/45/98/6d/45986d3cf4d64299869db2be4704719e.gif" />
+      
       <div style={{
         color: 'white',
         textAlign: 'center',
@@ -21,8 +21,8 @@ export default function SuccessPage() {
         position: 'relative',
         padding: '2rem'
       }}>
-        <h1 style={{ fontSize: '3rem', color: '#00cc00', marginBottom: '1rem' }}>🎉</h1>
-        <p style={{ fontSize: '1.2rem', marginBottom: '2rem' }}>Obrigado pela sua compra simulada!(em modo de teste).</p>
+        <h1 style={{ fontSize: '3rem', color: '#00cc00', marginBottom: '1rem' }}>✔️</h1>
+        <p style={{ fontSize: '1.2rem', marginBottom: '2rem' }}>Obrigado pela sua compra.</p>
         <Link href="/home">
           <button style={{
             padding: '15px 30px',
