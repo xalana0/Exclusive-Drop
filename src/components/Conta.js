@@ -1,4 +1,4 @@
-// components/Conta.js (ou pages/conta.js, dependendo de onde você o está a usar)
+// src/components/Conta.js
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 import { useSession, signOut } from 'next-auth/react';
@@ -237,7 +237,7 @@ const Conta = () => {
   }, [session, status, router, fetchUserData, fetchUserList, fetchProducts, fetchOrders, isAdmin, activeTab]); // Adicionado activeTab
 
 
-  // --- Funções da Aba "Minha Conta" ---
+  // --- Funções da Aba "Conta" ---
 
   const handleEditProfile = () => {
     setIsEditingProfile(true);
@@ -964,7 +964,7 @@ const Conta = () => {
   return (
     <>
       <div className="dashboard-container"> {/* Novo container principal */}
-        <h1 className="account-title">Minha Conta</h1>
+        <h1 className="account-title">Conta</h1>
 
         <div className="dashboard-layout">
           <div className="sidebar">
@@ -972,7 +972,7 @@ const Conta = () => {
               className={`tab-button ${activeTab === 'conta' ? 'active' : ''}`}
               onClick={() => setActiveTab('conta')}
             >
-              <FaUser /> Minha Conta
+              <FaUser /> Conta
             </button>
             {isAdmin && (
               <>

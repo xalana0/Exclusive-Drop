@@ -553,7 +553,17 @@
 
 @media (max-width: 600px) {
   .dashboard-container {
-    padding: 1.5rem 1rem;
+     padding: 3rem 4rem; /* Aumentado o padding horizontal */
+  min-height: 100vh;
+  font-family: "Roboto Mono", serif;
+  font-style: normal;
+  color: white;
+  position: relative;
+  z-index: 2;
+  max-width: 95%; /* Alterado para usar percentagem e ocupar mais espaço */
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
   }
 
   .account-title {
