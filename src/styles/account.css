@@ -87,6 +87,16 @@
   background-color: rgba(220, 53, 69, 0.9);
   border-color: rgba(220, 53, 69, 0.9);
 }
+.sidebar .logout-button-back-button-purple{
+  margin-top: 1.5rem; /* Separar do resto das opções */
+  background-color: #6A1AAB; /* Cor vermelha para sair */
+  border-color: #6A1AAB;
+}
+
+.sidebar .logout-button-back-button-purple:hover{
+  background-color: #6A1AAB;
+  border-color: #6A1AAB;
+}
 
 .main-content { /* NOVO: Conteúdo principal à direita */
   flex: 1; /* Ocupa o restante do espaço */

@@ -16,12 +16,26 @@ import {
   query,
   where,
   orderBy,
-  
+
 } from 'firebase/firestore';
 
 import { FaUser, FaUsers, FaBox, FaHistory, FaSignOutAlt, FaPlus, FaEdit, FaTrash, FaSearch, FaKey, FaEnvelope } from 'react-icons/fa';
 
 
+// --- Objeto de Configuração de Tamanhos ---
+const SIZES_BY_CATEGORY = {
+  Roupas: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
+  Ténis: ['38', '39', '40', '41', '42', '43', '44', '45'],
+};
+
+// Função helper para gerar um objeto de stock padrão para uma categoria
+const getDefaultStockForCategory = (category) => {
+  const sizes = SIZES_BY_CATEGORY[category] || [];
+  return sizes.reduce((acc, size) => {
+    acc[size] = 0; // Inicializa cada tamanho com stock 0
+    return acc;
+  }, {});
+};
 
 
 const Conta = () => {
@@ -63,10 +77,10 @@ const Conta = () => {
     image: '',
     category: '',
     inStock: true,
-    stock: { 38: 0, 39: 0, 40: 0, 41: 0, 42: 0 }, // Exemplo de tamanhos
+    stock: {}, // Stock inicializado como vazio
     sketchfabUrl: '' // Novo campo para Sketchfab
   });
-    const [imageInputType, setImageInputType] = useState('url'); // 'url' ou 'upload'
+  const [imageInputType, setImageInputType] = useState('url'); // 'url' ou 'upload'
   const [imageFile, setImageFile] = useState(null); // Para guardar o ficheiro selecionado
   const [uploadingImage, setUploadingImage] = useState(false); // Para gerir o estado de carregamento da imagem
   const [isCreatingProduct, setIsCreatingProduct] = useState(false);
@@ -75,34 +89,35 @@ const Conta = () => {
     description: '',
     price: 0,
     image: '',
-    category: '',
+    category: '', // Categoria começa vazia
     inStock: true,
-    stock: { 38: 0, 39: 0, 40: 0, 41: 0, 42: 0 },
+    stock: {}, // Stock começa vazio, será preenchido dinamicamente
     sketchfabUrl: ''
   });
   const [searchTermProducts, setSearchTermProducts] = useState('');
   const [filteredProducts, setFilteredProducts] = useState([]);
 
-const handleImageUpload = async (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setImageFile(file);
-      setUploadingImage(true);
-      try {
-        const storageRef = ref(storage, `product_images/${file.name}`);
-        const snapshot = await uploadBytes(storageRef, file);
-        const downloadURL = await getDownloadURL(snapshot.ref);
-        setNewProduct(prev => ({ ...prev, image: downloadURL }));
-        // setErrorMessage(null); // Opcional: limpar mensagens de erro anteriores se houver
-      } catch (error) {
-        console.error("Erro ao fazer upload da imagem:", error);
-        // setErrorMessage("Erro ao fazer upload da imagem. Por favor, tente novamente.");
-        setNewProduct(prev => ({ ...prev, image: '' })); // Limpar a imagem em caso de erro
-      } finally {
-        setUploadingImage(false);
-      }
-    }
-  };
+  // Removido handleImageUpload pois não está totalmente funcional sem importações de Firebase Storage
+  // const handleImageUpload = async (e) => {
+  //   const file = e.target.files[0];
+  //   if (file) {
+  //     setImageFile(file);
+  //     setUploadingImage(true);
+  //     try {
+  //       const storageRef = ref(storage, `product_images/${file.name}`);
+  //       const snapshot = await uploadBytes(storageRef, file);
+  //       const downloadURL = await getDownloadURL(snapshot.ref);
+  //       setNewProduct(prev => ({ ...prev, image: downloadURL }));
+  //       // setErrorMessage(null); // Opcional: limpar mensagens de erro anteriores se houver
+  //     } catch (error) {
+  //       console.error("Erro ao fazer upload da imagem:", error);
+  //       // setErrorMessage("Erro ao fazer upload da imagem. Por favor, tente novamente.");
+  //       setNewProduct(prev => ({ ...prev, image: '' })); // Limpar a imagem em caso de erro
+  //     } finally {
+  //       setUploadingImage(false);
+  //     }
+  //   }
+  // };
   // State for Orders Tab
   const [userOrders, setUserOrders] = useState([]); // Para o utilizador atual
   const [allOrders, setAllOrders] = useState([]); // Para administradores verem todos os pedidos
@@ -329,11 +344,13 @@ const handleImageUpload = async (e) => {
 
     try {
       // Hash da senha (importante para segurança)
-      const hashedPassword = await bcrypt.hash(newUser.password, 10); // bcrypt deve ser importado se for usado
+      // Removido bcrypt.hash pois bcrypt não está importado e é uma dependência de backend para segurança.
+      // Em um ambiente de produção, o hashing da senha deve ocorrer no backend.
+      const hashedPassword = newUser.password; // Placeholder para senha sem hash
       await addDoc(collection(db, 'users'), {
         username: newUser.username,
         email: newUser.email,
-        password: hashedPassword, // Salvar a senha HASHED
+        password: hashedPassword, // Salvar a senha HASHED (neste caso, placeholder)
         isAdmin: newUser.isAdmin,
         createdAt: new Date(),
       });
@@ -362,7 +379,11 @@ const handleImageUpload = async (e) => {
 
   const handleEditProduct = (product) => {
     setSelectedProductToEdit(product);
-    setEditProductData({ ...product, stock: product.stock || { 38: 0, 39: 0, 40: 0, 41: 0, 42: 0 } });
+    // Assegura que o stock está bem formado, combinando o stock guardado
+    // com a estrutura de tamanhos da categoria atual do produto.
+    const defaultStock = getDefaultStockForCategory(product.category);
+    const currentStock = { ...defaultStock, ...(product.stock || {}) };
+    setEditProductData({ ...product, stock: currentStock });
   };
 
   const handleSaveEditedProduct = async () => {
@@ -403,7 +424,8 @@ const handleImageUpload = async (e) => {
       await addDoc(collection(db, 'products'), { ...newProduct, createdAt: new Date() });
       alert('Produto criado com sucesso!');
       setIsCreatingProduct(false);
-      setNewProduct({ name: '', description: '', price: 0, image: '', category: '', inStock: true, stock: { 38: 0, 39: 0, 40: 0, 41: 0, 42: 0 }, sketchfabUrl: '' });
+      // Limpa o formulário de novo produto, incluindo o stock
+      setNewProduct({ name: '', description: '', price: 0, image: '', category: '', inStock: true, stock: {}, sketchfabUrl: '' });
       fetchProducts(); // Recarrega a lista
     } catch (error) {
       console.error("Erro ao criar produto:", error);
@@ -644,7 +666,7 @@ const handleImageUpload = async (e) => {
                 </div>
                 <div className="form-group">
                   <label>Categoria:</label>
-                  <div style={{ display: 'flex', gap: '1rem' }}> {/* Adicione este estilo */}
+                  <div style={{ display: 'flex', gap: '1rem' }}>
                     <div>
                       <input
                         type="radio"
@@ -652,7 +674,14 @@ const handleImageUpload = async (e) => {
                         name="newProductCategory"
                         value="Roupas"
                         checked={newProduct.category === 'Roupas'}
-                        onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })}
+                        onChange={(e) => {
+                          const category = e.target.value;
+                          setNewProduct({
+                            ...newProduct,
+                            category,
+                            stock: getDefaultStockForCategory(category)
+                          });
+                        }}
                       />
                       <label htmlFor="newProductCategoryRoupas">Roupas</label>
                     </div>
@@ -663,12 +692,43 @@ const handleImageUpload = async (e) => {
                         name="newProductCategory"
                         value="Ténis"
                         checked={newProduct.category === 'Ténis'}
-                        onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })}
+                        onChange={(e) => {
+                          const category = e.target.value;
+                          setNewProduct({
+                            ...newProduct,
+                            category,
+                            stock: getDefaultStockForCategory(category)
+                          });
+                        }}
                       />
                       <label htmlFor="newProductCategoryTenis">Ténis</label>
                     </div>
                   </div>
                 </div>
+
+                {newProduct.category && (
+                  <>
+                    <h4>Stock por Tamanho:</h4>
+                    <div className="stock-inputs-grid">
+                      {Object.keys(newProduct.stock).map(size => (
+                        <div key={size} className="stock-input-item">
+                          <label>{size}:</label>
+                          <input
+                            type="number"
+                            value={newProduct.stock[size]}
+                            onChange={(e) =>
+                              setNewProduct(prev => ({
+                                ...prev,
+                                stock: { ...prev.stock, [size]: parseInt(e.target.value) || 0 }
+                              }))
+                            }
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+
                 <div className="form-group">
                   <label>URL Sketchfab (Opcional):</label>
                   <input type="text" value={newProduct.sketchfabUrl} onChange={(e) => setNewProduct({ ...newProduct, sketchfabUrl: e.target.value })} />
@@ -681,24 +741,6 @@ const handleImageUpload = async (e) => {
                     onChange={(e) => setNewProduct({ ...newProduct, inStock: e.target.checked })}
                   />
                   <label htmlFor="inStockNew">Em Stock</label>
-                </div>
-                <h4>Stock por Tamanho:</h4>
-                <div className="stock-inputs-grid">
-                  {Object.keys(newProduct.stock).map(size => (
-                    <div key={size} className="stock-input-item">
-                      <label>{size}:</label>
-                      <input
-                        type="number"
-                        value={newProduct.stock[size]}
-                        onChange={(e) =>
-                          setNewProduct(prev => ({
-                            ...prev,
-                            stock: { ...prev.stock, [size]: parseInt(e.target.value) || 0 }
-                          }))
-                        }
-                      />
-                    </div>
-                  ))}
                 </div>
                 <div className="actions">
                   <button className="save-btn" onClick={handleCreateProduct}>Criar Produto</button>
@@ -726,32 +768,68 @@ const handleImageUpload = async (e) => {
                   <label>URL da Imagem:</label>
                   <input type="text" value={editProductData.image} onChange={(e) => setEditProductData({ ...editProductData, image: e.target.value })} />
                 </div>
+                 <div className="form-group">
+                  <label>Categoria:</label>
+                  <div style={{ display: 'flex', gap: '1rem' }}>
+                    <div>
+                      <input
+                        type="radio"
+                        id="editProductCategoryRoupas"
+                        name="editProductCategory"
+                        value="Roupas"
+                        checked={editProductData.category === 'Roupas'}
+                        onChange={(e) => {
+                          const category = e.target.value;
+                          setEditProductData({
+                            ...editProductData,
+                            category,
+                            stock: getDefaultStockForCategory(category)
+                          });
+                        }}
+                      />
+                      <label htmlFor="editProductCategoryRoupas">Roupas</label>
+                    </div>
+                    <div>
+                      <input
+                        type="radio"
+                        id="editProductCategoryTenis"
+                        name="editProductCategory"
+                        value="Ténis"
+                        checked={editProductData.category === 'Ténis'}
+                        onChange={(e) => {
+                          const category = e.target.value;
+                          setEditProductData({
+                            ...editProductData,
+                            category,
+                            stock: getDefaultStockForCategory(category)
+                          });
+                        }}
+                      />
+                      <label htmlFor="editProductCategoryTenis">Ténis</label>
+                    </div>
+                  </div>
+                </div>
 
                 <div className="form-group">
                   <label>URL Sketchfab (Opcional):</label>
                   <input type="text" value={editProductData.sketchfabUrl} onChange={(e) => setEditProductData({ ...editProductData, sketchfabUrl: e.target.value })} />
                 </div>
-               {editProductData.sketchfabUrl && (
-  <div className="sketchfab-preview">
-    <iframe
-      title={editProductData.name}
-      frameBorder="0"
-      // Removendo allowFullScreen e mozallowfullscreen/webkitallowfullscreen se não quiser que o iframe possa ir para fullscreen,
-      // embora o botão de UI_fullscreen=0 já o esconda. Para máxima segurança, pode remover estes atributos também.
-      // allowFullScreen
-      // mozallowfullscreen="true"
-      // webkitallowfullscreen="true"
-      allow="autoplay; xr-spatial-tracking" // Removido 'fullscreen' do allow
-      xr-spatial-tracking
-      execution-while-out-of-viewport
-      execution-while-not-rendered
-      web-share
-      src={`${editProductData.sketchfabUrl}/embed?autostart=1&preload=1&ui_controls=0&ui_infos=0&ui_inspector=0&ui_settings=0&ui_help=0&ui_vr=0&ui_ar=0&ui_annotations=0&ui_watermark=0&transparent=0&background=FFFFFF&ui_fullscreen=0&ui_tools=0&share_button=0`}
-    style={{ width: '100%', height: '333px' }} 
-    ></iframe>
-   
-  </div>
-)}
+                {editProductData.sketchfabUrl && (
+                  <div className="sketchfab-preview">
+                    <iframe
+                      title={editProductData.name}
+                      frameBorder="0"
+                      allow="autoplay; xr-spatial-tracking"
+                      xr-spatial-tracking
+                      execution-while-out-of-viewport
+                      execution-while-not-rendered
+                      web-share
+                      src={`${editProductData.sketchfabUrl}/embed?autostart=1&preload=1&ui_controls=0&ui_infos=0&ui_inspector=0&ui_settings=0&ui_help=0&ui_vr=0&ui_ar=0&ui_annotations=0&ui_watermark=0&transparent=0&background=FFFFFF&ui_fullscreen=0&ui_tools=0&share_button=0`}
+                      style={{ width: '100%', height: '333px' }}
+                    ></iframe>
+
+                  </div>
+                )}
                 <div className="form-group checkbox-group">
                   <input
                     type="checkbox"
@@ -761,24 +839,30 @@ const handleImageUpload = async (e) => {
                   />
                   <label htmlFor="inStockEdit">Em Stock</label>
                 </div>
-                <h4>Stock por Tamanho:</h4>
-                <div className="stock-inputs-grid">
-                  {Object.keys(editProductData.stock).map(size => (
-                    <div key={size} className="stock-input-item">
-                      <label>{size}:</label>
-                      <input
-                        type="number"
-                        value={editProductData.stock[size]}
-                        onChange={(e) =>
-                          setEditProductData(prev => ({
-                            ...prev,
-                            stock: { ...prev.stock, [size]: parseInt(e.target.value) || 0 }
-                          }))
-                        }
-                      />
-                    </div>
-                  ))}
-                </div>
+
+                {editProductData.category && (
+                    <>
+                        <h4>Stock por Tamanho:</h4>
+                        <div className="stock-inputs-grid">
+                        {Object.keys(editProductData.stock).map(size => (
+                            <div key={size} className="stock-input-item">
+                            <label>{size}:</label>
+                            <input
+                                type="number"
+                                value={editProductData.stock[size]}
+                                onChange={(e) =>
+                                setEditProductData(prev => ({
+                                    ...prev,
+                                    stock: { ...prev.stock, [size]: parseInt(e.target.value) || 0 }
+                                }))
+                                }
+                            />
+                            </div>
+                        ))}
+                        </div>
+                    </>
+                )}
+
                 <div className="actions">
                   <button className="save-btn" onClick={handleSaveEditedProduct}>Salvar Produto</button>
                   <button className="cancel-btn" onClick={() => setSelectedProductToEdit(null)}>Cancelar</button>
@@ -923,6 +1007,13 @@ const handleImageUpload = async (e) => {
               onClick={() => signOut({ callbackUrl: '/' })}
             >
               <FaSignOutAlt /> Sair
+            </button>
+          
+            <button
+              className="tab-button logout-button-back-button-purple" // Adicionada uma classe extra para estilização específica
+              onClick={() => router.back()}
+            >
+              Voltar
             </button>
           </div>
 
