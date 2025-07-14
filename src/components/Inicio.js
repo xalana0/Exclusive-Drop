@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import BackgroundAnimation from '@/components/Background'; // Importa o componente do GIF
+import BackgroundAnimation from '@/components/Background';
 
+// Componente da página de boas-vindas com opções de login e registo.
 function Welcome() {
   const [showOptions, setShowOptions] = useState(false);
   const containerRef = useRef(null);
@@ -14,7 +15,6 @@ function Welcome() {
 
   useEffect(() => {
     if (containerRef.current) {
-      // Este código será executado apenas após a primeira renderização
     }
   }, []);
 
@@ -22,12 +22,9 @@ function Welcome() {
 
   return (
     <>
-      <BackgroundAnimation gifUrl={gifUrl} /> {/* Usa o componente de fundo com o GIF */}
-
-      {/* Removido: <img src="/images/logo.gif" alt="Logo Exclusive Drop" className="inicio-logo-gif" /> */}
-
+      <BackgroundAnimation gifUrl={gifUrl} />
       <div className="container" ref={containerRef}>
-        <h2 className="nome">Exclusive Drop</h2> {/* Título com floating aqui */}
+        <h2 className="nome">Exclusive Drop</h2>
 
         {!showOptions ? (
           <button
@@ -37,7 +34,6 @@ function Welcome() {
             Entrar
           </button>
         ) : (
-
           <div className="options-container">
             <Link href="/login" className="btn btn-secondary">
               LOGIN

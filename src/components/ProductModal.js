@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from 'react';
 
-// Função para analisar uma string de query em um objeto
+// Constantes de tamanhos, agora sincronizadas com a criação de produtos.
+const SIZES_BY_CATEGORY = {
+  Roupas: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
+  Ténis: ['38', '39', '40', '41', '42', '43', '44', '45'],
+};
+
+// Função para analisar uma string de query para um objeto.
 const parseQueryString = (queryString) => {
   const params = {};
   queryString.split('&').forEach(param => {
@@ -12,13 +18,14 @@ const parseQueryString = (queryString) => {
   return params;
 };
 
-// Função para converter um objeto de volta para uma string de query
+// Converte um objeto de volta para uma string de query.
 const buildQueryString = (params) => {
   return Object.entries(params)
     .map(([key, value]) => `${key}=${value}`)
     .join('&');
 };
 
+// Modal para exibir detalhes do produto e adicionar ao carrinho.
 const ProductModal = ({ product, onClose, onAdd }) => {
   const [selectedSize, setSelectedSize] = useState("");
   const [showSizeGuide, setShowSizeGuide] = useState(false);
@@ -27,7 +34,6 @@ const ProductModal = ({ product, onClose, onAdd }) => {
 
   if (!product) return null;
 
-  // Atualiza o stock para o tamanho selecionado
   useEffect(() => {
     if (selectedSize && product.stock && product.stock[selectedSize] !== undefined) {
       setStockForSelectedSize(product.stock[selectedSize]);
@@ -36,106 +42,83 @@ const ProductModal = ({ product, onClose, onAdd }) => {
     }
   }, [selectedSize, product.stock]);
 
-  // Parâmetros Sketchfab predefinidos para minimizar a UI
   const defaultSketchfabParamsString = "autostart=1&preload=1&ui_controls=0&ui_infos=0&ui_inspector=0&ui_settings=0&ui_help=0&ui_vr=0&ui_ar=0&ui_annotations=0&ui_watermark=0&transparent=0&background=FFFFFF&ui_fullscreen=0&ui_tools=0&share_button=0&camera=0&autospin=0&nav_ar=0&nav_panning=0&nav_roll=0&nav_zoom=0&tracking=0&scrollwheel=0&spinner=0&ui_stop=0&cards=0&ui_theme=dark&ui_animations=0&ui_hint=0";
 
   const defaultParams = parseQueryString(defaultSketchfabParamsString);
-  // Parâmetros personalizados vêm do produto, se existirem
   const customParams = product.customSketchfabEmbedParams ? parseQueryString(product.customSketchfabEmbedParams) : {};
-
-  // Mescla os parâmetros padrão com os personalizados (personalizados substituem os padrão)
   const mergedParams = { ...defaultParams, ...customParams };
-
   const finalSketchfabParamsString = buildQueryString(mergedParams);
   const sketchfabEmbedUrl = product.sketchfabUrl ? `${product.sketchfabUrl}/embed?${finalSketchfabParamsString}` : '';
 
   const handleAdd = () => {
     if (!selectedSize) {
-      alert("Por favor, selecione um tamanho."); // Idealmente, substituir por um modal personalizado
+      alert("Por favor, selecione um tamanho.");
       return;
     }
-    if (stockForSelectedSize === 0) { // Alterado para === 0 para maior clareza
-      alert("Este tamanho está esgotado."); // Idealmente, substituir por um modal personalizado
+    if (stockForSelectedSize === 0) {
+      alert("Este tamanho está esgotado.");
       return;
     }
     onAdd({ ...product, size: selectedSize });
-    onClose(); // Fecha o modal após adicionar ao carrinho
+    onClose();
   };
 
   const toggleSizeGuide = () => {
     setShowSizeGuide(!showSizeGuide);
   };
+  
+  // Função que gera dinamicamente a tabela do guia de tamanhos.
+  const generateSizeGuideTable = (category) => {
+      const sizes = SIZES_BY_CATEGORY[category];
+      if (!sizes) return null;
 
-  // Conteúdo do guia de tamanhos para Roupas
-  const clothingSizeGuideContent = (
-    <div className="size-guide-content" onClick={(e) => e.stopPropagation()}>
-      <h3>Guia de Tamanhos (Roupas)</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>Tamanho</th>
-            <th>Peito (cm)</th>
-            <th>Cintura (cm)</th>
-            <th>Ancas (cm)</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td>XS</td><td>76-80</td><td>60-64</td><td>84-88</td></tr>
-          <tr><td>S</td><td>84-88</td><td>68-72</td><td>92-96</td></tr>
-          <tr><td>M</td><td>92-96</td><td>76-80</td><td>100-104</td></tr>
-          <tr><td>L</td><td>100-104</td><td>84-88</td><td>108-112</td></tr>
-          <tr><td>XL</td><td>108-112</td><td>92-96</td><td>116-120</td></tr>
-          <tr><td>XXL</td><td>116-120</td><td>100-104</td><td>124-128</td></tr>
-        </tbody>
-      </table>
-      <p style={{fontSize: '0.9rem', color: '#aaa'}}>*Medidas aproximadas do corpo em centímetros. Consulte a tabela para um ajuste ideal.</p>
-      <button className="closeSizeGuideBtn" onClick={toggleSizeGuide}>Fechar Guia</button>
-    </div>
-  );
+      let headers, rows;
 
-  // Conteúdo do guia de tamanhos para Ténis
-  const shoeSizeGuideContent = (
-    <div className="size-guide-content" onClick={(e) => e.stopPropagation()}>
-      <h3>Guia de Tamanhos (Ténis)</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>EU</th>
-            <th>US (M)</th>
-            <th>US (W)</th>
-            <th>UK</th>
-            <th>CM</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td>35</td><td>3.5</td><td>5</td><td>2</td><td>22</td></tr>
-          <tr><td>36</td><td>4</td><td>5.5</td><td>3</td><td>22.5</td></tr>
-          <tr><td>37</td><td>4.5</td><td>6.5</td><td>4</td><td>23.5</td></tr>
-          <tr><td>38</td><td>5.5</td><td>7.5</td><td>5</td><td>24.5</td></tr>
-          <tr><td>39</td><td>6.5</td><td>8.5</td><td>6</td><td>25</td></tr>
-          <tr><td>40</td><td>7</td><td>9</td><td>6.5</td><td>25.5</td></tr>
-          <tr><td>41</td><td>7.5</td><td>9.5</td><td>7</td><td>26</td></tr>
-          <tr><td>42</td><td>8.5</td><td>10.5</td><td>8</td><td>27</td></tr>
-          <tr><td>43</td><td>9.5</td><td>11.5</td><td>9</td><td>27.5</td></tr>
-          <tr><td>44</td><td>10</td><td>-</td><td>9.5</td><td>28</td></tr>
-          <tr><td>45</td><td>11</td><td>-</td><td>10.5</td><td>29</td></tr>
-          <tr><td>46</td><td>11.5</td><td>-</td><td>11</td><td>29.5</td></tr>
-          <tr><td>47</td><td>12</td><td>-</td><td>11.5</td><td>30</td></tr>
-        </tbody>
-      </table>
-      <p style={{fontSize: '0.9rem', color: '#aaa'}}>*Medidas aproximadas. Verifique o comprimento do pé em centímetros.</p>
-      <button className="closeSizeGuideBtn" onClick={toggleSizeGuide}>Fechar Guia</button>
-    </div>
-  );
-
-  // Seleciona o conteúdo do guia de tamanhos com base na categoria
-  let currentSizeGuideContent = null;
-  if (product.category === 'Roupas') {
-    currentSizeGuideContent = clothingSizeGuideContent;
-  } else if (product.category === 'Ténis') {
-    currentSizeGuideContent = shoeSizeGuideContent;
+      if (category === 'Roupas') {
+          headers = ['Tamanho', 'Peito (cm)', 'Cintura (cm)', 'Ancas (cm)'];
+          const data = { XS: [76, 60, 84], S: [84, 68, 92], M: [92, 76, 100], L: [100, 84, 108], XL: [108, 92, 116], XXL: [116, 100, 124] };
+          rows = sizes.map(size => (
+              <tr key={size}>
+                  <td>{size}</td>
+                  <td>{`${data[size][0]}-${data[size][0] + 4}`}</td>
+                  <td>{`${data[size][1]}-${data[size][1] + 4}`}</td>
+                  <td>{`${data[size][2]}-${data[size][2] + 4}`}</td>
+              </tr>
+          ));
+      } else if (category === 'Ténis') {
+          headers = ['EU', 'US (M)', 'US (W)', 'UK', 'CM'];
+          const data = { '38': [5.5, 7.5, 5, 24.5], '39': [6.5, 8.5, 6, 25], '40': [7, 9, 6.5, 25.5], '41': [7.5, 9.5, 7, 26], '42': [8.5, 10.5, 8, 27], '43': [9.5, 11.5, 9, 27.5], '44': [10, '-', 9.5, 28], '45': [11, '-', 10.5, 29] };
+          rows = sizes.map(size => (
+              <tr key={size}>
+                  <td>{size}</td>
+                  <td>{data[size][0]}</td>
+                  <td>{data[size][1]}</td>
+                  <td>{data[size][2]}</td>
+                  <td>{data[size][3]}</td>
+              </tr>
+          ));
+      }
+      
+      return (
+        <div className="size-guide-content" onClick={(e) => e.stopPropagation()}>
+            <h3>Guia de Tamanhos ({category})</h3>
+            <table>
+                <thead>
+                    <tr>
+                        {headers.map(h => <th key={h}>{h}</th>)}
+                    </tr>
+                </thead>
+                <tbody>
+                    {rows}
+                </tbody>
+            </table>
+            <p style={{fontSize: '0.9rem', color: '#aaa'}}>*Medidas aproximadas. Consulte a tabela para um ajuste ideal.</p>
+            <button className="closeSizeGuideBtn" onClick={toggleSizeGuide}>Fechar Guia</button>
+        </div>
+      );
   }
-  // Se a categoria não for 'Roupas' nem 'Ténis', currentSizeGuideContent permanece null
+
+  const currentSizeGuideContent = generateSizeGuideTable(product.category);
 
   return (
     <div className="overlay" onClick={onClose}>
@@ -154,10 +137,6 @@ const ProductModal = ({ product, onClose, onAdd }) => {
                   mozallowfullscreen="true"
                   webkitallowfullscreen="true"
                   allow="autoplay; fullscreen; xr-spatial-tracking"
-                  xr-spatial-tracking
-                  execution-while-out-of-viewport
-                  execution-while-not-rendered
-                  web-share
                   src={sketchfabEmbedUrl}
                   style={{ width: '100%', height: '400px' }}
                 ></iframe>
@@ -178,7 +157,7 @@ const ProductModal = ({ product, onClose, onAdd }) => {
                     className={!show3DView ? 'active' : ''}
                     onClick={() => setShow3DView(false)}
                   >
-                    2D View
+                    2D
                   </button>
                 )}
                 {product.sketchfabUrl && (
@@ -186,7 +165,7 @@ const ProductModal = ({ product, onClose, onAdd }) => {
                     className={show3DView ? 'active' : ''}
                     onClick={() => setShow3DView(true)}
                   >
-                    3D View
+                    3D
                   </button>
                 )}
               </div>
@@ -199,9 +178,8 @@ const ProductModal = ({ product, onClose, onAdd }) => {
 
             <div className="size-selection">
               <h3>Selecionar Tamanho:</h3>
-              {/* Dropdown de tamanhos */}
               <select
-                className="size-dropdown" // Nova classe para estilização
+                className="size-dropdown"
                 value={selectedSize}
                 onChange={(e) => setSelectedSize(e.target.value)}
               >
@@ -226,21 +204,19 @@ const ProductModal = ({ product, onClose, onAdd }) => {
               )}
             </div>
             
-            {currentSizeGuideContent && ( // Só mostra o botão se houver um guia de tamanhos relevante
+            {currentSizeGuideContent && (
               <button className="size-guide-button" onClick={toggleSizeGuide}>Guia de Tamanhos</button>
             )}
 
             <button className="addToCartBtn" onClick={handleAdd}>
               Adicionar ao carrinho
             </button>
-
-            
           </div>
         </div>
       </div>
-      {showSizeGuide && currentSizeGuideContent && ( // Renderiza o overlay do guia apenas se showSizeGuide e content existirem
+      {showSizeGuide && currentSizeGuideContent && (
          <div className="sizeGuideOverlay" onClick={toggleSizeGuide}>
-            {currentSizeGuideContent} {/* O conteúdo já inclui a div .size-guide-content */}
+            {currentSizeGuideContent}
          </div>
       )}
     </div>

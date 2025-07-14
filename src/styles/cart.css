@@ -1,18 +1,14 @@
-/* styles/cart.css */
-
-
-/* General Styling */
 .cart-container {
   padding: 3rem 2rem;
   min-height: 100vh;
   font-family: "Roboto Mono", serif;
   font-style: normal;
-  color: #FFFFFF; /* White text */
+  color: #ffffff;
   position: relative;
   z-index: 2;
   max-width: 1200px;
   margin: 0 auto;
-  background-color: #000000; /* Black background */
+  background-color: #000000;
 }
 
 .cart-title {
@@ -20,7 +16,7 @@
   font-weight: bold;
   margin-bottom: 3rem;
   text-align: center;
-  color: #FFFFFF; /* White for the title */
+  color: #ffffff;
   font-family: "Carattere", cursive;
 }
 
@@ -38,16 +34,15 @@
   }
 }
 
-/* Cart Items List */
 .cart-items-list {
-  background: rgba(10, 10, 10, 0.9); /* Very dark, slightly transparent black */
+  background: rgba(10, 10, 10, 0.9);
   border-radius: 15px;
   padding: 2rem;
-  border: 1px solid #333333; /* Dark gray border */
+  border: 1px solid #333333;
 }
 
 .no-items-message {
-  color: #CCCCCC; /* Light gray for messages */
+  color: #cccccc;
   text-align: center;
   font-size: 1.2rem;
   margin-bottom: 2rem;
@@ -58,7 +53,7 @@
   align-items: center;
   margin-bottom: 1.5rem;
   padding-bottom: 1.5rem;
-  border-bottom: 1px dashed #555555; /* Dashed dark gray separator */
+  border-bottom: 1px dashed #555555;
   gap: 1.5rem;
 }
 
@@ -73,7 +68,7 @@
   height: 120px;
   object-fit: cover;
   border-radius: 10px;
-  border: 1px solid #444444; /* Darker gray image border */
+  border: 1px solid #444444;
 }
 
 .cart-item-details {
@@ -85,13 +80,13 @@
 
 .cart-item-details h3 {
   font-size: 1.3rem;
-  color: #FFFFFF; /* White for item name */
+  color: #ffffff;
   margin: 0;
 }
 
 .cart-item-details p {
   font-size: 1rem;
-  color: #CCCCCC; /* Light gray for details */
+  color: #cccccc;
   margin: 0;
 }
 
@@ -104,14 +99,14 @@
 .quantity-control {
   display: flex;
   align-items: center;
-  background-color: #222222; /* Dark gray for controls */
+  background-color: #222222;
   border-radius: 5px;
   overflow: hidden;
-  border: 1px solid #555555; /* Medium gray border */
+  border: 1px solid #555555;
 }
 
 .quantity-control button {
-  background-color: #8A2BE2; /* Purple for quantity buttons */
+  background-color: #8a2be2;
   color: white;
   border: none;
   padding: 0.5rem 0.8rem;
@@ -121,18 +116,18 @@
 }
 
 .quantity-control button:hover {
-  background-color: #6A1AAB; /* Darker purple on hover */
+  background-color: #6a1aab;
 }
 
 .quantity-control span {
   color: white;
   padding: 0.5rem 1rem;
   font-size: 1.1rem;
-  background-color: #111111; /* Very dark background for quantity number */
+  background-color: #111111;
 }
 
 .remove-btn {
-  background-color: #FF0000; /* Red for remove button */
+  background-color: #ff0000;
   color: white;
   border: none;
   padding: 0.7rem 1.2rem;
@@ -143,11 +138,10 @@
 }
 
 .remove-btn:hover {
-  background-color: #CC0000; /* Darker red on hover */
+  background-color: #cc0000;
   transform: translateY(-2px);
 }
 
-/* Cart Controls (Clear and Continue Shopping) */
 .cart-controls {
   display: flex;
   justify-content: space-between;
@@ -156,9 +150,9 @@
 }
 
 .cart-clear-btn {
-  background-color: #FF0000; /* Red for clear cart button */
-  color: #FFFFFF; /* White text */
-  border: 1px solid #FF0000; /* Red border */
+  background-color: #ff0000;
+  color: #ffffff;
+  border: 1px solid #ff0000;
   padding: 0.8rem 1.5rem;
   border-radius: 8px;
   cursor: pointer;
@@ -167,14 +161,14 @@
 }
 
 .cart-clear-btn:hover {
-  background-color: #CC0000; /* Darker red on hover */
+  background-color: #cc0000;
   transform: translateY(-2px);
 }
 
 .cart-continue-btn {
-  background-color: #000000; /* Black for continue shopping button */
-  color: #FFFFFF; /* White text */
-  border: 1px solid #FFFFFF; /* White border */
+  background-color: #000000;
+  color: #ffffff;
+  border: 1px solid #ffffff;
   padding: 0.8rem 1.5rem;
   border-radius: 8px;
   cursor: pointer;
@@ -183,20 +177,19 @@
 }
 
 .cart-continue-btn:hover {
-  background-color: #333333; /* Dark gray on hover */
+  background-color: #333333;
   transform: translateY(-2px);
 }
 
-/* Cart Summary */
 .cart-summary {
-  background: rgba(10, 10, 10, 0.9); /* Very dark, slightly transparent black */
+  background: rgba(10, 10, 10, 0.9);
   border-radius: 15px;
   padding: 2rem;
   height: fit-content;
   font-family: "Roboto Mono", serif;
   font-style: normal;
-  color: #FFFFFF;
-  border: 1px solid #333333; /* Dark gray border */
+  color: #ffffff;
+  border: 1px solid #333333;
 }
 
 .cart-summary h2 {
@@ -204,7 +197,7 @@
   font-weight: 600;
   margin-bottom: 2rem;
   text-align: center;
-  color: #FFFFFF; /* White for summary title */
+  color: #ffffff;
 }
 
 .summary-row {
@@ -212,20 +205,20 @@
   justify-content: space-between;
   margin-bottom: 1rem;
   font-size: 1.1rem;
-  color: #FFFFFF; /* White for summary text */
+  color: #ffffff;
 }
 
 .summary-total {
   font-weight: bold;
   font-size: 1.5rem;
-  border-top: 1px solid #555555; /* Dark gray separator */
+  border-top: 1px solid #555555;
   padding-top: 1.5rem;
   margin-top: 1.5rem;
-  color: #FFFFFF; /* White for total amount */
+  color: #ffffff;
 }
 
 .checkout-btn {
-  background-color: #8A2BE2; /* Purple for checkout button */
+  background-color: #8a2be2;
   color: white;
   padding: 1rem 1.5rem;
   border: none;
@@ -238,12 +231,12 @@
 }
 
 .checkout-btn:hover:not(:disabled) {
-  background-color: #6A1AAB; /* Darker purple on hover */
+  background-color: #6a1aab;
   transform: translateY(-3px);
 }
 
 .checkout-btn:disabled {
-  background-color: #333333; /* Darker gray for disabled */
+  background-color: #333333;
   cursor: not-allowed;
   opacity: 0.7;
   box-shadow: none;

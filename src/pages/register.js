@@ -1,6 +1,6 @@
-// pages/register.js
-import Register from '../components/Register'; // Ensure path matches the location of your Login component
+import Register from '../components/Register';
 
+// Renderiza o componente da página de registo.
 export default function RegisterPage() {
   return <Register />;
 }

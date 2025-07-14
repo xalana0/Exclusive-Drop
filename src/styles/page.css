@@ -1,93 +1,92 @@
 /* page.css */
-
-
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: "Roboto Mono", serif; /* Definir Roboto Mono como padrão */
+  font-family: "Roboto Mono", serif;
   font-style: normal;
 }
 
 body {
-  background-color: #000; /* Fundo escuro para contrastar com o GIF */
+  background-color: #000;
 }
 
 .main {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  position: relative; /* Para o z-index do conteúdo */
-  z-index: 2; /* Garante que o conteúdo fique acima do GIF */
+  position: relative;
+  z-index: 2;
 }
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.5rem 3rem; /* Aumentar padding */
-  background-color: rgba(0, 0, 0, 0.6); /* Fundo semi-transparente para o cabeçalho */
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Linha divisória sutil */
-  position: sticky; /* Fixar cabeçalho no topo */
+  padding: 1.5rem 3rem;
+  background-color: rgba(0, 0, 0, 0.6);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  position: sticky;
   top: 0;
   width: 100%;
-  z-index: 10; /* Acima do conteúdo principal */
+  z-index: 10;
 }
 
-/* Estilo para o link do título no cabeçalho */
 .nome-link {
-  text-decoration: none; /* Remove o sublinhado do link do título */
-  color: inherit; /* Garante que a cor do texto seja herdada */
+  text-decoration: none;
+  color: inherit;
 }
 
 .nome {
   color: white;
   font-family: "Carattere", cursive;
   font-weight: 400;
-  font-size: 3rem; /* Tamanho adequado para cabeçalho */
+  font-size: 3rem;
   font-style: normal;
   text-align: center;
-  padding: 0; /* Remover padding aqui, já tratado no header */
+  padding: 0;
 }
 
 .header-links {
   display: flex;
-  gap: 2rem; /* Espaçamento entre os links */
+  gap: 2rem;
   align-items: center;
 }
 
-.cartLink, .logout-button {
+.cartLink,
+.logout-button {
   color: white;
   text-decoration: none;
   font-size: 1rem;
   font-weight: 500;
-  transition: color 0.3s ease, background-color 0.3s ease, transform 0.3s ease; /* Transições adicionadas */
-  padding: 0.5rem 1rem; /* Padding para a área de clique */
+  transition: color 0.3s ease, background-color 0.3s ease, transform 0.3s ease;
+  padding: 0.5rem 1rem;
   border-radius: 5px;
 }
 
-.cartLink:hover, .logout-button:hover {
-  color: #aaa; /* Cor mais clara ao passar o mouse */
-  background-color: rgba(255, 255, 255, 0.1); /* Fundo sutil */
-  transform: translateY(-2px); /* Leve elevação */
+.cartLink:hover,
+.logout-button:hover {
+  color: #aaa;
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
 }
 
 .logout-button {
   background-color: transparent;
-  border: 1px solid white; /* Borda branca fina */
+  border: 1px solid white;
   cursor: pointer;
 }
 
 .mainContent {
   display: flex;
-  flex: 1; /* Ocupa o espaço restante */
-  padding: 2rem 0; /* Padding vertical para o conteúdo principal */
+  flex: 1;
+  padding: 2rem 0;
 }
 
 .sidebar {
   width: 200px;
   padding: 0 2rem;
-  border-right: 1px solid rgba(255, 255, 255, 0.1); /* Borda sutil */
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .navList {
@@ -96,7 +95,7 @@ body {
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 1rem; /* Espaçamento entre itens da lista */
+  gap: 1rem;
 }
 
 .navList li {
@@ -104,10 +103,15 @@ body {
 }
 
 .navLink {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
   color: white;
   text-decoration: none;
-  padding: 0.8rem 0; /* Mais padding para os links */
-  display: block; /* Para ocupar toda a largura e o padding funcionar */
+  padding: 0.8rem 0;
+  display: block;
   font-size: 1rem;
   font-weight: 500;
   transition: all 0.3s ease;
@@ -115,15 +119,12 @@ body {
 
 .navLink:hover {
   color: #aaa;
-  transform: translateX(8px); /* Efeito sutil de deslizamento ao passar o mouse, um pouco mais pronunciado */
+  transform: translateX(8px);
 }
 
-/* ------------------------------------- */
-/* Seção de Destaque/Hero Banner */
 .hero-banner {
   width: 100%;
-  height: 400px; /* Altura do banner */
-  
+  height: 400px;
   background-size: cover;
   background-position: center;
   display: flex;
@@ -133,7 +134,7 @@ body {
   text-align: center;
   color: white;
   text-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
-  margin-bottom: 3rem; /* Espaçamento abaixo do banner */
+  margin-bottom: 3rem;
 }
 
 .hero-banner h1 {
@@ -156,7 +157,7 @@ body {
   font-size: 1.1rem;
   font-weight: bold;
   cursor: pointer;
-  border-radius: 50px; /* Botão arredondado */
+  border-radius: 50px;
   transition: all 0.3s ease;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -168,10 +169,9 @@ body {
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
 }
 
-/* Container e botão para alternar filtros */
 .filter-toggle-container {
   text-align: center;
-  margin-bottom: 1.5rem; /* Espaçamento abaixo do botão */
+  margin-bottom: 1.5rem;
 }
 
 .toggle-filters-btn {
@@ -184,7 +184,7 @@ body {
   font-size: 1rem;
   font-weight: 500;
   transition: all 0.3s ease;
-  display: inline-flex; /* Para alinhar ícone/texto */
+  display: inline-flex;
   align-items: center;
   gap: 8px;
 }
@@ -195,13 +195,11 @@ body {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
-
-/* Filtros */
 .filters-container {
-  padding: 0 3rem 2rem; /* Espaçamento abaixo dos filtros */
+  padding: 0 3rem 2rem;
   display: flex;
-  flex-wrap: wrap; /* Para responsividade */
-  gap: 1.5rem; /* Espaçamento entre os filtros */
+  flex-wrap: wrap;
+  gap: 1.5rem;
   justify-content: center;
   align-items: center;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -236,18 +234,17 @@ body {
 
 .filter-group select:focus,
 .filter-group input[type="number"]:focus {
-  border-color: #8A2BE2; /* Roxo */
-  box-shadow: 0 0 0 2px rgba(138, 43, 226, 0.2); /* Sombra roxa */
+  border-color: #8a2be2;
+  box-shadow: 0 0 0 2px rgba(138, 43, 226, 0.2);
 }
 
 .filter-group input[type="checkbox"] {
   width: 18px;
   height: 18px;
-  accent-color: #8A2BE2; /* Cor do checkbox - Roxo */
+  accent-color: #8a2be2;
   cursor: pointer;
 }
 
-/* Destaque de Categorias na Home */
 .category-highlights {
   padding: 2rem 3rem;
   margin-bottom: 3rem;
@@ -274,8 +271,8 @@ body {
   overflow: hidden;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  text-decoration: none; /* Remove underline do link */
-  color: white; /* Cor do texto padrão */
+  text-decoration: none;
+  color: white;
 }
 
 .category-card:hover {
@@ -300,7 +297,7 @@ body {
 }
 
 .category-card:hover .category-image {
-  transform: scale(1.15); /* Zoom maior na imagem da categoria */
+  transform: scale(1.15);
 }
 
 .category-name {
@@ -309,24 +306,20 @@ body {
   font-weight: 600;
   text-align: center;
   color: white;
-  background-color: rgba(0, 0, 0, 0.7); /* Fundo para o nome */
+  background-color: rgba(0, 0, 0, 0.7);
 }
-
-
-/* ------------------------------------- */
 
 .productsContainer {
   flex: 1;
-  padding: 0 3rem; /* Padding horizontal para a área de produtos */
+  padding: 0 3rem;
 }
 
 .productsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Mais flexibilidade */
-  gap: 2.5rem; /* Aumentar o espaçamento entre produtos */
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 2rem;
 }
 
-/* Animação de entrada para os produtos */
 @keyframes fadeInSlideUp {
   from {
     opacity: 0;
@@ -339,27 +332,26 @@ body {
 }
 
 .productWrapper.animate-in {
-  animation: fadeInSlideUp 0.8s ease-out forwards; /* Ajuste a duração e easing conforme desejar */
+  animation: fadeInSlideUp 0.8s ease-out forwards;
 }
-
 
 .productWrapper {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem; /* Espaçamento entre o card e o botão */
-  background-color: rgba(0, 0, 0, 0.5); /* Fundo semi-transparente para o wrapper do produto */
-  border-radius: 10px; /* Bordas arredondadas */
-  padding: 1.5rem; /* Padding interno */
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3); /* Sombra sutil */
-  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Adicionado box-shadow na transição */
-  opacity: 0; /* Escondido por padrão para a animação */
-  transform: translateY(20px); /* Posição inicial para a animação */
+  gap: 1rem;
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  opacity: 0;
+  transform: translateY(20px);
 }
 
 .productWrapper:hover {
-  transform: translateY(-8px) scale(1.02); /* Efeito de elevação mais pronunciado e leve escala ao passar o mouse */
-  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.6); /* Sombra mais forte no hover */
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.6);
 }
 
 .addToCartBtn {
@@ -371,23 +363,22 @@ body {
   font-weight: 500;
   cursor: pointer;
   border-radius: 5px;
-  transition: all 0.3s ease; /* Transição para todas as propriedades */
+  transition: all 0.3s ease;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  position: relative; /* Para o efeito de "estrelas" ou "brilho" */
-  overflow: hidden; /* Para esconder o que está fora */
+  position: relative;
+  overflow: hidden;
   z-index: 1;
 }
 
 .addToCartBtn:hover {
-  background-color: rgba(255, 255, 255, 0.2); /* Fundo ligeiramente mais claro */
-  transform: translateY(-3px) scale(1.03); /* Elevação e escala um pouco maiores */
-  border-color: #eee; /* Borda mais clara no hover */
+  background-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-3px) scale(1.03);
+  border-color: #eee;
 }
 
-/* Efeito de brilho/overlay para o addToCartBtn no hover */
 .addToCartBtn::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: -100%;
@@ -407,8 +398,6 @@ body {
   left: 100%;
 }
 
-
-/* Responsividade básica */
 @media (max-width: 768px) {
   .header {
     flex-direction: column;
@@ -459,7 +448,6 @@ body {
     gap: 1rem;
   }
   .category-grid {
-    grid-template-columns: 1fr; /* Uma coluna em telas menores */
+    grid-template-columns: 1fr;
   }
-  
 }

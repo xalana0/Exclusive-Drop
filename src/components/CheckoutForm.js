@@ -1,4 +1,3 @@
-// components/CheckoutForm.js
 'use client';
 
 import React, { useState } from 'react';
@@ -6,28 +5,29 @@ import { useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
 import { useCart } from '@/components/cartcontext';
 import { useRouter } from 'next/navigation';
 import { db } from '../lib/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore'; // addDoc será usado fora da transação para simplificar o exemplo, mas a intenção era que fosse transaction.set
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { doc, getDoc, runTransaction, updateDoc } from 'firebase/firestore'; 
 import { useSession } from 'next-auth/react';
 
 const CARD_ELEMENT_OPTIONS = {
   style: {
     base: {
-      color: '#FFFFFF', // White text for card input
+      color: '#FFFFFF',
       fontFamily: '"Roboto Mono", Helvetica, sans-serif',
       fontSmoothing: 'antialiased',
       fontSize: '16px',
       '::placeholder': {
-        color: '#CCCCCC', // Lighter gray placeholder text
+        color: '#CCCCCC',
       },
     },
     invalid: {
-      color: '#FF0000', // Red for invalid input
+      color: '#FF0000',
       iconColor: '#FF0000',
     },
   },
 };
 
+// Componente de formulário para o processo de checkout com Stripe.
 function CheckoutForm() {
   const stripe = useStripe();
   const elements = useElements();
@@ -41,7 +41,7 @@ function CheckoutForm() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setLoading(true);
-    setErrorMessage(null); // Limpar mensagens de erro anteriores
+    setErrorMessage(null);
 
     if (!stripe || !elements || subtotal <= 0) {
       setLoading(false);
@@ -65,31 +65,27 @@ function CheckoutForm() {
         const userId = session?.user?.id || 'guest';
         const userEmail = session?.user?.email || 'guest@example.com';
 
-        // INÍCIO DA LÓGICA DE ATUALIZAÇÃO DE STOCK COM TRANSAÇÃO
         await runTransaction(db, async (transaction) => {
-          // PASSO 1: Realizar TODAS as leituras primeiro
-          const productDocs = new Map(); // Para armazenar os snapshots dos produtos
+          const productDocs = new Map();
 
           for (const item of cartItems) {
             const productRef = doc(db, 'products', item.id);
-            const productDocSnapshot = await transaction.get(productRef); // LEITURA
+            const productDocSnapshot = await transaction.get(productRef);
             
             if (!productDocSnapshot.exists()) {
               throw new Error(`Produto com ID ${item.id} não encontrado.`);
             }
-            productDocs.set(item.id, productDocSnapshot); // Armazenar o snapshot
+            productDocs.set(item.id, productDocSnapshot);
           }
 
-          // PASSO 2: Depois de TODAS as leituras, realizar TODAS as escritas
           for (const item of cartItems) {
             const productRef = doc(db, 'products', item.id);
-            const productDocSnapshot = productDocs.get(item.id); // Obter o snapshot lido anteriormente
+            const productDocSnapshot = productDocs.get(item.id);
 
             const currentStock = productDocSnapshot.data().stock || {};
             const currentQuantity = currentStock[item.size] || 0;
 
             if (currentQuantity < item.quantity) {
-              // Lançar um erro para reverter a transação se o stock for insuficiente
               throw new Error(`Stock insuficiente para o produto ${item.name} (Tamanho: ${item.size}). Stock disponível: ${currentQuantity}, Necessário: ${item.quantity}`);
             }
 
@@ -97,12 +93,10 @@ function CheckoutForm() {
               ...currentStock,
               [item.size]: currentQuantity - item.quantity,
             };
-            transaction.update(productRef, { stock: newStock }); // ESCRITA
+            transaction.update(productRef, { stock: newStock });
           }
 
-          // PASSO 3: Adicionar o pedido na mesma transação para garantir atomicidade
-          // É importante usar transaction.set para adicionar um novo documento dentro de uma transação
-          const orderRef = doc(collection(db, 'orders')); // Gera uma nova referência de documento com ID automático
+          const orderRef = doc(collection(db, 'orders'));
           transaction.set(orderRef, {
             userId: userId,
             userEmail: userEmail,
@@ -115,18 +109,16 @@ function CheckoutForm() {
               image: item.image,
             })),
             totalAmount: subtotal,
-            orderDate: serverTimestamp(), // Usa o timestamp do servidor
+            orderDate: serverTimestamp(),
             status: 'completed',
           });
         });
-        // FIM DA LÓGICA DE ATUALIZAÇÃO DE STOCK COM TRANSAÇÃO
 
         setSucceeded(true);
-        clearCart(); // Limpa o carrinho após o sucesso da transação
-        router.push('/success-page'); // Redireciona para uma página de sucesso
+        clearCart();
+        router.push('/success-page');
       } catch (e) {
         console.error("Erro ao processar o pedido ou atualizar o stock: ", e);
-        // O FirebaseError será e.message diretamente se for lançado na transação
         setErrorMessage(`Erro: ${e.message || "Ocorreu um erro inesperado. Por favor, tente novamente."}`);
         setSucceeded(false);
       } finally {
@@ -140,10 +132,10 @@ function CheckoutForm() {
       maxWidth: '600px',
       margin: '4rem auto',
       padding: '2.5rem',
-      backgroundColor: 'rgba(10, 10, 10, 0.9)', // Dark background
+      backgroundColor: 'rgba(10, 10, 10, 0.9)',
       borderRadius: '15px',
-      border: '1px solid #333333', // Dark gray border
-      color: '#FFFFFF', // White text
+      border: '1px solid #333333',
+      color: '#FFFFFF',
       fontFamily: '"Roboto Mono", sans-serif'
     }}>
       <h2 style={{
@@ -151,11 +143,11 @@ function CheckoutForm() {
         fontWeight: 'bold',
         marginBottom: '2.5rem',
         textAlign: 'center',
-        color: '#FFFFFF', // White title
+        color: '#FFFFFF',
       }}>Checkout</h2>
 
       <div style={{ marginBottom: '1.5rem' }}>
-        <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#FFFFFF' }}>Detalhes do Pedido</h3> {/* White heading */}
+        <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#FFFFFF' }}>Detalhes do Pedido</h3>
         {cartItems.length === 0 ? (
           <p style={{ color: '#CCCCCC', textAlign: 'center' }}>O seu carrinho está vazio.</p>
         ) : (
@@ -165,11 +157,11 @@ function CheckoutForm() {
                 display: 'flex',
                 justifyContent: 'space-between',
                 padding: '0.8rem 0',
-                borderBottom: '1px dashed #555555', // Subtle dashed dark gray line
+                borderBottom: '1px dashed #555555',
                 fontSize: '1rem'
               }}>
                 <span style={{ color: '#FFFFFF' }}>{item.name} ({item.size}) x {item.quantity}</span>
-                <span style={{ color: '#FFFFFF' }}>€{(item.price * item.quantity).toFixed(2)}</span> {/* White price */}
+                <span style={{ color: '#FFFFFF' }}>€{(item.price * item.quantity).toFixed(2)}</span>
               </li>
             ))}
           </ul>
@@ -179,17 +171,17 @@ function CheckoutForm() {
           justifyContent: 'space-between',
           marginTop: '1.5rem',
           paddingTop: '1.5rem',
-          borderTop: '1px solid #555555', // Dark gray border
+          borderTop: '1px solid #555555',
           fontWeight: 'bold',
           fontSize: '1.3rem',
-          color: '#FFFFFF' // White total
+          color: '#FFFFFF'
         }}>
           <span>Total</span>
           <span>€{subtotal.toFixed(2)}</span>
         </div>
       </div>
 
-      <div style={{ marginBottom: '2rem', padding: '1.5rem', border: '1px solid #555555', borderRadius: '10px', backgroundColor: 'rgba(0,0,0,0.4)' }}> {/* Dark gray border and background */}
+      <div style={{ marginBottom: '2rem', padding: '1.5rem', border: '1px solid #555555', borderRadius: '10px', backgroundColor: 'rgba(0,0,0,0.4)' }}>
         <label htmlFor="card-element" style={{ display: 'block', marginBottom: '1rem', fontWeight: 'bold', fontSize: '1.1rem', color: '#FFFFFF' }}>
           Detalhes do Cartão (Teste)
         </label>
@@ -201,7 +193,7 @@ function CheckoutForm() {
         disabled={!stripe || loading || succeeded || subtotal <= 0}
         style={{
           padding: '15px 25px',
-          backgroundColor: subtotal <= 0 ? '#333333' : '#8A2BE2', // Purple for active, dark gray for disabled
+          backgroundColor: subtotal <= 0 ? '#333333' : '#8A2BE2',
           color: 'white',
           border: 'none',
           borderRadius: '10px',
@@ -215,8 +207,8 @@ function CheckoutForm() {
         {loading ? 'Processando...' : succeeded ? 'Pagamento Aprovado!' : 'Pagar'}
       </button>
 
-      {errorMessage && <div style={{ color: '#FF0000', marginTop: '1.5rem', textAlign: 'center', fontSize: '1.1rem' }}>{errorMessage}</div>} {/* Red error message */}
-      {succeeded && <div style={{ color: '#8A2BE2', marginTop: '1.5rem', textAlign: 'center', fontSize: '1.1rem' }}>Pagamento processado com sucesso! Redirecionando...</div>} {/* Purple success message */}
+      {errorMessage && <div style={{ color: '#FF0000', marginTop: '1.5rem', textAlign: 'center', fontSize: '1.1rem' }}>{errorMessage}</div>}
+      {succeeded && <div style={{ color: '#8A2BE2', marginTop: '1.5rem', textAlign: 'center', fontSize: '1.1rem' }}>Pagamento processado com sucesso! Redirecionando...</div>}
     </form>
   );
 }

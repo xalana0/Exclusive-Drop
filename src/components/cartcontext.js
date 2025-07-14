@@ -3,10 +3,11 @@ import { createContext, useContext, useState, useEffect } from "react";
 
 const CartContext = createContext();
 
+// Fornece o contexto do carrinho para a aplicação.
 export function CartProvider({ children }) {
   const [cartItems, setCartItems] = useState([]);
 
-  // Função para carregar o carrinho do localStorage ao iniciar
+  // Carrega o carrinho do localStorage ao iniciar.
   useEffect(() => {
     try {
       const storedCartItems = localStorage.getItem('cartItems');
@@ -18,7 +19,7 @@ export function CartProvider({ children }) {
     }
   }, []);
 
-  // Função para salvar o carrinho no localStorage sempre que cartItems mudar
+  // Salva o carrinho no localStorage sempre que os itens mudam.
   useEffect(() => {
     try {
       localStorage.setItem('cartItems', JSON.stringify(cartItems));
@@ -41,7 +42,6 @@ export function CartProvider({ children }) {
         );
       }
 
-      // Garante que price é um número ao adicionar um novo item
       return [...prev, { ...product, price: parseFloat(product.price), quantity: 1 }];
     });
   };
@@ -76,7 +76,6 @@ export function CartProvider({ children }) {
     setCartItems([]);
   };
 
-  // Calcular o subtotal aqui no contexto
   const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
   const cartContextValue = {
@@ -96,6 +95,7 @@ export function CartProvider({ children }) {
   );
 }
 
+// Hook para usar o contexto do carrinho.
 export function useCart() {
   return useContext(CartContext);
 }

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 
+// Componente para testar o acesso a uma rota protegida por token.
 const Protected = () => {
   const [data, setData] = useState('');
   const [error, setError] = useState('');
-  const router = useRouter(); // Hook for navigation
+  const router = useRouter();
 
   useEffect(() => {
     const fetchProtectedData = async () => {
@@ -12,7 +13,7 @@ const Protected = () => {
       setData('');
 
       try {
-        const token = localStorage.getItem('token'); // Retrieve the token from localStorage
+        const token = localStorage.getItem('token');
 
         if (!token) {
           setError('Token is missing. Please log in.');
@@ -22,7 +23,7 @@ const Protected = () => {
         const response = await fetch('/api/protected', {
           method: 'GET',
           headers: {
-            Authorization: `Bearer ${token}`, // Include the token in the Authorization header
+            Authorization: `Bearer ${token}`,
           },
         });
 
@@ -38,8 +39,8 @@ const Protected = () => {
       }
     };
 
-    fetchProtectedData(); // Fetch data when the component mounts
-  }, []); // Empty dependency array ensures this runs once on mount
+    fetchProtectedData();
+  }, []);
 
   return (
     <div style={{ textAlign: 'center', marginTop: '50px' }}>

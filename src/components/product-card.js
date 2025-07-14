@@ -1,13 +1,12 @@
 import Link from "next/link"
 import styles from "../styles/product-card.module.css"
-// Removido: import { FaHeart } from 'react-icons/fa';
 
-export default function ProductCard({ name, price, image }) { // Removido productId, isWishlisted, onToggleWishlist
+// Componente que exibe um cartão de produto individual.
+export default function ProductCard({ name, price, image }) {
   return (
-    <Link href="#" className={styles.productLink}> {/* Link genérico, pode ser ajustado para /product/${productId} se quiser */}
+    <Link href="#" className={styles.productLink}>
       <div className={styles.productCard}>
         <div className={styles.imageContainer}>
-          {/* Removido: Botão de Lista de Desejos */}
           <img src={image || "/placeholder.svg"} alt={name} className={styles.productImage} />
         </div>
         <h3 className={styles.productName}>{name}</h3>

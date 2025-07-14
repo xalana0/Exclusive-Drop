@@ -3,33 +3,27 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import ProductCard from "@/components/product-card";
-import { useCart } from "@/components/cartcontext"; // Reintroduzido: import do useCart
+import { useCart } from "@/components/cartcontext";
 import ProductModal from "@/components/ProductModal";
-
 import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/router';
-
 import { db } from '../lib/firebase';
-import { collection, getDocs } from 'firebase/firestore'; // Removido doc, updateDoc, onSnapshot, getDoc
+import { collection, getDocs } from 'firebase/firestore';
 
+// Componente principal da página inicial, exibindo produtos e filtros.
 export default function Home() {
-  const { cartItems, addToCart } = useCart(); // Reintroduzido: uso do useCart
+  const { cartItems, addToCart } = useCart();
   const { data: session, status } = useSession();
   const router = useRouter();
 
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
-
   const [categoryFilter, setCategoryFilter] = useState('Todos');
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
   const [inStockOnly, setInStockOnly] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
-
-  // Removido: Estado para o carrinho (agora gerido pelo Firebase)
-  // const [cartItems, setCartItems] = useState([]);
-  // Removido: const [wishlistItems, setWishlistItems] = useState([]);
 
   const categories = ["Roupas", "Ténis" ];
 
@@ -38,16 +32,6 @@ export default function Home() {
       router.push('/login');
     }
   }, [router, status]);
-
-  // Removido: Função auxiliar para garantir que todas as propriedades do produto estão definidas
-  // const sanitizeProductData = (item) => { ... };
-
-  // Removido: Listener para o carrinho do utilizador no Firebase
-  // useEffect(() => { ... }, [session?.user?.id]);
-
-  // Removido: Listener para a lista de desejos do utilizador no Firebase
-  // useEffect(() => { ... }, [session?.user?.id]);
-
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -65,29 +49,24 @@ export default function Home() {
   useEffect(() => {
     let currentProducts = products;
 
-    // Filtro por Categoria
     if (categoryFilter !== 'Todos') {
       currentProducts = currentProducts.filter(product => product.category === categoryFilter);
     }
 
-    // Filtro por Preço Mínimo
     if (minPrice !== '') {
       currentProducts = currentProducts.filter(product => product.price >= parseFloat(minPrice));
     }
 
-    // Filtro por Preço Máximo
     if (maxPrice !== '') {
       currentProducts = currentProducts.filter(product => product.price <= parseFloat(maxPrice));
     }
 
-    // Filtro por Em Stock
     if (inStockOnly) {
       currentProducts = currentProducts.filter(product => {
-        // Se houver stock, verificar se algum tamanho tem stock > 0
         if (product.stock) {
           return Object.values(product.stock).some(qty => qty > 0);
         }
-        return false; // Se não houver info de stock, assume que não está em stock
+        return false;
       });
     }
 
@@ -102,32 +81,30 @@ export default function Home() {
     setSelectedProduct(null);
   };
 
-  // Função addToCart agora usa o contexto useCart
-  // A função `addToCart` do contexto já deve lidar com a lógica de adicionar/atualizar
-  // e não precisa de interagir diretamente com o Firebase aqui.
-  // A ProductModal já chama `onAdd` que é o `addToCart` do contexto.
+  // Define a categoria para filtrar os produtos.
+  const handleCategoryFilter = (category) => {
+    setCategoryFilter(category);
+  };
 
-  // Removido: Função para adicionar/remover da lista de desejos
-  // const handleToggleWishlist = async (productId) => { ... };
-
-
-  const heroBannerStyle = {
-    backgroundImage: 'url(/images/destaque.jpg)',
+  // Limpa todos os filtros aplicados.
+  const handleClearFilters = () => {
+    setCategoryFilter('Todos');
+    setMinPrice('');
+    setMaxPrice('');
+    setInStockOnly(false);
   };
 
   return (
     <>
       <main className="main">
-        {/* Cabeçalho Global (não está dentro do Home.js, mas mantido para contexto de estilos) */}
         <header className="header">
-          <Link href="/" className="nome-link"> {/* Este é o link do título */}
+          <Link href="/" className="nome-link">
             <h1 className="nome">Exclusive Drop</h1>
           </Link>
           <div className="header-links">
             <Link href="/cartpage" className="cartLink">
-              Carrinho ({cartItems.length}) {/* Usa o length do cartItems do contexto */}
+              Carrinho ({cartItems.length})
             </Link>
-            {/* Adicionado de volta o link para a página de Conta */}
             <Link href="/conta" className="cartLink">
               <span>👤</span> Conta
             </Link>
@@ -139,31 +116,18 @@ export default function Home() {
           </div>
         </header>
 
-        {/* Banner Hero */}
-       
-
         <div className="mainContent">
-          {/* Sidebar de Navegação (mantida para contexto de estilos) */}
           <aside className="sidebar">
             <nav>
               <ul className="navList">
-                <li><Link href="/home" className="navLink">Home</Link></li>
-                {categories.map(category => (
-                  <li key={category}>
-                    <Link href={`/category/${category.toLowerCase()}`} className="navLink">{category}</Link>
-                  </li>
-                ))}
-                <li><Link href="/about" className="navLink">Sobre Nós</Link></li>
-                <li><Link href="/contact" className="navLink">Contacto</Link></li>
+                <li><button onClick={handleClearFilters} className="navLink">Home</button></li>
+                <li><button onClick={() => handleCategoryFilter('Roupas')} className="navLink">Roupas</button></li>
+                <li><button onClick={() => handleCategoryFilter('Ténis')} className="navLink">Ténis</button></li>
               </ul>
             </nav>
           </aside>
 
           <div className="productsContainer" id="products-section">
-            {/* Secção de Destaque de Categorias na Home */}
-            
-
-            {/* Botão para mostrar/esconder filtros */}
             <div className="filter-toggle-container">
               <button
                 onClick={() => setShowFilters(!showFilters)}
@@ -173,7 +137,6 @@ export default function Home() {
               </button>
             </div>
 
-            {/* Filtros - Visíveis apenas quando showFilters é true */}
             {showFilters && (
               <div className="filters-container">
                 <div className="filter-group">
@@ -224,11 +187,10 @@ export default function Home() {
               </div>
             )}
 
-
             <div className="productsGrid">
               {filteredProducts.length > 0 ? (
                 filteredProducts.map((product) => (
-                  <div key={product.id} className="productWrapper animate-in"> {/* Adicionado animate-in */}
+                  <div key={product.id} className="productWrapper animate-in">
                     <ProductCard
                       name={product.name}
                       price={`€${product.price.toFixed(2)}`}
@@ -252,11 +214,22 @@ export default function Home() {
         </div>
       </main>
 
+      <footer style={{
+        backgroundColor: 'rgba(10, 10, 10, 0.9)',
+        color: 'white',
+        textAlign: 'center',
+        padding: '2rem',
+        marginTop: 'auto',
+        borderTop: '1px solid #333333'
+      }}>
+        <p>Contacto: +351 111 111 111 | Email: suporte@exclusivedrop.com</p>
+      </footer>
+
       {selectedProduct && (
         <ProductModal
           product={selectedProduct}
           onClose={handleCloseModal}
-          onAdd={addToCart} // Esta função agora interage com o contexto useCart
+          onAdd={addToCart}
         />
       )}
     </>

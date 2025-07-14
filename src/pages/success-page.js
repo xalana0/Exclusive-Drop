@@ -2,12 +2,12 @@
 
 import React, { useEffect } from 'react';
 import Link from 'next/link';
-import BackgroundAnimation from '../components/Background'; // Ajuste o caminho se necessário
+import BackgroundAnimation from '../components/Background';
 
+// Página exibida após um pagamento bem-sucedido.
 export default function SuccessPage() {
   return (
     <>
-      
       <div style={{
         color: 'white',
         textAlign: 'center',

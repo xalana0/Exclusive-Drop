@@ -1,38 +1,30 @@
-/* LoginRegister.css */
-
-
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-/* Removido o estilo .static-background */
-
-/* O título "Exclusive Drop" */
 .nome {
   color: white;
   font-family: "Carattere", serif;
   font-weight: 400;
-  font-size: 5rem; /* Aumentar o tamanho do título */
+  font-size: 5rem;
   font-style: normal;
   margin-bottom: 0;
   letter-spacing: 2px;
   text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-  position: relative; /* Para garantir que o título fique acima do GIF */
-  z-index: 5; /* Aumentado para garantir que fique acima do background GIF */
-  
+  position: relative;
+  z-index: 5;
 }
 
-/* Animação de pulsação/flutuação (mantida e aplicada a botões) */
 @keyframes floatingText {
   0% {
     transform: translateY(0px);
     opacity: 1;
   }
   50% {
-    transform: translateY(-10px); /* Move 10px para cima */
-    opacity: 0.9; /* Pequena pulsação na opacidade */
+    transform: translateY(-10px);
+    opacity: 0.9;
   }
   100% {
     transform: translateY(0px);
@@ -41,16 +33,16 @@
 }
 
 .container {
-  height: 100vh; /* GARANTE QUE O CONTENTOR OCUPA A ALTURA TOTAL DA VIEWPORT */
+  height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2.5rem; /* Aumentar o espaçamento */
+  gap: 2.5rem;
   position: relative;
-  z-index: 5; /* Aumentado para garantir que o conteúdo do container fique acima do GIF */
+  z-index: 5;
   text-align: center;
-  padding: 2rem; /* Adicionar algum padding para o conteúdo */
+  padding: 2rem;
   box-sizing: border-box;
   width: 100%;
   max-width: 1200px;
@@ -58,81 +50,80 @@
 }
 
 .card {
-  background-color: rgba(0, 0, 0, 0.7); /* Fundo semi-transparente para o card */
+  background-color: rgba(0, 0, 0, 0.7);
   padding: 40px;
   border-radius: 10px;
-  box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.5); /* Sombra mais discreta */
+  box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.5);
   width: 90%;
-  max-width: 400px; /* Limitar largura máxima do card */
+  max-width: 400px;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem; /* Espaçamento entre os elementos do card */
+  gap: 1.5rem;
   box-sizing: border-box;
 }
 
 .input-container {
-  margin-bottom: 1rem; /* Espaçamento entre os grupos de input */
+  margin-bottom: 1rem;
 }
 
 .input-container label {
   display: block;
-  margin-bottom: 8px; /* Espaçamento entre label e input */
-  color: white; /* Labels brancas */
+  margin-bottom: 8px;
+  color: white;
   font-family: "Roboto Mono", serif;
   font-weight: 400;
   font-size: 0.95rem;
-  text-align: left; /* Alinhar labels à esquerda */
+  text-align: left;
 }
 
 .input-container input {
   width: 100%;
-  padding: 12px 15px; /* Mais padding para inputs */
-  border: 1px solid rgba(255, 255, 255, 0.3); /* Borda branca transparente */
+  padding: 12px 15px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 5px;
-  background-color: rgba(255, 255, 255, 0.05); /* Fundo transparente sutil */
-  color: white; /* Texto do input branco */
+  background-color: rgba(255, 255, 255, 0.05);
+  color: white;
   box-sizing: border-box;
   transition: border-color 0.3s, background-color 0.3s;
   font-family: "Roboto Mono", serif;
-  font-weight: 300; /* Fonte mais leve */
+  font-weight: 300;
   font-size: 1rem;
 }
 
 .input-container input:focus {
-  border-color: white; /* Borda branca sólida ao focar */
-  background-color: rgba(255, 255, 255, 0.1); /* Fundo um pouco mais visível ao focar */
+  border-color: white;
+  background-color: rgba(255, 255, 255, 0.1);
   outline: none;
 }
 
 .input-container input::placeholder {
-  color: rgba(255, 255, 255, 0.5); /* Cor do placeholder */
+  color: rgba(255, 255, 255, 0.5);
 }
 
 .button {
   background-color: transparent;
-  border: none; /* Borda */
+  border: none;
   color: white;
   padding: 15px 20px;
   font-size: 1.1rem;
   font-weight: 500;
-  margin-top: 1.5rem; /* Mais margem superior */
+  margin-top: 1.5rem;
   cursor: pointer;
-  border-radius: 5px; /* Bordas levemente arredondadas */
+  border-radius: 5px;
   transition: all 0.3s ease;
   width: 100%;
   font-family: "Roboto Mono", serif;
   text-transform: uppercase;
   letter-spacing: 1px;
- 
 }
 
 .button:hover {
   background-color: rgba(255, 255, 255, 0.1);
-  transform: translateY(-2px); /* Efeito sutil ao passar o mouse */
+  transform: translateY(-2px);
 }
 
 .error-message {
-  color: #ff6b6b; /* Vermelho mais suave para erros */
+  color: #ff6b6b;
   margin-top: 10px;
   font-family: "Roboto Mono", serif;
   font-size: 0.9rem;
@@ -146,13 +137,13 @@
 }
 
 .register-link a {
-  color: white; /* Link branco */
-  text-decoration: underline; /* Sublinhado para links */
+  color: white;
+  text-decoration: underline;
   transition: color 0.3s ease;
 }
 
 .register-link a:hover {
-  color: #aaa; /* Cor mais clara ao passar o mouse */
+  color: #aaa;
 }
 
 .success-section {
@@ -169,9 +160,9 @@
   margin-bottom: 1rem;
 }
 
-.button2 { /* Botão para 'Entrar' após o registro */
+.button2 {
   background-color: transparent;
-  border: none; /* Borda */
+  border: none;
   color: white;
   padding: 15px 20px;
   font-size: 1.1rem;
@@ -183,7 +174,6 @@
   font-family: "Roboto Mono", serif;
   text-transform: uppercase;
   letter-spacing: 1px;
-  
 }
 
 .button2:hover {

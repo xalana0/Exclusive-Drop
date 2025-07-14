@@ -3,21 +3,19 @@
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import CheckoutForm from '../components/CheckoutForm';
-import BackgroundAnimation from '../components/Background' // Ajuste o caminho se necessário
+import BackgroundAnimation from '../components/Background'
 import { useCart } from '@/components/cartcontext';
 import Link from 'next/link';
 
-// Certifique-se de que NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY está no seu .env.local
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
 
+// Página de checkout que integra o Stripe para pagamentos.
 export default function CheckoutPage() {
     const { cartItems } = useCart();
 
-    // Redireciona ou exibe uma mensagem se o carrinho estiver vazio
     if (cartItems.length === 0) {
         return (
             <>
-             
                 <div style={{
                     color: 'white',
                     textAlign: 'center',
@@ -42,7 +40,6 @@ export default function CheckoutPage() {
 
     return (
         <>
-      
             <div style={{ zIndex: 2, position: 'relative' }}>
                 <Elements stripe={stripePromise}>
                     <CheckoutForm />

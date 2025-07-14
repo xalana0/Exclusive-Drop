@@ -9,14 +9,14 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {
-    const { amount, cartItems, userId, userName, userEmail } = req.body; // userName e userEmail já virão como null, se necessário
+    const { amount, cartItems, userId, userName, userEmail } = req.body; 
 
     if (!amount || amount <= 0 || !cartItems || cartItems.length === 0 || !userId) {
       return res.status(400).json({ error: { message: 'Dados do pedido inválidos ou incompletos.' } });
     }
 
     try {
-      // 1. Crie o PaymentIntent no Stripe
+    
       const paymentIntent = await stripe.paymentIntents.create({
         amount: amount,
         currency: 'eur',
@@ -31,7 +31,7 @@ export default async function handler(req, res) {
         },
       });
 
-      // 2. Salve o pedido no Firestore (status inicial 'pending')
+     
       const orderData = {
         userId: userId,
         userName: userName, // Este já deve ser null ou string
@@ -53,7 +53,7 @@ export default async function handler(req, res) {
       const orderRef = await addDoc(collection(db, 'orders'), orderData);
       console.log('Pedido criado com ID: ', orderRef.id, ' e status pending.');
 
-      // 3. Decrementar o stock dos produtos no Firebase usando uma transação
+      
       const stockUpdatePromises = cartItems.map(async (item) => {
         const productRef = doc(db, 'products', item.id);
         await runTransaction(db, async (transaction) => {

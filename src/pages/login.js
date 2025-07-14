@@ -1,5 +1,6 @@
-import Login from '../components/Login'; // Ensure path matches the location of your Login component
+import Login from '../components/Login';
 
+// Renderiza o componente de login.
 export default function LoginPage() {
   return <Login />;
 }

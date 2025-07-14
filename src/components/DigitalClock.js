@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 
+// Componente que exibe um relógio digital.
 export default function DigitalClock() {
   const [time, setTime] = useState(new Date());
 

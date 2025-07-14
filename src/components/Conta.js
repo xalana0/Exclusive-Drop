@@ -1,4 +1,3 @@
-// src/components/Conta.js
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 import { useSession, signOut } from 'next-auth/react';
@@ -16,25 +15,36 @@ import {
   query,
   where,
   orderBy,
-
 } from 'firebase/firestore';
+import { FaUser, FaUsers, FaBox, FaHistory, FaSignOutAlt, FaPlus, FaEdit, FaTrash, FaSearch } from 'react-icons/fa';
 
-import { FaUser, FaUsers, FaBox, FaHistory, FaSignOutAlt, FaPlus, FaEdit, FaTrash, FaSearch, FaKey, FaEnvelope } from 'react-icons/fa';
-
-
-// --- Objeto de Configuração de Tamanhos ---
 const SIZES_BY_CATEGORY = {
   Roupas: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
   Ténis: ['38', '39', '40', '41', '42', '43', '44', '45'],
 };
 
-// Função helper para gerar um objeto de stock padrão para uma categoria
 const getDefaultStockForCategory = (category) => {
   const sizes = SIZES_BY_CATEGORY[category] || [];
   return sizes.reduce((acc, size) => {
-    acc[size] = 0; // Inicializa cada tamanho com stock 0
+    acc[size] = 0;
     return acc;
   }, {});
+};
+
+// Função para validar se um URL é de uma imagem
+const isImageURL = (url) => {
+    if (!url) return false;
+    // Validação simples de extensão
+    if (!/\.(jpg|jpeg|png|webp|gif|svg)$/i.test(url)) {
+        return false;
+    }
+    // Tenta carregar a imagem para confirmar que é válida
+    return new Promise((resolve) => {
+        const img = new Image();
+        img.src = url;
+        img.onload = () => resolve(true);
+        img.onerror = () => resolve(false);
+    });
 };
 
 
@@ -44,20 +54,17 @@ const Conta = () => {
 
   const [userData, setUserData] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [activeTab, setActiveTab] = useState(router.query.tab || 'conta'); // Default para 'conta' ou da URL
-  const [loading, setLoading] = useState(true); // Novo estado de carregamento
-  const [errorMessage, setErrorMessage] = useState('');
+  const [activeTab, setActiveTab] = useState(router.query.tab || 'conta');
+  const [loading, setLoading] = useState(true);
+  const [formMessage, setFormMessage] = useState({ type: '', text: '' }); // { type: 'error' | 'success', text: '...' }
 
-
-  // State for Account Tab
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [editName, setEditName] = useState('');
   const [editEmail, setEditEmail] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
-  const [passwordMessage, setPasswordMessage] = useState(''); // Mensagens para feedback de password
-
-  // State for Users Tab (Admin)
+  
   const [userList, setUserList] = useState([]);
   const [selectedUserToEdit, setSelectedUserToEdit] = useState(null);
   const [editUserData, setEditUserData] = useState({ username: '', email: '', isAdmin: false });
@@ -66,64 +73,17 @@ const Conta = () => {
   const [searchTermUsers, setSearchTermUsers] = useState('');
   const [filteredUserList, setFilteredUserList] = useState([]);
 
-
-  // State for Products Tab (Admin)
   const [products, setProducts] = useState([]);
   const [selectedProductToEdit, setSelectedProductToEdit] = useState(null);
-  const [editProductData, setEditProductData] = useState({
-    name: '',
-    description: '',
-    price: 0,
-    image: '',
-    category: '',
-    inStock: true,
-    stock: {}, // Stock inicializado como vazio
-    sketchfabUrl: '' // Novo campo para Sketchfab
-  });
-  const [imageInputType, setImageInputType] = useState('url'); // 'url' ou 'upload'
-  const [imageFile, setImageFile] = useState(null); // Para guardar o ficheiro selecionado
-  const [uploadingImage, setUploadingImage] = useState(false); // Para gerir o estado de carregamento da imagem
+  const [editProductData, setEditProductData] = useState({ name: '', description: '', price: 0, image: '', category: '', inStock: true, stock: {}, sketchfabUrl: '' });
   const [isCreatingProduct, setIsCreatingProduct] = useState(false);
-  const [newProduct, setNewProduct] = useState({
-    name: '',
-    description: '',
-    price: 0,
-    image: '',
-    category: '', // Categoria começa vazia
-    inStock: true,
-    stock: {}, // Stock começa vazio, será preenchido dinamicamente
-    sketchfabUrl: ''
-  });
+  const [newProduct, setNewProduct] = useState({ name: '', description: '', price: 0, image: '', category: '', inStock: true, stock: {}, sketchfabUrl: '' });
   const [searchTermProducts, setSearchTermProducts] = useState('');
   const [filteredProducts, setFilteredProducts] = useState([]);
 
-  // Removido handleImageUpload pois não está totalmente funcional sem importações de Firebase Storage
-  // const handleImageUpload = async (e) => {
-  //   const file = e.target.files[0];
-  //   if (file) {
-  //     setImageFile(file);
-  //     setUploadingImage(true);
-  //     try {
-  //       const storageRef = ref(storage, `product_images/${file.name}`);
-  //       const snapshot = await uploadBytes(storageRef, file);
-  //       const downloadURL = await getDownloadURL(snapshot.ref);
-  //       setNewProduct(prev => ({ ...prev, image: downloadURL }));
-  //       // setErrorMessage(null); // Opcional: limpar mensagens de erro anteriores se houver
-  //     } catch (error) {
-  //       console.error("Erro ao fazer upload da imagem:", error);
-  //       // setErrorMessage("Erro ao fazer upload da imagem. Por favor, tente novamente.");
-  //       setNewProduct(prev => ({ ...prev, image: '' })); // Limpar a imagem em caso de erro
-  //     } finally {
-  //       setUploadingImage(false);
-  //     }
-  //   }
-  // };
-  // State for Orders Tab
-  const [userOrders, setUserOrders] = useState([]); // Para o utilizador atual
-  const [allOrders, setAllOrders] = useState([]); // Para administradores verem todos os pedidos
-  const [usersMap, setUsersMap] = useState({}); // Para mapear userId a username/email em pedidos
-
-  // --- Funções de Carregamento de Dados ---
+  const [userOrders, setUserOrders] = useState([]);
+  const [allOrders, setAllOrders] = useState([]);
+  const [usersMap, setUsersMap] = useState({});
 
   const fetchUserData = useCallback(async () => {
     if (session?.user?.id) {
@@ -136,12 +96,10 @@ const Conta = () => {
           setEditName(userDocSnap.data().username || '');
           setEditEmail(userDocSnap.data().email || '');
         } else {
-          console.error("Dados do utilizador não encontrados no Firestore.");
-          setErrorMessage("Erro: Dados do utilizador não encontrados.");
+          setFormMessage({ type: 'error', text: "Erro: Dados do utilizador não encontrados." });
         }
       } catch (error) {
-        console.error("Erro ao buscar dados do utilizador:", error);
-        setErrorMessage("Erro ao carregar dados do utilizador.");
+        setFormMessage({ type: 'error', text: "Erro ao carregar os dados do utilizador." });
       }
     }
   }, [session]);
@@ -152,10 +110,8 @@ const Conta = () => {
       const usersSnapshot = await getDocs(usersCol);
       const usersData = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setUserList(usersData);
-      setFilteredUserList(usersData); // Inicializa a lista filtrada
     } catch (error) {
-      console.error("Erro ao carregar lista de utilizadores:", error);
-      setErrorMessage("Erro ao carregar lista de utilizadores.");
+      setFormMessage({ type: 'error', text: "Erro ao carregar a lista de utilizadores." });
     }
   }, []);
 
@@ -165,10 +121,8 @@ const Conta = () => {
       const productsSnapshot = await getDocs(productsCol);
       const productsData = productsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setProducts(productsData);
-      setFilteredProducts(productsData); // Inicializa a lista filtrada
     } catch (error) {
-      console.error("Erro ao carregar produtos:", error);
-      setErrorMessage("Erro ao carregar produtos.");
+        setFormMessage({ type: 'error', text: "Erro ao carregar os produtos." });
     }
   }, []);
 
@@ -176,19 +130,16 @@ const Conta = () => {
     if (!session?.user?.id) return;
     try {
       const ordersCol = collection(db, 'orders');
-      // Pedidos do utilizador atual
       const userOrdersQuery = query(ordersCol, where('userId', '==', session.user.id), orderBy('orderDate', 'desc'));
       const userOrdersSnapshot = await getDocs(userOrdersQuery);
       setUserOrders(userOrdersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
 
-      // Todos os pedidos (apenas para admin)
       if (isAdmin) {
         const allOrdersQuery = query(ordersCol, orderBy('orderDate', 'desc'));
         const allOrdersSnapshot = await getDocs(allOrdersQuery);
         const allOrdersData = allOrdersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setAllOrders(allOrdersData);
 
-        // Mapear IDs de utilizador para nomes/emails para exibição
         const usersRef = collection(db, 'users');
         const usersSnapshot = await getDocs(usersRef);
         const usersMapData = {};
@@ -197,17 +148,13 @@ const Conta = () => {
         });
         setUsersMap(usersMapData);
       }
-
     } catch (error) {
-      console.error("Erro ao carregar pedidos:", error);
-      setErrorMessage("Erro ao carregar pedidos.");
+        setFormMessage({ type: 'error', text: "Erro ao carregar os pedidos." });
     }
   }, [session, isAdmin]);
 
-
   useEffect(() => {
     if (status === 'loading') return;
-
     if (!session) {
       router.push('/login');
       return;
@@ -215,157 +162,219 @@ const Conta = () => {
 
     const loadAllData = async () => {
       setLoading(true);
-      setErrorMessage(''); // Limpa mensagens de erro anteriores
+      setFormMessage({ type: '', text: '' });
       await fetchUserData();
-      // Não carrega tudo de uma vez, mas sim quando a aba é ativada
-      // para otimizar o desempenho, mas mantive o carregamento inicial para a conta.
       setLoading(false);
     };
 
     loadAllData();
 
-    // Carregar dados específicos da aba quando ela é ativada
-    if (activeTab === 'utilizadores' && isAdmin) {
-      fetchUserList();
-    } else if (activeTab === 'produtos' && isAdmin) {
-      fetchProducts();
-    } else if (activeTab === 'historico-compras-pessoal' || (activeTab === 'historico-compras-utilizador' && isAdmin)) {
-      fetchOrders();
-    }
-
-
-  }, [session, status, router, fetchUserData, fetchUserList, fetchProducts, fetchOrders, isAdmin, activeTab]); // Adicionado activeTab
-
-
-  // --- Funções da Aba "Conta" ---
+    if (activeTab === 'utilizadores' && isAdmin) fetchUserList();
+    else if (activeTab === 'produtos' && isAdmin) fetchProducts();
+    else if (activeTab === 'historico-compras-pessoal' || (activeTab === 'historico-compras-utilizador' && isAdmin)) fetchOrders();
+  }, [session, status, router, fetchUserData, fetchUserList, fetchProducts, fetchOrders, isAdmin, activeTab]);
 
   const handleEditProfile = () => {
     setIsEditingProfile(true);
+    setFormMessage({ type: '', text: '' });
   };
 
   const handleSaveProfile = async () => {
+    setFormMessage({ type: '', text: '' });
     if (!userData?.id) return;
+    if (!editName || !editEmail) {
+      setFormMessage({ type: 'error', text: "O nome de utilizador e o email não podem estar vazios." });
+      return;
+    }
+
     try {
-      const userDocRef = doc(db, 'users', userData.id);
-      await updateDoc(userDocRef, {
-        username: editName,
-        email: editEmail,
+      const response = await fetch('/api/update-profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: editName, email: editEmail }),
       });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message);
+      
       setUserData(prev => ({ ...prev, username: editName, email: editEmail }));
       setIsEditingProfile(false);
-      setErrorMessage('');
-      alert('Perfil atualizado com sucesso!');
+      setFormMessage({ type: 'success', text: 'Perfil guardado com sucesso!' });
     } catch (error) {
-      console.error("Erro ao salvar perfil:", error);
-      setErrorMessage("Erro ao salvar perfil.");
-      alert('Erro ao atualizar perfil.');
+      setFormMessage({ type: 'error', text: error.message || "Erro ao guardar o perfil." });
     }
   };
 
   const handleChangePassword = async () => {
-    if (!newPassword || newPassword !== confirmNewPassword) {
-      setPasswordMessage('As novas palavras-passe não correspondem.');
+    setFormMessage({ type: '', text: '' });
+    if (!currentPassword || !newPassword || !confirmNewPassword) {
+      setFormMessage({ type: 'error', text: 'Por favor, preencha todos os campos da palavra-passe.' });
       return;
     }
-    if (newPassword.length < 6) { // Exemplo de validação
-      setPasswordMessage('A palavra-passe deve ter pelo menos 6 caracteres.');
+    if (newPassword !== confirmNewPassword) {
+      setFormMessage({ type: 'error', text: 'As novas palavras-passe não correspondem.' });
+      return;
+    }
+    if (newPassword.length < 6) {
+      setFormMessage({ type: 'error', text: 'A nova palavra-passe deve ter pelo menos 6 caracteres.' });
       return;
     }
 
     try {
-      // Esta lógica é para o NextAuth, não para Firebase Auth diretamente.
-      // A mudança de senha para Credenciais no NextAuth geralmente envolve a API do seu backend.
-      // Se você estiver a usar Firebase Authentication, a lógica seria diferente (e.g., updatePassword(user, newPassword)).
-      // Para este exemplo, apenas simulamos uma mensagem de sucesso/erro.
-      setPasswordMessage('Funcionalidade de mudança de palavra-passe desativada para este exemplo. Implemente a sua lógica de backend.');
+      const response = await fetch('/api/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: session.user.id, currentPassword, newPassword }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message);
+
+      setFormMessage({ type: 'success', text: 'Palavra-passe alterada com sucesso!' });
+      setCurrentPassword('');
       setNewPassword('');
       setConfirmNewPassword('');
-      // alert('Senha alterada com sucesso! (Funcionalidade simulada)');
     } catch (error) {
-      console.error("Erro ao mudar palavra-passe:", error);
-      setPasswordMessage('Erro ao mudar palavra-passe.');
+      setFormMessage({ type: 'error', text: error.message || 'Erro ao alterar a palavra-passe.' });
     }
   };
-
-
-  // --- Funções da Aba "Utilizadores" (Admin) ---
 
   useEffect(() => {
     const lowercasedSearchTerm = searchTermUsers.toLowerCase();
     const filtered = userList.filter(user =>
-      (user.username && user.username.toLowerCase().includes(lowercasedSearchTerm)) ||
-      (user.email && user.email.toLowerCase().includes(lowercasedSearchTerm))
+      user.id !== session?.user?.id &&
+      ((user.username && user.username.toLowerCase().includes(lowercasedSearchTerm)) ||
+      (user.email && user.email.toLowerCase().includes(lowercasedSearchTerm)))
     );
     setFilteredUserList(filtered);
-  }, [searchTermUsers, userList]);
+  }, [searchTermUsers, userList, session?.user?.id]);
 
   const handleEditUser = (user) => {
     setSelectedUserToEdit(user);
     setEditUserData({ username: user.username, email: user.email, isAdmin: user.isAdmin });
+    setFormMessage({ type: '', text: '' });
   };
 
   const handleSaveEditedUser = async () => {
     if (!selectedUserToEdit?.id) return;
     try {
-      const userDocRef = doc(db, 'users', selectedUserToEdit.id);
-      await updateDoc(userDocRef, {
+      await updateDoc(doc(db, 'users', selectedUserToEdit.id), {
         username: editUserData.username,
         email: editUserData.email,
         isAdmin: editUserData.isAdmin,
       });
       alert('Utilizador atualizado com sucesso!');
       setSelectedUserToEdit(null);
-      fetchUserList(); // Recarrega a lista
+      fetchUserList();
     } catch (error) {
-      console.error("Erro ao salvar utilizador:", error);
-      alert('Erro ao atualizar utilizador.');
+      alert('Erro ao guardar o utilizador.');
     }
   };
 
   const handleDeleteUser = async (userId) => {
-    if (window.confirm('Tem a certeza que deseja eliminar este utilizador?')) {
+    if (window.confirm('Tem a certeza que deseja apagar este utilizador?')) {
       try {
         await deleteDoc(doc(db, 'users', userId));
-        alert('Utilizador eliminado com sucesso!');
-        fetchUserList(); // Recarrega a lista
+        alert('Utilizador apagado com sucesso!');
+        fetchUserList();
       } catch (error) {
-        console.error("Erro ao eliminar utilizador:", error);
-        alert('Erro ao eliminar utilizador.');
+        alert('Erro ao apagar o utilizador.');
       }
     }
   };
 
   const handleCreateUser = async () => {
-    // Validação básica
     if (!newUser.username || !newUser.email || !newUser.password) {
       alert('Por favor, preencha todos os campos para criar um novo utilizador.');
       return;
     }
-
     try {
-      // Hash da senha (importante para segurança)
-      // Removido bcrypt.hash pois bcrypt não está importado e é uma dependência de backend para segurança.
-      // Em um ambiente de produção, o hashing da senha deve ocorrer no backend.
-      const hashedPassword = newUser.password; // Placeholder para senha sem hash
-      await addDoc(collection(db, 'users'), {
-        username: newUser.username,
-        email: newUser.email,
-        password: hashedPassword, // Salvar a senha HASHED (neste caso, placeholder)
-        isAdmin: newUser.isAdmin,
-        createdAt: new Date(),
+      const response = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...newUser, telemovel: 'N/A' }),
       });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message);
+      
       alert('Utilizador criado com sucesso!');
       setIsCreatingUser(false);
       setNewUser({ username: '', email: '', password: '', isAdmin: false });
-      fetchUserList(); // Recarrega a lista
+      fetchUserList();
     } catch (error) {
-      console.error("Erro ao criar utilizador:", error);
-      alert('Erro ao criar utilizador.');
+      alert(error.message || 'Erro ao criar o utilizador.');
+    }
+  };
+  
+  const handleCreateProduct = async () => {
+    setFormMessage({type: '', text: ''});
+    if (!newProduct.name || !newProduct.price || !newProduct.image || !newProduct.category) {
+        setFormMessage({type: 'error', text: 'Por favor, preencha todos os campos obrigatórios.'});
+      return;
+    }
+    
+    if (!newProduct.inStock) {
+        if (!window.confirm("Este produto está a ser criado como 'Esgotado'. Deseja continuar?")) {
+            return;
+        }
+    }
+
+    const isValidImage = await isImageURL(newProduct.image);
+    if (!isValidImage) {
+        setFormMessage({type: 'error', text: 'O URL da imagem fornecido não é válido ou não foi encontrado.'});
+        return;
+    }
+    
+    try {
+      await addDoc(collection(db, 'products'), { ...newProduct, createdAt: new Date() });
+      setFormMessage({type: 'success', text: 'Produto criado com sucesso!'});
+      setIsCreatingProduct(false);
+      setNewProduct({ name: '', description: '', price: 0, image: '', category: '', inStock: true, stock: {}, sketchfabUrl: '' });
+      fetchProducts();
+    } catch (error) {
+      setFormMessage({type: 'error', text: 'Erro ao criar o produto.'});
     }
   };
 
+  const handleEditProduct = (product) => {
+    setSelectedProductToEdit(product);
+    const defaultStock = getDefaultStockForCategory(product.category);
+    const currentStock = { ...defaultStock, ...(product.stock || {}) };
+    setEditProductData({ ...product, stock: currentStock });
+    setFormMessage({type: '', text: ''});
+  };
 
-  // --- Funções da Aba "Produtos" (Admin) ---
+  const handleSaveEditedProduct = async () => {
+    setFormMessage({type: '', text: ''});
+    if (!selectedProductToEdit?.id) return;
+    
+    const isValidImage = await isImageURL(editProductData.image);
+    if (!isValidImage) {
+        setFormMessage({type: 'error', text: 'O URL da imagem fornecido não é válido ou não foi encontrado.'});
+        return;
+    }
+
+    try {
+      const productDocRef = doc(db, 'products', selectedProductToEdit.id);
+      await updateDoc(productDocRef, { ...editProductData });
+      setFormMessage({type: 'success', text: 'Produto atualizado com sucesso!'});
+      setSelectedProductToEdit(null);
+      fetchProducts();
+    } catch (error) {
+      setFormMessage({type: 'error', text: 'Erro ao guardar as alterações do produto.'});
+    }
+  };
+
+  const handleDeleteProduct = async (productId) => {
+    if (window.confirm('Tem a certeza que deseja apagar este produto?')) {
+      try {
+        await deleteDoc(doc(db, 'products', productId));
+        alert('Produto apagado com sucesso!');
+        fetchProducts();
+      } catch (error) {
+        alert('Erro ao apagar o produto.');
+      }
+    }
+  };
 
   useEffect(() => {
     const lowercasedSearchTerm = searchTermProducts.toLowerCase();
@@ -377,136 +386,54 @@ const Conta = () => {
     setFilteredProducts(filtered);
   }, [searchTermProducts, products]);
 
-  const handleEditProduct = (product) => {
-    setSelectedProductToEdit(product);
-    // Assegura que o stock está bem formado, combinando o stock guardado
-    // com a estrutura de tamanhos da categoria atual do produto.
-    const defaultStock = getDefaultStockForCategory(product.category);
-    const currentStock = { ...defaultStock, ...(product.stock || {}) };
-    setEditProductData({ ...product, stock: currentStock });
-  };
-
-  const handleSaveEditedProduct = async () => {
-    if (!selectedProductToEdit?.id) return;
-    try {
-      const productDocRef = doc(db, 'products', selectedProductToEdit.id);
-      await updateDoc(productDocRef, { ...editProductData });
-      alert('Produto atualizado com sucesso!');
-      setSelectedProductToEdit(null);
-      fetchProducts(); // Recarrega a lista
-    } catch (error) {
-      console.error("Erro ao salvar produto:", error);
-      alert('Erro ao atualizar produto.');
-    }
-  };
-
-  const handleDeleteProduct = async (productId) => {
-    if (window.confirm('Tem a certeza que deseja eliminar este produto?')) {
-      try {
-        await deleteDoc(doc(db, 'products', productId));
-        alert('Produto eliminado com sucesso!');
-        fetchProducts(); // Recarrega a lista
-      } catch (error) {
-        console.error("Erro ao eliminar produto:", error);
-        alert('Erro ao eliminar produto.');
-      }
-    }
-  };
-
-  const handleCreateProduct = async () => {
-    // Validação básica
-    if (!newProduct.name || !newProduct.price || !newProduct.image || !newProduct.category) {
-      alert('Por favor, preencha os campos obrigatórios para criar um produto.');
-      return;
-    }
-
-    try {
-      await addDoc(collection(db, 'products'), { ...newProduct, createdAt: new Date() });
-      alert('Produto criado com sucesso!');
-      setIsCreatingProduct(false);
-      // Limpa o formulário de novo produto, incluindo o stock
-      setNewProduct({ name: '', description: '', price: 0, image: '', category: '', inStock: true, stock: {}, sketchfabUrl: '' });
-      fetchProducts(); // Recarrega a lista
-    } catch (error) {
-      console.error("Erro ao criar produto:", error);
-      alert('Erro ao criar produto.');
-    }
-  };
-
-
-  if (status === 'loading' || loading) {
-    return (
-      <div className="account-container" style={{ textAlign: 'center', padding: '50px', color: 'white' }}>
-        <h2>Carregando dados...</h2>
-        {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
-      </div>
-    );
-  }
-
-  if (!session) {
-    return (
-      <div className="account-container" style={{ textAlign: 'center', padding: '50px', color: 'white' }}>
-        <h2>Acesso não autorizado. Por favor, faça login.</h2>
-      </div>
-    );
-  }
-
+  if (status === 'loading' || loading) return <div className="account-container" style={{ textAlign: 'center', padding: '50px', color: 'white' }}><h2>A carregar...</h2></div>;
+  if (!session) return null;
+  
   const renderContent = () => {
     switch (activeTab) {
       case 'conta':
         return (
           <div className="tab-content profile-section">
-            <h2>Bem-vindo, {userData?.username || session.user.username}!</h2>
+            <h2>A Minha Conta</h2>
+            {formMessage.text && <p className={formMessage.type === 'error' ? 'error-message' : 'success-message'} style={{textAlign: 'center', marginBottom: '1rem'}}>{formMessage.text}</p>}
+            
             {isEditingProfile ? (
               <div className="edit-profile-form">
                 <div className="form-group">
                   <label>Nome de Utilizador:</label>
-                  <input
-                    type="text"
-                    value={editName}
-                    onChange={(e) => setEditName(e.target.value)}
-                  />
+                  <input type="text" value={editName} onChange={(e) => setEditName(e.target.value)} />
                 </div>
                 <div className="form-group">
                   <label>Email:</label>
-                  <input
-                    type="email"
-                    value={editEmail}
-                    onChange={(e) => setEditEmail(e.target.value)}
-                  />
+                  <input type="email" value={editEmail} onChange={(e) => setEditEmail(e.target.value)} />
                 </div>
                 <div className="actions">
-                  <button className="save-btn" onClick={handleSaveProfile}>Salvar</button>
-                  <button className="cancel-btn" onClick={() => setIsEditingProfile(false)}>Cancelar</button>
+                  <button className="save-btn" onClick={handleSaveProfile}>Guardar Alterações</button>
+                  <button className="cancel-btn" onClick={() => { setIsEditingProfile(false); setFormMessage({type: '', text: ''}); }}>Cancelar</button>
                 </div>
                 <hr style={{ margin: '2rem 0', borderColor: 'rgba(255,255,255,0.2)' }} />
-                <h3>Mudar Palavra-Passe</h3>
+                <h3>Mudar Palavra-passe</h3>
                 <div className="form-group">
-                  <label>Nova Palavra-Passe:</label>
-                  <input
-                    type="password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                  />
+                  <label>Palavra-passe Atual:</label>
+                  <input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} />
                 </div>
                 <div className="form-group">
-                  <label>Confirmar Nova Palavra-Passe:</label>
-                  <input
-                    type="password"
-                    value={confirmNewPassword}
-                    onChange={(e) => setConfirmNewPassword(e.target.value)}
-                  />
+                  <label>Nova Palavra-passe:</label>
+                  <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
                 </div>
-                {passwordMessage && <p style={{ color: passwordMessage.includes('sucesso') ? 'lightgreen' : 'red', marginTop: '10px' }}>{passwordMessage}</p>}
+                <div className="form-group">
+                  <label>Confirmar Nova Palavra-passe:</label>
+                  <input type="password" value={confirmNewPassword} onChange={(e) => setConfirmNewPassword(e.target.value)} />
+                </div>
                 <div className="actions">
-                  <button className="edit-btn" onClick={handleChangePassword}>Mudar Palavra-Passe</button>
+                  <button className="edit-btn" onClick={handleChangePassword}>Mudar Palavra-passe</button>
                 </div>
               </div>
             ) : (
               <div className="profile-info">
                 <p><strong>Nome de Utilizador:</strong> {userData?.username || 'N/A'}</p>
                 <p><strong>Email:</strong> {userData?.email || 'N/A'}</p>
-                <p><strong>Tipo de Conta:</strong> {isAdmin ? 'Administrador' : 'Utilizador Padrão'}</p>
+                <p><strong>Tipo de Conta:</strong> {isAdmin ? 'Administrador' : 'Utilizador'}</p>
                 <div className="actions">
                   <button className="edit-btn" onClick={handleEditProfile}>Editar Perfil</button>
                 </div>
@@ -515,18 +442,13 @@ const Conta = () => {
           </div>
         );
       case 'utilizadores':
-        if (!isAdmin) return <p className="no-permission-message">Acesso negado. Apenas administradores.</p>;
+        if (!isAdmin) return <p className="no-permission-message">Acesso negado. Apenas para administradores.</p>;
         return (
           <div className="tab-content">
             <h2>Gestão de Utilizadores</h2>
             <div className="search-bar">
               <FaSearch className="search-icon" />
-              <input
-                type="text"
-                placeholder="Pesquisar utilizadores..."
-                value={searchTermUsers}
-                onChange={(e) => setSearchTermUsers(e.target.value)}
-              />
+              <input type="text" placeholder="Pesquisar utilizadores..." value={searchTermUsers} onChange={(e) => setSearchTermUsers(e.target.value)} />
             </div>
             <button className="add-btn" onClick={() => setIsCreatingUser(true)}>
               <FaPlus /> Adicionar Novo Utilizador
@@ -537,35 +459,18 @@ const Conta = () => {
                 <h3>Criar Novo Utilizador</h3>
                 <div className="form-group">
                   <label>Nome de Utilizador:</label>
-                  <input
-                    type="text"
-                    value={newUser.username}
-                    onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
-                  />
+                  <input type="text" value={newUser.username} onChange={(e) => setNewUser({ ...newUser, username: e.target.value })} />
                 </div>
                 <div className="form-group">
                   <label>Email:</label>
-                  <input
-                    type="email"
-                    value={newUser.email}
-                    onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-                  />
+                  <input type="email" value={newUser.email} onChange={(e) => setNewUser({ ...newUser, email: e.target.value })} />
                 </div>
                 <div className="form-group">
                   <label>Palavra-Passe:</label>
-                  <input
-                    type="password"
-                    value={newUser.password}
-                    onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
-                  />
+                  <input type="password" value={newUser.password} onChange={(e) => setNewUser({ ...newUser, password: e.target.value })} />
                 </div>
                 <div className="form-group checkbox-group">
-                  <input
-                    type="checkbox"
-                    id="isAdminNew"
-                    checked={newUser.isAdmin}
-                    onChange={(e) => setNewUser({ ...newUser, isAdmin: e.target.checked })}
-                  />
+                  <input type="checkbox" id="isAdminNew" checked={newUser.isAdmin} onChange={(e) => setNewUser({ ...newUser, isAdmin: e.target.checked })} />
                   <label htmlFor="isAdminNew">Administrador</label>
                 </div>
                 <div className="actions">
@@ -580,31 +485,18 @@ const Conta = () => {
                 <h3>Editar Utilizador: {selectedUserToEdit.username}</h3>
                 <div className="form-group">
                   <label>Nome de Utilizador:</label>
-                  <input
-                    type="text"
-                    value={editUserData.username}
-                    onChange={(e) => setEditUserData({ ...editUserData, username: e.target.value })}
-                  />
+                  <input type="text" value={editUserData.username} onChange={(e) => setEditUserData({ ...editUserData, username: e.target.value })} />
                 </div>
                 <div className="form-group">
                   <label>Email:</label>
-                  <input
-                    type="email"
-                    value={editUserData.email}
-                    onChange={(e) => setEditUserData({ ...editUserData, email: e.target.value })}
-                  />
+                  <input type="email" value={editUserData.email} onChange={(e) => setEditUserData({ ...editUserData, email: e.target.value })} />
                 </div>
                 <div className="form-group checkbox-group">
-                  <input
-                    type="checkbox"
-                    id="isAdminEdit"
-                    checked={editUserData.isAdmin}
-                    onChange={(e) => setEditUserData({ ...editUserData, isAdmin: e.target.checked })}
-                  />
+                  <input type="checkbox" id="isAdminEdit" checked={editUserData.isAdmin} onChange={(e) => setEditUserData({ ...editUserData, isAdmin: e.target.checked })} />
                   <label htmlFor="isAdminEdit">Administrador</label>
                 </div>
                 <div className="actions">
-                  <button className="save-btn" onClick={handleSaveEditedUser}>Salvar</button>
+                  <button className="save-btn" onClick={handleSaveEditedUser}>Guardar</button>
                   <button className="cancel-btn" onClick={() => setSelectedUserToEdit(null)}>Cancelar</button>
                 </div>
               </div>
@@ -628,248 +520,119 @@ const Conta = () => {
           </div>
         );
       case 'produtos':
-        if (!isAdmin) return <p className="no-permission-message">Acesso negado. Apenas administradores.</p>;
+        if (!isAdmin) return <p className="no-permission-message">Acesso negado. Apenas para administradores.</p>;
         return (
           <div className="tab-content">
             <h2>Gestão de Produtos</h2>
+            {formMessage.text && <p className={formMessage.type === 'error' ? 'error-message' : 'success-message'} style={{textAlign: 'center', marginBottom: '1rem'}}>{formMessage.text}</p>}
             <div className="search-bar">
               <FaSearch className="search-icon" />
-              <input
-                type="text"
-                placeholder="Pesquisar produtos..."
-                value={searchTermProducts}
-                onChange={(e) => setSearchTermProducts(e.target.value)}
-              />
+              <input type="text" placeholder="Pesquisar produtos..." value={searchTermProducts} onChange={(e) => setSearchTermProducts(e.target.value)} />
             </div>
-            <button className="add-btn" onClick={() => setIsCreatingProduct(true)}>
+            <button className="add-btn" onClick={() => {setIsCreatingProduct(true); setFormMessage({ type: '', text: '' });}}>
               <FaPlus /> Adicionar Novo Produto
             </button>
-
             {isCreatingProduct && (
-              <div className="form-modal product-form">
-                <h3>Criar Novo Produto</h3>
-                <div className="form-group">
-                  <label>Nome:</label>
-                  <input type="text" value={newProduct.name} onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })} />
-                </div>
-                <div className="form-group">
-                  <label>Descrição:</label>
-                  <textarea value={newProduct.description} onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}></textarea>
-                </div>
-                <div className="form-group">
-                  <label>Preço:</label>
-                  <input type="number" value={newProduct.price} onChange={(e) => setNewProduct({ ...newProduct, price: parseFloat(e.target.value) || 0 })} />
-                </div>
-                <div className="form-group">
-                  <label>URL da Imagem:</label>
-                  <input type="text" value={newProduct.image} onChange={(e) => setNewProduct({ ...newProduct, image: e.target.value })} />
-                </div>
-                <div className="form-group">
-                  <label>Categoria:</label>
-                  <div style={{ display: 'flex', gap: '1rem' }}>
-                    <div>
-                      <input
-                        type="radio"
-                        id="newProductCategoryRoupas"
-                        name="newProductCategory"
-                        value="Roupas"
-                        checked={newProduct.category === 'Roupas'}
-                        onChange={(e) => {
-                          const category = e.target.value;
-                          setNewProduct({
-                            ...newProduct,
-                            category,
-                            stock: getDefaultStockForCategory(category)
-                          });
-                        }}
-                      />
-                      <label htmlFor="newProductCategoryRoupas">Roupas</label>
+                <div className="form-modal product-form">
+                    <h3>Criar Novo Produto</h3>
+                    <div className="form-group">
+                      <label>Nome:</label>
+                      <input type="text" value={newProduct.name} onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })} />
                     </div>
-                    <div>
-                      <input
-                        type="radio"
-                        id="newProductCategoryTenis"
-                        name="newProductCategory"
-                        value="Ténis"
-                        checked={newProduct.category === 'Ténis'}
-                        onChange={(e) => {
-                          const category = e.target.value;
-                          setNewProduct({
-                            ...newProduct,
-                            category,
-                            stock: getDefaultStockForCategory(category)
-                          });
-                        }}
-                      />
-                      <label htmlFor="newProductCategoryTenis">Ténis</label>
+                    <div className="form-group">
+                      <label>Descrição:</label>
+                      <textarea value={newProduct.description} onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}></textarea>
                     </div>
-                  </div>
-                </div>
-
-                {newProduct.category && (
-                  <>
-                    <h4>Stock por Tamanho:</h4>
-                    <div className="stock-inputs-grid">
-                      {Object.keys(newProduct.stock).map(size => (
-                        <div key={size} className="stock-input-item">
-                          <label>{size}:</label>
-                          <input
-                            type="number"
-                            value={newProduct.stock[size]}
-                            onChange={(e) =>
-                              setNewProduct(prev => ({
-                                ...prev,
-                                stock: { ...prev.stock, [size]: parseInt(e.target.value) || 0 }
-                              }))
-                            }
-                          />
+                    <div className="form-group">
+                      <label>Preço:</label>
+                      <input type="number" value={newProduct.price} onChange={(e) => setNewProduct({ ...newProduct, price: parseFloat(e.target.value) || 0 })} />
+                    </div>
+                    <div className="form-group">
+                      <label>URL da Imagem:</label>
+                      <input type="text" value={newProduct.image} onChange={(e) => setNewProduct({ ...newProduct, image: e.target.value })} />
+                    </div>
+                    <div className="form-group">
+                      <label>Categoria:</label>
+                      <div style={{ display: 'flex', gap: '1rem' }}>
+                        <div>
+                          <input type="radio" id="newProductCategoryRoupas" name="newProductCategory" value="Roupas" checked={newProduct.category === 'Roupas'} onChange={(e) => { const category = e.target.value; setNewProduct({ ...newProduct, category, stock: getDefaultStockForCategory(category) }); }} />
+                          <label htmlFor="newProductCategoryRoupas">Roupas</label>
                         </div>
-                      ))}
+                        <div>
+                          <input type="radio" id="newProductCategoryTenis" name="newProductCategory" value="Ténis" checked={newProduct.category === 'Ténis'} onChange={(e) => { const category = e.target.value; setNewProduct({ ...newProduct, category, stock: getDefaultStockForCategory(category) }); }} />
+                          <label htmlFor="newProductCategoryTenis">Ténis</label>
+                        </div>
+                      </div>
                     </div>
-                  </>
-                )}
-
-                <div className="form-group">
-                  <label>URL Sketchfab (Opcional):</label>
-                  <input type="text" value={newProduct.sketchfabUrl} onChange={(e) => setNewProduct({ ...newProduct, sketchfabUrl: e.target.value })} />
-                </div>
-                <div className="form-group checkbox-group">
-                  <input
-                    type="checkbox"
-                    id="inStockNew"
-                    checked={newProduct.inStock}
-                    onChange={(e) => setNewProduct({ ...newProduct, inStock: e.target.checked })}
-                  />
-                  <label htmlFor="inStockNew">Em Stock</label>
-                </div>
-                <div className="actions">
-                  <button className="save-btn" onClick={handleCreateProduct}>Criar Produto</button>
-                  <button className="cancel-btn" onClick={() => setIsCreatingProduct(false)}>Cancelar</button>
-                </div>
-              </div>
-            )}
-
-            {selectedProductToEdit && (
-              <div className="form-modal product-form">
-                <h3>Editar Produto: {selectedProductToEdit.name}</h3>
-                <div className="form-group">
-                  <label>Nome:</label>
-                  <input type="text" value={editProductData.name} onChange={(e) => setEditProductData({ ...editProductData, name: e.target.value })} />
-                </div>
-                <div className="form-group">
-                  <label>Descrição:</label>
-                  <textarea value={editProductData.description} onChange={(e) => setEditProductData({ ...editProductData, description: e.target.value })}></textarea>
-                </div>
-                <div className="form-group">
-                  <label>Preço:</label>
-                  <input type="number" value={editProductData.price} onChange={(e) => setEditProductData({ ...editProductData, price: parseFloat(e.target.value) || 0 })} />
-                </div>
-                <div className="form-group">
-                  <label>URL da Imagem:</label>
-                  <input type="text" value={editProductData.image} onChange={(e) => setEditProductData({ ...editProductData, image: e.target.value })} />
-                </div>
-                 <div className="form-group">
-                  <label>Categoria:</label>
-                  <div style={{ display: 'flex', gap: '1rem' }}>
-                    <div>
-                      <input
-                        type="radio"
-                        id="editProductCategoryRoupas"
-                        name="editProductCategory"
-                        value="Roupas"
-                        checked={editProductData.category === 'Roupas'}
-                        onChange={(e) => {
-                          const category = e.target.value;
-                          setEditProductData({
-                            ...editProductData,
-                            category,
-                            stock: getDefaultStockForCategory(category)
-                          });
-                        }}
-                      />
-                      <label htmlFor="editProductCategoryRoupas">Roupas</label>
-                    </div>
-                    <div>
-                      <input
-                        type="radio"
-                        id="editProductCategoryTenis"
-                        name="editProductCategory"
-                        value="Ténis"
-                        checked={editProductData.category === 'Ténis'}
-                        onChange={(e) => {
-                          const category = e.target.value;
-                          setEditProductData({
-                            ...editProductData,
-                            category,
-                            stock: getDefaultStockForCategory(category)
-                          });
-                        }}
-                      />
-                      <label htmlFor="editProductCategoryTenis">Ténis</label>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="form-group">
-                  <label>URL Sketchfab (Opcional):</label>
-                  <input type="text" value={editProductData.sketchfabUrl} onChange={(e) => setEditProductData({ ...editProductData, sketchfabUrl: e.target.value })} />
-                </div>
-                {editProductData.sketchfabUrl && (
-                  <div className="sketchfab-preview">
-                    <iframe
-                      title={editProductData.name}
-                      frameBorder="0"
-                      allow="autoplay; xr-spatial-tracking"
-                      xr-spatial-tracking
-                      execution-while-out-of-viewport
-                      execution-while-not-rendered
-                      web-share
-                      src={`${editProductData.sketchfabUrl}/embed?autostart=1&preload=1&ui_controls=0&ui_infos=0&ui_inspector=0&ui_settings=0&ui_help=0&ui_vr=0&ui_ar=0&ui_annotations=0&ui_watermark=0&transparent=0&background=FFFFFF&ui_fullscreen=0&ui_tools=0&share_button=0`}
-                      style={{ width: '100%', height: '333px' }}
-                    ></iframe>
-
-                  </div>
-                )}
-                <div className="form-group checkbox-group">
-                  <input
-                    type="checkbox"
-                    id="inStockEdit"
-                    checked={editProductData.inStock}
-                    onChange={(e) => setEditProductData({ ...editProductData, inStock: e.target.checked })}
-                  />
-                  <label htmlFor="inStockEdit">Em Stock</label>
-                </div>
-
-                {editProductData.category && (
-                    <>
+                    {newProduct.category && (
+                      <>
                         <h4>Stock por Tamanho:</h4>
                         <div className="stock-inputs-grid">
+                          {Object.keys(newProduct.stock).map(size => (
+                            <div key={size} className="stock-input-item">
+                              <label>{size}:</label>
+                              <input type="number" value={newProduct.stock[size]} onChange={(e) => setNewProduct(prev => ({ ...prev, stock: { ...prev.stock, [size]: parseInt(e.target.value) || 0 } }))} />
+                            </div>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                    <div className="form-group">
+                      <label>URL Sketchfab (Opcional):</label>
+                      <input type="text" value={newProduct.sketchfabUrl} onChange={(e) => setNewProduct({ ...newProduct, sketchfabUrl: e.target.value })} />
+                    </div>
+                    <div className="form-group checkbox-group">
+                      <input type="checkbox" id="inStockNew" checked={newProduct.inStock} onChange={(e) => setNewProduct({ ...newProduct, inStock: e.target.checked })} />
+                      <label htmlFor="inStockNew">Em Stock</label>
+                    </div>
+                    <div className="actions">
+                      <button className="save-btn" onClick={handleCreateProduct}>Criar Produto</button>
+                      <button className="cancel-btn" onClick={() => setIsCreatingProduct(false)}>Cancelar</button>
+                    </div>
+                </div>
+            )}
+            {selectedProductToEdit && (
+                <div className="form-modal product-form">
+                    <h3>Editar Produto: {selectedProductToEdit.name}</h3>
+                    <div className="form-group">
+                        <label>Nome:</label>
+                        <input type="text" value={editProductData.name} onChange={(e) => setEditProductData({ ...editProductData, name: e.target.value })} />
+                    </div>
+                    <div className="form-group">
+                        <label>Descrição:</label>
+                        <textarea value={editProductData.description} onChange={(e) => setEditProductData({ ...editProductData, description: e.target.value })}></textarea>
+                    </div>
+                    <div className="form-group">
+                        <label>Preço:</label>
+                        <input type="number" value={editProductData.price} onChange={(e) => setEditProductData({ ...editProductData, price: parseFloat(e.target.value) || 0 })} />
+                    </div>
+                    <div className="form-group">
+                        <label>URL da Imagem:</label>
+                        <input type="text" value={editProductData.image} onChange={(e) => setEditProductData({ ...editProductData, image: e.target.value })} />
+                    </div>
+                    <div className="form-group">
+                        <label>URL Sketchfab (Opcional):</label>
+                        <input type="text" value={editProductData.sketchfabUrl} onChange={(e) => setEditProductData({ ...editProductData, sketchfabUrl: e.target.value })} />
+                    </div>
+                    <div className="form-group checkbox-group">
+                        <input type="checkbox" id="inStockEdit" checked={editProductData.inStock} onChange={(e) => setEditProductData({ ...editProductData, inStock: e.target.checked })} />
+                        <label htmlFor="inStockEdit">Em Stock</label>
+                    </div>
+                    <h4>Stock por Tamanho:</h4>
+                    <div className="stock-inputs-grid">
                         {Object.keys(editProductData.stock).map(size => (
                             <div key={size} className="stock-input-item">
-                            <label>{size}:</label>
-                            <input
-                                type="number"
-                                value={editProductData.stock[size]}
-                                onChange={(e) =>
-                                setEditProductData(prev => ({
-                                    ...prev,
-                                    stock: { ...prev.stock, [size]: parseInt(e.target.value) || 0 }
-                                }))
-                                }
-                            />
+                                <label>{size}:</label>
+                                <input type="number" value={editProductData.stock[size]} onChange={(e) => setEditProductData(prev => ({...prev, stock: { ...prev.stock, [size]: parseInt(e.target.value) || 0 }}))} />
                             </div>
                         ))}
-                        </div>
-                    </>
-                )}
-
-                <div className="actions">
-                  <button className="save-btn" onClick={handleSaveEditedProduct}>Salvar Produto</button>
-                  <button className="cancel-btn" onClick={() => setSelectedProductToEdit(null)}>Cancelar</button>
+                    </div>
+                    <div className="actions">
+                      <button className="save-btn" onClick={handleSaveEditedProduct}>Guardar Alterações</button>
+                      <button className="cancel-btn" onClick={() => setSelectedProductToEdit(null)}>Cancelar</button>
+                    </div>
                 </div>
-              </div>
             )}
-
             <div className="product-grid">
               {filteredProducts.length === 0 ? (
                 <p className="no-items-message">Nenhum produto encontrado.</p>
@@ -901,9 +664,9 @@ const Conta = () => {
       case 'historico-compras-pessoal':
         return (
           <div className="tab-content orders-history-tab">
-            <h2>Meu Histórico de Compras</h2>
+            <h2>O Meu Histórico de Compras</h2>
             {userOrders.length === 0 ? (
-              <p className="no-items-message">Você ainda não fez nenhum pedido.</p>
+              <p className="no-items-message">Ainda não efetuou nenhum pedido.</p>
             ) : (
               <div className="orders-list">
                 {userOrders.map(order => (
@@ -915,7 +678,7 @@ const Conta = () => {
                     <ul>
                       {order.items.map((item, index) => (
                         <li key={index} className="order-product-item">
-                          <img src={item.image} alt={item.name} className="order-product-image" />
+                          <img src={item.image} alt={item.name} className="order-product-image"/>
                           <span>{item.name} ({item.size}) x {item.quantity} - €{(item.price * item.quantity).toFixed(2)}</span>
                         </li>
                       ))}
@@ -927,7 +690,7 @@ const Conta = () => {
           </div>
         );
       case 'historico-compras-utilizador':
-        if (!isAdmin) return <p className="no-permission-message">Acesso negado. Apenas administradores.</p>;
+        if (!isAdmin) return <p className="no-permission-message">Acesso negado. Apenas para administradores.</p>;
         return (
           <div className="tab-content section all-orders-history-tab">
             <h2>Histórico de Compras de Todos os Utilizadores</h2>
@@ -945,7 +708,7 @@ const Conta = () => {
                     <ul>
                       {order.items.map((item, index) => (
                         <li key={index} className="order-product-item">
-                          <img src={item.image} alt={item.name} className="order-product-image" />
+                          <img src={item.image} alt={item.name} className="order-product-image"/>
                           <span>{item.name} ({item.size}) x {item.quantity} - €{(item.price * item.quantity).toFixed(2)}</span>
                         </li>
                       ))}
@@ -963,62 +726,37 @@ const Conta = () => {
 
   return (
     <>
-      <div className="dashboard-container"> {/* Novo container principal */}
-        <h1 className="account-title">Conta</h1>
-
+      <div className="dashboard-container">
+        <h1 className="account-title">Área de Cliente</h1>
         <div className="dashboard-layout">
           <div className="sidebar">
-            <button
-              className={`tab-button ${activeTab === 'conta' ? 'active' : ''}`}
-              onClick={() => setActiveTab('conta')}
-            >
-              <FaUser /> Conta
+            <button className={`tab-button ${activeTab === 'conta' ? 'active' : ''}`} onClick={() => setActiveTab('conta')}>
+              <FaUser /> A Minha Conta
             </button>
             {isAdmin && (
               <>
-                <button
-                  className={`tab-button ${activeTab === 'utilizadores' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('utilizadores')}
-                >
-                  <FaUsers /> Utilizadores
+                <button className={`tab-button ${activeTab === 'utilizadores' ? 'active' : ''}`} onClick={() => setActiveTab('utilizadores')}>
+                  <FaUsers /> Gerir Utilizadores
                 </button>
-                <button
-                  className={`tab-button ${activeTab === 'produtos' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('produtos')}
-                >
-                  <FaBox /> Produtos
+                <button className={`tab-button ${activeTab === 'produtos' ? 'active' : ''}`} onClick={() => setActiveTab('produtos')}>
+                  <FaBox /> Gerir Produtos
                 </button>
-                <button
-                  className={`tab-button ${activeTab === 'historico-compras-utilizador' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('historico-compras-utilizador')}
-                >
-                  <FaHistory /> Histórico de Todos os Pedidos
+                <button className={`tab-button ${activeTab === 'historico-compras-utilizador' ? 'active' : ''}`} onClick={() => setActiveTab('historico-compras-utilizador')}>
+                  <FaHistory /> Todos os Pedidos
                 </button>
               </>
             )}
-            <button
-              className={`tab-button ${activeTab === 'historico-compras-pessoal' ? 'active' : ''}`}
-              onClick={() => setActiveTab('historico-compras-pessoal')}
-            >
-              <FaHistory /> Meu Histórico de Compras
+            <button className={`tab-button ${activeTab === 'historico-compras-pessoal' ? 'active' : ''}`} onClick={() => setActiveTab('historico-compras-pessoal')}>
+              <FaHistory /> As Minhas Compras
             </button>
-            <button
-              className="tab-button logout-button"
-              onClick={() => signOut({ callbackUrl: '/' })}
-            >
+            <button className="tab-button logout-button" onClick={() => signOut({ callbackUrl: '/' })}>
               <FaSignOutAlt /> Sair
             </button>
-          
-            <button
-              className="tab-button logout-button-back-button-purple" // Adicionada uma classe extra para estilização específica
-              onClick={() => router.back()}
-            >
+            <button className="tab-button logout-button-back-button-purple" onClick={() => router.back()}>
               Voltar
             </button>
           </div>
-
           <div className="main-content">
-            {errorMessage && <p className="error-message">{errorMessage}</p>}
             {renderContent()}
           </div>
         </div>

@@ -1,12 +1,10 @@
-/* styles/ProductModal.css */
-
 .overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.8); /* Fundo mais escuro */
+  background-color: rgba(0, 0, 0, 0.8);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -14,24 +12,24 @@
 }
 
 .modal {
-  background: rgba(0, 0, 0, 0.9); /* Fundo quase opaco para o modal */
-  padding: 30px; /* Mais padding */
+  background: rgba(0, 0, 0, 0.9);
+  padding: 30px;
   border-radius: 10px;
   position: relative;
   width: 90%;
-  max-width: 800px; /* Aumentado a largura máxima do modal padrão */
+  max-width: 800px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5); /* Sombra mais forte */
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
   display: flex;
   flex-direction: column;
-  color: white; /* Texto branco padrão no modal */
+  color: white;
   font-family: "Roboto Mono", serif;
-  transition: max-width 0.3s ease; /* Transição para o max-width */
+  transition: max-width 0.3s ease;
 }
 
 .modal.large-3d-view {
-  max-width: 1200px; /* Nova largura máxima para 3D View */
+  max-width: 1200px;
 }
 
 .closeBtn {
@@ -40,63 +38,62 @@
   right: 15px;
   background: none;
   border: none;
-  font-size: 1.8rem; /* Ícone maior */
+  font-size: 1.8rem;
   color: #ccc;
   cursor: pointer;
-  transition: color 0.3s ease, transform 0.3s ease; /* Transições */
-  padding: 5px; /* Área de clique maior */
+  transition: color 0.3s ease, transform 0.3s ease;
+  padding: 5px;
 }
 
 .closeBtn:hover {
-  color: white; /* Fica branco no hover */
-  transform: rotate(90deg); /* Efeito de rotação */
+  color: white;
+  transform: rotate(90deg);
 }
 
 .modal-content {
   display: flex;
-  flex-direction: column; /* Em colunas para mobile */
-  gap: 2rem; /* Espaçamento entre as seções */
+  flex-direction: column;
+  gap: 2rem;
 }
 
 @media (min-width: 768px) {
   .modal-content {
-    flex-direction: row; /* Em linha para desktop */
+    flex-direction: row;
   }
 }
 
 .modal-media-and-toggle-container {
-  position: relative; /* Importante para o z-index dos filhos */
-  width: 100%; /* Ocupa a largura total em mobile */
-  aspect-ratio: 1/1; /* Garante que a imagem ou iframe tenha proporção */
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1/1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  padding-bottom: 50px; /* Garante espaço para os botões se estiverem no fundo */
-  flex-shrink: 0; /* Impede que ele encolha */
-  flex-grow: 1; /* Permite que ele cresça */
+  padding-bottom: 50px;
+  flex-shrink: 0;
+  flex-grow: 1;
 }
 
 @media (min-width: 768px) {
   .modal-media-and-toggle-container {
-    width: 50%; /* Ocupa 50% em desktop */
-    aspect-ratio: auto; /* Deixa o conteúdo definir a altura */
+    width: 50%;
+    aspect-ratio: auto;
   }
   .modal.large-3d-view .modal-media-and-toggle-container {
-    width: 70%; /* Ocupa mais espaço no modo 3D maior */
+    width: 70%;
   }
 }
 
-
 .toggle-view-buttons {
-  position: absolute; /* Posiciona os botões de forma absoluta */
-  bottom: 10px; /* Distância do fundo do modal-media-and-toggle-container */
-  left: 50%; /* Centraliza horizontalmente */
-  transform: translateX(-50%); /* Ajuste para o centro exato */
-  z-index: 10; /* Garante que estejam acima de outros elementos */
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
   display: flex;
-  gap: 10px; /* Espaçamento entre os botões */
-  background-color: rgba(0, 0, 0, 0.9); /* Fundo semi-transparente preto para visibilidade */
+  gap: 10px;
+  background-color: rgba(0, 0, 0, 0.9);
   padding: 8px 15px;
   border-radius: 5px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
@@ -104,39 +101,38 @@
 
 .toggle-view-buttons button {
   padding: 8px 15px;
-  border: 1px solid rgba(255, 255, 255, 0.4); /* Borda branca transparente */
+  border: 1px solid rgba(255, 255, 255, 0.4);
   border-radius: 4px;
-  background-color: #333; /* Cinza escuro */
+  background-color: #333;
   color: white;
   cursor: pointer;
-  transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.2s ease; /* Transições adicionadas */
+  transition: background-color 0.3s ease, border-color 0.3s ease,
+    transform 0.2s ease;
 }
 
 .toggle-view-buttons button.active {
-  background-color: #8A2BE2; /* Roxo para o botão ativo */
+  background-color: #8a2be2;
   color: white;
-  border-color: #8A2BE2;
-  transform: scale(1.05); /* Leve zoom no ativo */
+  border-color: #8a2be2;
+  transform: scale(1.05);
 }
 
 .toggle-view-buttons button:not(.active):hover {
-  background-color: rgba(255, 255, 255, 0.2); /* Fundo mais claro no hover, se não ativo */
-  border-color: white; /* Borda branca no hover */
-  transform: translateY(-2px); /* Leve elevação */
+  background-color: rgba(255, 255, 255, 0.2);
+  border-color: white;
+  transform: translateY(-2px);
 }
 
-
-/* Certifique-se de que o iframe e a imagem não estão a cobrir os botões */
 .modal-image-wrapper,
 .modal-3d-iframe {
   width: 100%;
   height: 100%;
-  position: relative; /* Garante que eles não saiam do fluxo */
-  z-index: 1; /* Deve ser menor que o z-index dos botões */
+  position: relative;
+  z-index: 1;
   display: flex;
   justify-content: center;
   align-items: center;
-  overflow: hidden; /* Para garantir que a imagem não transborde */
+  overflow: hidden;
 }
 
 .modal-product-image {
@@ -144,20 +140,15 @@
   max-height: 100%;
   object-fit: contain;
   border-radius: 5px;
-  transition: transform 0.4s ease; /* Para o zoom no modal se quiser */
+  transition: transform 0.4s ease;
 }
-
-.modal-product-image:hover {
-  /* transform: scale(1.03); */ /* Opcional: zoom na imagem do modal */
-}
-
 
 .modal-product-info {
   flex-grow: 1;
   color: white;
   display: flex;
   flex-direction: column;
-  gap: 1rem; /* Espaçamento entre infos */
+  gap: 1rem;
 }
 
 .modal-product-info h2 {
@@ -175,7 +166,7 @@
 .modal-product-info .price {
   font-size: 1.5rem;
   font-weight: bold;
-  color: #E22B2B; /* Vermelho para o preço */
+  color: #e22b2b;
   margin-top: 1rem;
 }
 
@@ -190,41 +181,39 @@
   font-weight: 600;
 }
 
-/* Novo estilo para o dropdown de tamanhos */
 .size-dropdown {
-  width: 100%; /* Ocupa a largura total disponível */
+  width: 100%;
   padding: 10px 15px;
   border: 1px solid white;
   border-radius: 5px;
-  background-color: transparent; /* Fundo transparente */
-  color: white; /* Texto branco */
+  background-color: transparent;
+  color: white;
   font-size: 1rem;
   cursor: pointer;
-  appearance: none; /* Remove a seta padrão do navegador */
+  appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
-  background-image: url('data:image/svg+xml;utf8,<svg fill="white" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>'); /* Seta branca personalizada */
+  background-image: url('data:image/svg+xml;utf8,<svg fill="white" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
   background-repeat: no-repeat;
   background-position: right 10px center;
-  margin-top: 0.5rem; /* Espaçamento superior */
+  margin-top: 0.5rem;
 }
 
 .size-dropdown option {
-  background-color: #333; /* Fundo escuro para as opções */
-  color: white; /* Texto branco para as opções */
-  padding: 10px; /* Padding para melhor visualização */
+  background-color: #333;
+  color: white;
+  padding: 10px;
 }
 
 .size-dropdown option:disabled {
-  color: #888; /* Cor para opções desabilitadas */
+  color: #888;
 }
 
 .size-dropdown:focus {
   outline: none;
-  border-color: #8A2BE2; /* Borda roxa no foco */
-  box-shadow: 0 0 0 2px rgba(138, 43, 226, 0.5); /* Sombra de foco roxa */
+  border-color: #8a2be2;
+  box-shadow: 0 0 0 2px rgba(138, 43, 226, 0.5);
 }
-
 
 .stockInfo {
   margin-top: 1rem;
@@ -235,8 +224,8 @@
 
 .size-guide-button {
   background-color: transparent;
-  border: 1px solid #8A2BE2; /* Borda roxa para destaque */
-  color: #8A2BE2;
+  border: 1px solid #8a2be2;
+  color: #8a2be2;
   padding: 10px 20px;
   font-size: 0.95rem;
   font-weight: 500;
@@ -249,13 +238,12 @@
 }
 
 .size-guide-button:hover {
-  background-color: #8A2BE2; /* Fundo roxo no hover */
-  color: white; /* Texto branco */
-  transform: translateY(-2px); /* Elevação sutil */
-  box-shadow: 0 3px 10px rgba(138, 43, 226, 0.3); /* Sombra arroxeada */
+  background-color: #8a2be2;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 3px 10px rgba(138, 43, 226, 0.3);
 }
 
-/* Adicionar ao carrinho (no modal) */
 .addToCartBtn {
   width: 100%;
   background-color: transparent;
@@ -267,11 +255,11 @@
   cursor: pointer;
   border-radius: 5px;
   transition: all 0.3s ease;
-  margin-top: 2rem; /* Mais espaçamento para o botão */
+  margin-top: 2rem;
   text-transform: uppercase;
   letter-spacing: 0.8px;
-  position: relative; /* Para o efeito de brilho */
-  overflow: hidden; /* Para esconder o brilho fora */
+  position: relative;
+  overflow: hidden;
   z-index: 1;
 }
 
@@ -281,8 +269,8 @@
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
 }
 
-.addToCartBtn::before { /* Efeito de brilho */
-  content: '';
+.addToCartBtn::before {
+  content: "";
   position: absolute;
   top: 0;
   left: -100%;
@@ -302,37 +290,35 @@
   left: 100%;
 }
 
-
-/* Size Guide Modal */
 .sizeGuideOverlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.85); /* Fundo mais escuro para o guia */
+  background-color: rgba(0, 0, 0, 0.85);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1001; /* Acima do modal principal */
+  z-index: 1001;
 }
 
 .size-guide-content {
-  background: rgba(0, 0, 0, 0.95); /* Fundo quase opaco para o guia */
+  background: rgba(0, 0, 0, 0.95);
   padding: 30px;
   border-radius: 8px;
   color: white;
   max-width: 500px;
   width: 90%;
-  margin: auto; /* Centraliza */
-  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.6); /* Sombra forte */
+  margin: auto;
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.6);
 }
 
 .size-guide-content h3 {
   margin-bottom: 15px;
   font-size: 1.5rem;
   text-align: center;
-  color: #8A2BE2; /* Título com cor de destaque - Roxo */
+  color: #8a2be2;
 }
 
 .size-guide-content table {
@@ -341,7 +327,8 @@
   margin-bottom: 15px;
 }
 
-.size-guide-content th, .size-guide-content td {
+.size-guide-content th,
+.size-guide-content td {
   border: 1px solid rgba(255, 255, 255, 0.2);
   padding: 10px;
   text-align: left;
@@ -354,22 +341,22 @@
 }
 
 .closeSizeGuideBtn {
-    background-color: transparent;
-    border: 1px solid white;
-    color: white;
-    padding: 10px 20px;
-    font-size: 0.95rem;
-    font-weight: bold;
-    cursor: pointer;
-    border-radius: 5px;
-    transition: all 0.3s ease;
-    display: block; /* Para ocupar a largura e centralizar */
-    margin: 1.5rem auto 0; /* Centralizar e espaçamento */
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+  background-color: transparent;
+  border: 1px solid white;
+  color: white;
+  padding: 10px 20px;
+  font-size: 0.95rem;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+  display: block;
+  margin: 1.5rem auto 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .closeSizeGuideBtn:hover {
   background-color: rgba(255, 255, 255, 0.1);
-  transform: translateY(-2px); /* Elevação sutil */
+  transform: translateY(-2px);
 }

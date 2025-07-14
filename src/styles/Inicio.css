@@ -1,71 +1,60 @@
-/* Inicio.css */
-
-/* Reset básico para um visual limpo */
 body {
-  font-family: 'Inter', sans-serif; /* Usar uma fonte simples e moderna */
+  font-family: "Inter", sans-serif;
   line-height: 1.6;
-  color: #000000; /* Texto mais escuro para contraste */
-  background-color: #000; /* Fundo escuro para contrastar com o GIF */
+  color: #000000;
+  background-color: #000;
   overflow-x: hidden;
   margin: 0;
   padding: 0;
 }
 
-/* Removido o estilo .static-background */
-
 .container {
-  height: 100vh; /* GARANTE QUE O CONTENTOR OCUPA A ALTURA TOTAL DA VIEWPORT */
+  height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2.5rem; /* Aumentar o espaçamento */
-  position: relative; /* Para o z-index */
-  z-index: 5; /* Aumentado para garantir que fique acima do background GIF */
+  gap: 2.5rem;
+  position: relative;
+  z-index: 5;
   text-align: center;
-  padding: 2rem; /* Adicionar algum padding para o conteúdo */
-  box-sizing: border-box; /* Garante que padding e border são incluídos na largura/altura total */
-  width: 100%; /* Garante que ocupa a largura total disponível */
-  max-width: 1200px; /* Limita a largura máxima para melhor legibilidade */
-  margin: 0 auto; /* Centraliza o contentor */
+  padding: 2rem;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-/* Estilos para o logo GIF na página de Início - POSICIONAMENTO ABSOLUTO */
 .inicio-logo-gif {
-  position: absolute; /* Posiciona o logo independentemente do fluxo do documento */
-  top: 5%; /* Ajuste a distância do topo conforme necessário */
-  left: 50%; /* Centraliza horizontalmente */
-  transform: translateX(-50%); /* Ajuste para centralização exata */
-  height: 300px; /* Tamanho ajustado para o logo na página de Início */
+  position: absolute;
+  top: 5%;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 300px;
   width: auto;
   object-fit: contain;
-  z-index: 6; /* Garante que o logo esteja acima do container e do background */
+  z-index: 6;
 }
 
-
-/* O título "Exclusive Drop" sem animação de pulsação/flutuação */
 .nome {
-  color: white; /* Cor do nome no topo */
+  color: white;
   font-family: "Carattere", serif;
   font-weight: 400;
-  font-size: 5rem; /* Aumentar o tamanho do título */
+  font-size: 5rem;
   font-style: normal;
-  margin-bottom: 0; /* Remover margem inferior */
-  letter-spacing: 2px; /* Adicionar um pequeno espaçamento entre letras */
-  text-shadow: 0 0 10px rgba(0, 0, 0, 0.5); /* Sombra sutil para destaque */
-  /* Removida a animação de flutuação para o título na página de Início */
-  /* animation: floatingText 3s ease-in-out infinite; */
+  margin-bottom: 0;
+  letter-spacing: 2px;
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
-/* Animação de pulsação/flutuação (mantida, mas não aplicada a nenhum elemento por padrão) */
 @keyframes floatingText {
   0% {
     transform: translateY(0px);
     opacity: 1;
   }
   50% {
-    transform: translateY(-10px); /* Move 10px para cima */
-    opacity: 0.9; /* Pequena pulsação na opacidade */
+    transform: translateY(-10px);
+    opacity: 0.9;
   }
   100% {
     transform: translateY(0px);
@@ -75,33 +64,32 @@ body {
 
 .btn {
   font-family: "Roboto Mono", serif;
-  font-weight: 500; /* Um pouco mais de peso */
-  padding: 15px 40px; /* Aumentar padding para botões maiores */
-  border: none; /* Borda */
+  font-weight: 500;
+  padding: 15px 40px;
+  border: none;
   cursor: pointer;
-  font-size: 1.1rem; /* Aumentar tamanho da fonte */
-  background-color: transparent; /* Fundo transparente */
-  color: white; /* Texto branco */
-  transition: all 0.3s ease; /* Transição suave para hover */
+  font-size: 1.1rem;
+  background-color: transparent;
+  color: white;
+  transition: all 0.3s ease;
   text-transform: uppercase;
   letter-spacing: 1px;
-  /* Removida a animação de flutuação para o botão */
-  /* animation: floatingText 3s ease-in-out infinite; */
 }
 
-.btn-primary:hover, .btn-secondary:hover {
-  background-color: rgba(255, 255, 255, 0.1); /* Fundo sutil ao passar o mouse */
-  color: white; /* Manter a cor do texto */
+.btn-primary:hover,
+.btn-secondary:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
 }
 
 .options-container {
   display: flex;
-  flex-direction: column; /* Botões empilhados */
-  gap: 1.5rem; /* Espaçamento entre os botões */
+  flex-direction: column;
+  gap: 1.5rem;
   width: 100%;
-  max-width: 300px; /* Limitar largura máxima dos botões */
+  max-width: 300px;
 }
 
 .options-container .btn-secondary {
-  border: none; /* Borda */
+  border: none;
 }

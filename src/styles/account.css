@@ -1,9 +1,4 @@
-/* styles/account.css */
-
-
-
-/* General Styling */
-.dashboard-container { /* NOVO: Container principal da dashboard */
+.dashboard-container {
   padding: 3rem 2rem;
   min-height: 100vh;
   font-family: "Roboto Mono", serif;
@@ -11,10 +6,10 @@
   color: white;
   position: relative;
   z-index: 2;
-  max-width: 1400px; /* Aumentado a largura máxima para acomodar o layout */
+  max-width: 1400px;
   margin: 0 auto;
-  display: flex; /* Adicionado para centralizar o título e o layout */
-  flex-direction: column; /* Coloca título acima do layout */
+  display: flex;
+  flex-direction: column;
 }
 
 .account-title {
@@ -27,25 +22,24 @@
   font-family: "Carattere", cursive;
 }
 
-/* NOVO: Layout da Dashboard */
 .dashboard-layout {
   display: flex;
-  gap: 2rem; /* Espaçamento entre sidebar e main content */
-  flex-wrap: wrap; /* Para responsividade em telas menores */
-  flex-grow: 1; /* Permite que o layout cresça */
+  gap: 2rem;
+  flex-wrap: wrap;
+  flex-grow: 1;
 }
 
-.sidebar { /* NOVO: Menu de navegação lateral */
-  flex: 0 0 250px; /* Largura fixa para a sidebar */
-  background-color: rgba(0, 0, 0, 0.7); /* Fundo semi-transparente */
+.sidebar {
+  flex: 0 0 250px;
+  background-color: rgba(0, 0, 0, 0.7);
   padding: 1.5rem;
   border-radius: 10px;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
   display: flex;
   flex-direction: column;
   gap: 0.8rem;
-  height: fit-content; /* Ajusta a altura ao conteúdo */
-  min-width: 200px; /* Para telas pequenas */
+  height: fit-content;
+  min-width: 200px;
 }
 
 .sidebar .tab-button {
@@ -58,28 +52,29 @@
   font-size: 1rem;
   font-weight: 500;
   text-align: left;
-  transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+  transition: background-color 0.3s ease, border-color 0.3s ease,
+    transform 0.2s ease;
   display: flex;
   align-items: center;
-  gap: 0.8rem; /* Espaçamento entre ícone e texto */
+  gap: 0.8rem;
 }
 
 .sidebar .tab-button:hover {
   background-color: rgba(255, 255, 255, 0.08);
   border-color: rgba(255, 255, 255, 0.2);
-  transform: translateX(3px); /* Pequeno movimento para indicar interatividade */
+  transform: translateX(3px);
 }
 
 .sidebar .tab-button.active {
-  background-color: rgba(0, 123, 255, 0.8); /* Cor mais vibrante para a aba ativa */
+  background-color: rgba(0, 123, 255, 0.8);
   border-color: #007bff;
   font-weight: bold;
   box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
 }
 
 .sidebar .logout-button {
-  margin-top: 1.5rem; /* Separar do resto das opções */
-  background-color: rgba(220, 53, 69, 0.7); /* Cor vermelha para sair */
+  margin-top: 1.5rem;
+  background-color: rgba(220, 53, 69, 0.7);
   border-color: rgba(220, 53, 69, 0.7);
 }
 
@@ -87,41 +82,40 @@
   background-color: rgba(220, 53, 69, 0.9);
   border-color: rgba(220, 53, 69, 0.9);
 }
-.sidebar .logout-button-back-button-purple{
-  margin-top: 1.5rem; /* Separar do resto das opções */
-  background-color: #6A1AAB; /* Cor vermelha para sair */
-  border-color: #6A1AAB;
+.sidebar .logout-button-back-button-purple {
+  margin-top: 1.5rem;
+  background-color: #6a1aab;
+  border-color: #6a1aab;
 }
 
-.sidebar .logout-button-back-button-purple:hover{
-  background-color: #6A1AAB;
-  border-color: #6A1AAB;
+.sidebar .logout-button-back-button-purple:hover {
+  background-color: #6a1aab;
+  border-color: #6a1aab;
 }
 
-.main-content { /* NOVO: Conteúdo principal à direita */
-  flex: 1; /* Ocupa o restante do espaço */
+.main-content {
+  flex: 1;
   background-color: rgba(0, 0, 0, 0.7);
   padding: 2rem;
   border-radius: 10px;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
-  min-height: 500px; /* Altura mínima para melhor visual */
+  min-height: 500px;
 }
 
-/* Mensagens de erro/permissão */
-.error-message, .no-permission-message, .no-items-message {
+.error-message,
+.no-permission-message,
+.no-items-message {
   color: red;
   text-align: center;
   margin-top: 20px;
   font-size: 1.1rem;
 }
 
-/* Existing styles - Make sure they are still correctly applied to the new structure */
-/* Abaixo estão os estilos que você já tinha, garantindo que se adaptem ao novo layout.
-   Verifique e adapte-os conforme necessário, especialmente se eles usavam seletores como
-   .tab-content que agora está aninhado dentro de .main-content. */
-
-.profile-section, .users-section, .products-section, .orders-section {
-  padding: 1rem; /* Ajuste o padding interno das seções se necessário */
+.profile-section,
+.users-section,
+.products-section,
+.orders-section {
+  padding: 1rem;
 }
 
 .profile-info p {
@@ -165,10 +159,14 @@
   margin-top: 1.5rem;
   display: flex;
   gap: 1rem;
-  justify-content: flex-end; /* Alinhar botões à direita */
+  justify-content: flex-end;
 }
 
-.save-btn, .cancel-btn, .edit-btn, .add-btn, .delete-btn {
+.save-btn,
+.cancel-btn,
+.edit-btn,
+.add-btn,
+.delete-btn {
   padding: 0.8rem 1.5rem;
   border: none;
   border-radius: 5px;
@@ -179,7 +177,7 @@
 }
 
 .save-btn {
-  background-color: #28a745; /* Verde */
+  background-color: #28a745;
   color: white;
 }
 
@@ -189,7 +187,7 @@
 }
 
 .cancel-btn {
-  background-color: #6c757d; /* Cinzento */
+  background-color: #6c757d;
   color: white;
 }
 
@@ -199,7 +197,7 @@
 }
 
 .edit-btn {
-  background-color: #007bff; /* Azul */
+  background-color: #007bff;
   color: white;
 }
 
@@ -209,7 +207,7 @@
 }
 
 .delete-btn {
-  background-color: #dc3545; /* Vermelho */
+  background-color: #dc3545;
   color: white;
 }
 
@@ -218,8 +216,8 @@
   transform: translateY(-2px);
 }
 
-.add-btn { /* Estilo para o botão "Adicionar Novo X" */
-  background-color: #17a2b8; /* Ciano */
+.add-btn {
+  background-color: #17a2b8;
   color: white;
   margin-top: 1.5rem;
   margin-bottom: 1.5rem;
@@ -233,45 +231,42 @@
   transform: translateY(-2px);
 }
 
-
-/* Search Bar */
 .search-bar {
-    position: relative;
-    margin-bottom: 1.5rem;
-    max-width: 400px;
+  position: relative;
+  margin-bottom: 1.5rem;
+  max-width: 400px;
 }
 
 .search-bar input {
-    width: 100%;
-    padding: 0.8rem 0.8rem 0.8rem 2.5rem; /* Padding esquerdo para o ícone */
-    background-color: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 5px;
-    color: white;
-    font-size: 1rem;
+  width: 100%;
+  padding: 0.8rem 0.8rem 0.8rem 2.5rem;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 5px;
+  color: white;
+  font-size: 1rem;
 }
 
 .search-bar input:focus {
-    outline: none;
-    border-color: #007bff;
-    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
 }
 
 .search-icon {
-    position: absolute;
-    left: 0.8rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #bbb;
-    font-size: 1.1rem;
+  position: absolute;
+  left: 0.8rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #bbb;
+  font-size: 1.1rem;
 }
 
-/* Formulário Modal (Editar/Criar) */
 .form-modal {
-  background-color: rgba(0, 0, 0, 0.85); /* Fundo mais escuro */
+  background-color: rgba(0, 0, 0, 0.85);
   padding: 2rem;
   border-radius: 10px;
-  margin-bottom: 2rem; /* Espaçamento entre o formulário e a lista */
+  margin-bottom: 2rem;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
@@ -328,7 +323,6 @@
   justify-content: flex-end;
 }
 
-/* User List */
 .user-list {
   display: flex;
   flex-direction: column;
@@ -350,7 +344,6 @@
   color: #e0e0e0;
 }
 
-/* Product Grid */
 .product-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -389,106 +382,101 @@
 }
 
 .product-item .stock-details span {
-    background-color: rgba(0, 123, 255, 0.3);
-    padding: 0.2em 0.5em;
-    border-radius: 5px;
-    font-size: 0.85rem;
-    margin: 0 0.2rem;
-    white-space: nowrap; /* Impede quebras de linha */
-    display: inline-block; /* Para o padding */
-    margin-top: 0.5rem;
+  background-color: rgba(0, 123, 255, 0.3);
+  padding: 0.2em 0.5em;
+  border-radius: 5px;
+  font-size: 0.85rem;
+  margin: 0 0.2rem;
+  white-space: nowrap;
+  display: inline-block;
+  margin-top: 0.5rem;
 }
 
-
-/* Stock Inputs (Produtos) */
 .stock-inputs-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); /* Mais compacto */
-    gap: 0.8rem;
-    margin-top: 0.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 0.8rem;
+  margin-top: 0.5rem;
 }
 .stock-input-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 .stock-input-item label {
-    margin-bottom: 0;
-    min-width: 30px;
-    color: #ccc;
+  margin-bottom: 0;
+  min-width: 30px;
+  color: #ccc;
 }
 .stock-input-item input {
-    width: 60px; /* Largura fixa para input de stock */
-    padding: 0.5rem;
-    text-align: center;
+  width: 60px;
+  padding: 0.5rem;
+  text-align: center;
 }
 
-
-/* Order History */
 .orders-history-tab {
-    margin-top: 2rem;
+  margin-top: 2rem;
 }
 
 .orders-list {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
 .order-item {
-    background-color: rgba(255, 255, 255, 0.05);
-    padding: 1.5rem;
-    border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  background-color: rgba(255, 255, 255, 0.05);
+  padding: 1.5rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 }
 
 .order-item h3 {
-    color: #fff;
-    margin-bottom: 0.8rem;
-    font-size: 1.6rem;
+  color: #fff;
+  margin-bottom: 0.8rem;
+  font-size: 1.6rem;
 }
 
 .order-item p {
-    color: #ccc;
-    margin-bottom: 0.4rem;
+  color: #ccc;
+  margin-bottom: 0.4rem;
 }
 
 .order-item h4 {
-    color: #eee;
-    margin-top: 1rem;
-    margin-bottom: 0.5rem;
-    font-size: 1.2rem;
+  color: #eee;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  font-size: 1.2rem;
 }
 
 .order-item ul {
-    list-style: none;
-    padding: 0;
+  list-style: none;
+  padding: 0;
 }
 
 .order-product-item {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    background-color: rgba(255, 255, 255, 0.03);
-    padding: 0.8rem;
-    border-radius: 5px;
-    margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background-color: rgba(255, 255, 255, 0.03);
+  padding: 0.8rem;
+  border-radius: 5px;
+  margin-bottom: 0.5rem;
 }
 
 .order-product-item img {
-    width: 60px;
-    height: 60px;
-    object-fit: cover;
-    border-radius: 3px;
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 3px;
 }
 
 .order-product-item span {
-    color: #e0e0e0;
-    font-size: 1rem;
+  color: #e0e0e0;
+  font-size: 1rem;
 }
 
-/* Sketchfab Preview */
 .sketchfab-preview {
   margin-top: 1rem;
   background-color: rgba(255, 255, 255, 0.05);
@@ -520,50 +508,49 @@
   text-decoration: underline;
 }
 
-/* Responsividade */
 @media (max-width: 900px) {
   .dashboard-layout {
-    flex-direction: column; /* Pilha a sidebar e o conteúdo em telas menores */
+    flex-direction: column;
   }
 
   .sidebar {
-    flex: 0 0 auto; /* Permite que a sidebar ocupe a largura total */
+    flex: 0 0 auto;
     width: 100%;
     margin-bottom: 1rem;
-    flex-direction: row; /* Botões em linha */
-    flex-wrap: wrap; /* Quebra de linha se muitos botões */
+    flex-direction: row;
+    flex-wrap: wrap;
     justify-content: center;
   }
 
   .sidebar .tab-button {
-    flex: 1 1 auto; /* Permite que os botões se ajustem */
-    min-width: 140px; /* Largura mínima para botões */
+    flex: 1 1 auto;
+    min-width: 140px;
     text-align: center;
-    justify-content: center; /* Centraliza conteúdo do botão */
+    justify-content: center;
   }
 
   .main-content {
-    padding: 1.5rem; /* Ajuste o padding para telas menores */
+    padding: 1.5rem;
   }
 
   .product-grid {
-    grid-template-columns: 1fr; /* Uma coluna em telas muito pequenas */
+    grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 600px) {
   .dashboard-container {
-     padding: 3rem 4rem; /* Aumentado o padding horizontal */
-  min-height: 100vh;
-  font-family: "Roboto Mono", serif;
-  font-style: normal;
-  color: white;
-  position: relative;
-  z-index: 2;
-  max-width: 95%; /* Alterado para usar percentagem e ocupar mais espaço */
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
+    padding: 3rem 4rem;
+    min-height: 100vh;
+    font-family: "Roboto Mono", serif;
+    font-style: normal;
+    color: white;
+    position: relative;
+    z-index: 2;
+    max-width: 95%;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
   }
 
   .account-title {
@@ -580,7 +567,8 @@
     font-size: 1.5rem;
   }
 
-  .user-item, .order-item {
+  .user-item,
+  .order-item {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.8rem;

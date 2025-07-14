@@ -1,11 +1,9 @@
 import { useRouter } from 'next/router';
-import { collection, addDoc, getDocs, query, where } from 'firebase/firestore';
-import { db } from '../lib/firebase';
-
 import { useState } from 'react';
-import BackgroundAnimation from '@/components/Background'; // Importa o componente do GIF
-import bcrypt from 'bcryptjs';
+import BackgroundAnimation from '@/components/Background';
+import Link from 'next/link';
 
+// Componente para o formulário de registo de novos utilizadores.
 const Register = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
@@ -16,39 +14,46 @@ const Register = () => {
   const [isRegistered, setIsRegistered] = useState(false);
   const router = useRouter();
 
+  // Valida o formato do email no lado do cliente.
+  const validateEmail = (email) => {
+    return /\S+@\S+\.\S+/.test(email);
+  };
+
+  // Submete os dados de registo para a API.
   const handleRegister = async (e) => {
     e.preventDefault();
     setErrorMessage('');
 
     if (password !== confirmPassword) {
-      setErrorMessage('As passwords não correspondem!');
+      setErrorMessage('As palavras-passe não correspondem!');
+      return;
+    }
+    if (password.length < 6) {
+      setErrorMessage('A palavra-passe deve ter pelo menos 6 caracteres.');
+      return;
+    }
+    if (!validateEmail(email)) {
+      setErrorMessage('Por favor, insira um email válido.');
       return;
     }
 
     try {
-      const usersRef = collection(db, 'users');
-      const usernameQuery = query(usersRef, where('username', '==', username));
-      const usernameSnapshot = await getDocs(usernameQuery);
-
-      if (!usernameSnapshot.empty) {
-        setErrorMessage('Username já existe');
-        return;
-      }
-
-      const hashedPassword = await bcrypt.hash(password, 10);
-
-      await addDoc(collection(db, 'users'), {
-        username,
-        email,
-        telemovel,
-        password: hashedPassword,
-        isUser: true,
-        isAdmin: false,
+      const response = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, email, telemovel, password }),
       });
 
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Ocorreu um erro ao registar.');
+      }
+
       setIsRegistered(true);
+
     } catch (err) {
-      setErrorMessage(err.message || 'Registo falhou.');
+      setErrorMessage(err.message);
     }
   };
 
@@ -56,7 +61,7 @@ const Register = () => {
 
   return (
     <>
-      <BackgroundAnimation gifUrl={gifUrl} /> {/* Usa o componente de fundo com o GIF */}
+      <BackgroundAnimation gifUrl={gifUrl} />
       
       <div className="container">
         <h2 className="nome">Exclusive Drop</h2>
@@ -65,49 +70,24 @@ const Register = () => {
           {!isRegistered ? (
             <form onSubmit={handleRegister}>
               <div className="input-container">
-                <label>Username</label>
-                <input
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  required
-                />
+                <label>Utilizador</label>
+                <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} required />
               </div>
               <div className="input-container">
                 <label>Email</label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
+                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
               </div>
               <div className="input-container">
                 <label>Telemóvel</label>
-                <input
-                  type="text"
-                  value={telemovel}
-                  onChange={(e) => setTelemovel(e.target.value)}
-                  required
-                />
+                <input type="tel" value={telemovel} onChange={(e) => setTelemovel(e.target.value)} required />
               </div>
               <div className="input-container">
-                <label>Password</label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
+                <label>Palavra-passe</label>
+                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
               </div>
               <div className="input-container">
-                <label>Confirmar Password</label>
-                <input
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
-                />
+                <label>Confirmar Palavra-passe</label>
+                <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
               </div>
 
               {errorMessage && <p className="error-message">{errorMessage}</p>}
@@ -117,9 +97,9 @@ const Register = () => {
           ) : (
             <div className="success-section">
               <p className="success-msg">Registo concluído com sucesso!</p>
-              <button className="button2" onClick={() => router.push('/home')}>
-                Entrar
-              </button>
+              <Link href="/login" passHref>
+                <button className="button2">Ir para o Login</button>
+              </Link>
             </div>
           )}
         </div>

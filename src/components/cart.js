@@ -1,9 +1,9 @@
 "use client";
 import { useCart } from "@/components/cartcontext";
 import Link from "next/link";
-// Removed: import BackgroundAnimation from './Background'; // Remove BackgroundAnimation
-import { useSession } from 'next-auth/react'; // Para obter o ID do utilizador
+import { useSession } from 'next-auth/react';
 
+// Componente que renderiza a página do carrinho de compras.
 export default function CartPage() {
   const {
     cartItems,
@@ -17,8 +17,6 @@ export default function CartPage() {
 
   return (
     <>
-      {/* Removed BackgroundAnimation component */}
-
       <div className="cart-container">
         <h1 className="cart-title">Carrinho</h1>
 
@@ -76,7 +74,7 @@ export default function CartPage() {
               <span>IVA</span>
               <span>Calculado no checkout</span>
             </div>
-            <hr style={{borderColor: '#555555', margin: '1rem 0'}}/> {/* Dark gray line */}
+            <hr style={{borderColor: '#555555', margin: '1rem 0'}}/>
             <div className="summary-row summary-total">
               <span>Total</span>
               <span>€{subtotal.toFixed(2)}</span>
