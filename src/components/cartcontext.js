@@ -1,13 +1,14 @@
 'use client';
 import { createContext, useContext, useState, useEffect } from "react";
+import { useSession } from "next-auth/react"; // 1. Importar o useSession
 
 const CartContext = createContext();
 
-// Fornece o contexto do carrinho para a aplicação.
 export function CartProvider({ children }) {
   const [cartItems, setCartItems] = useState([]);
+  const { data: session, status } = useSession(); // 2. Obter o estado da sessão
 
-  // Carrega o carrinho do localStorage ao iniciar.
+  // Efeito para carregar o carrinho do localStorage ao iniciar
   useEffect(() => {
     try {
       const storedCartItems = localStorage.getItem('cartItems');
@@ -19,7 +20,7 @@ export function CartProvider({ children }) {
     }
   }, []);
 
-  // Salva o carrinho no localStorage sempre que os itens mudam.
+  // Efeito para guardar o carrinho no localStorage sempre que os itens mudam
   useEffect(() => {
     try {
       localStorage.setItem('cartItems', JSON.stringify(cartItems));
@@ -27,6 +28,18 @@ export function CartProvider({ children }) {
       console.error("Failed to save cart to localStorage:", error);
     }
   }, [cartItems]);
+
+  // --- INÍCIO DA NOVA LÓGICA ---
+  // 3. Efeito para limpar o carrinho quando a sessão do utilizador muda
+  useEffect(() => {
+    // Se o estado da sessão mudar (login/logout), limpamos o carrinho.
+    // Isto garante que cada utilizador tem o seu próprio carrinho isolado.
+    if (status !== 'loading') {
+        clearCart();
+    }
+  }, [session, status]); // Este efeito é executado sempre que 'session' ou 'status' mudam
+  // --- FIM DA NOVA LÓGICA ---
+
 
   const addToCart = (product) => {
     setCartItems((prev) => {
@@ -41,7 +54,6 @@ export function CartProvider({ children }) {
             : item
         );
       }
-
       return [...prev, { ...product, price: parseFloat(product.price), quantity: 1 }];
     });
   };
@@ -95,7 +107,6 @@ export function CartProvider({ children }) {
   );
 }
 
-// Hook para usar o contexto do carrinho.
 export function useCart() {
   return useContext(CartContext);
 }
