@@ -31,14 +31,19 @@ const getDefaultStockForCategory = (category) => {
   }, {});
 };
 
+// --- NOVA FUNÇÃO DE VALIDAÇÃO ---
+// Valida o formato do email
+const validateEmail = (email) => {
+    if (!email) return false;
+    return /\S+@\S+\.\S+/.test(email);
+};
+
 // Função para validar se um URL é de uma imagem
 const isImageURL = (url) => {
     if (!url) return false;
-    // Validação simples de extensão
     if (!/\.(jpg|jpeg|png|webp|gif|svg)$/i.test(url)) {
         return false;
     }
-    // Tenta carregar a imagem para confirmar que é válida
     return new Promise((resolve) => {
         const img = new Image();
         img.src = url;
@@ -91,10 +96,11 @@ const Conta = () => {
         const userDocRef = doc(db, 'users', session.user.id);
         const userDocSnap = await getDoc(userDocRef);
         if (userDocSnap.exists()) {
-          setUserData({ id: userDocSnap.id, ...userDocSnap.data() });
-          setIsAdmin(userDocSnap.data().isAdmin || false);
-          setEditName(userDocSnap.data().username || '');
-          setEditEmail(userDocSnap.data().email || '');
+          const data = userDocSnap.data();
+          setUserData({ id: userDocSnap.id, ...data });
+          setIsAdmin(data.isAdmin || false);
+          setEditName(data.username || '');
+          setEditEmail(data.email || '');
         } else {
           setFormMessage({ type: 'error', text: "Erro: Dados do utilizador não encontrados." });
         }
@@ -182,21 +188,31 @@ const Conta = () => {
   const handleSaveProfile = async () => {
     setFormMessage({ type: '', text: '' });
     if (!userData?.id) return;
-    if (!editName || !editEmail) {
+    
+    const finalName = editName.trim();
+    const finalEmail = editEmail.trim();
+
+    if (!finalName || !finalEmail) {
       setFormMessage({ type: 'error', text: "O nome de utilizador e o email não podem estar vazios." });
       return;
+    }
+    
+    // --- MELHORIA DE VALIDAÇÃO ---
+    if (!validateEmail(finalEmail)) {
+        setFormMessage({ type: 'error', text: "O formato do email é inválido." });
+        return;
     }
 
     try {
       const response = await fetch('/api/update-profile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: editName, email: editEmail }),
+        body: JSON.stringify({ username: finalName, email: finalEmail }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.message);
       
-      setUserData(prev => ({ ...prev, username: editName, email: editEmail }));
+      setUserData(prev => ({ ...prev, username: finalName, email: finalEmail }));
       setIsEditingProfile(false);
       setFormMessage({ type: 'success', text: 'Perfil guardado com sucesso!' });
     } catch (error) {
@@ -256,14 +272,33 @@ const Conta = () => {
 
   const handleSaveEditedUser = async () => {
     if (!selectedUserToEdit?.id) return;
-    if (!editUserData.username || !editUserData.email) {
+    
+    const finalUsername = editUserData.username.trim();
+    const finalEmail = editUserData.email.trim();
+
+    if (!finalUsername || !finalEmail) {
       setFormMessage({ type: 'error', text: 'O nome de utilizador e o email não podem estar vazios.' });
       return;
     }
+    
+    // --- MELHORIA DE VALIDAÇÃO ---
+    if (!validateEmail(finalEmail)) {
+        setFormMessage({ type: 'error', text: 'O formato do email é inválido.' });
+        return;
+    }
+
+    // --- MELHORIA DE VALIDAÇÃO ---
+    // Verifica se o novo email já está a ser usado por outro utilizador
+    const isEmailTaken = userList.some(user => user.email === finalEmail && user.id !== selectedUserToEdit.id);
+    if (isEmailTaken) {
+        setFormMessage({ type: 'error', text: 'Este email já está em uso por outro utilizador.' });
+        return;
+    }
+
     try {
       await updateDoc(doc(db, 'users', selectedUserToEdit.id), {
-        username: editUserData.username,
-        email: editUserData.email,
+        username: finalUsername,
+        email: finalEmail,
         isAdmin: editUserData.isAdmin,
       });
       setFormMessage({ type: 'success', text: 'Utilizador atualizado com sucesso!' });
@@ -287,7 +322,14 @@ const Conta = () => {
   };
 
   const handleCreateUser = async () => {
-    if (!newUser.username || !newUser.email || !newUser.password) {
+    const finalNewUser = {
+      username: newUser.username.trim(),
+      email: newUser.email.trim(),
+      password: newUser.password,
+      isAdmin: newUser.isAdmin
+    };
+
+    if (!finalNewUser.username || !finalNewUser.email || !finalNewUser.password) {
       setFormMessage({ type: 'error', text: 'Por favor, preencha todos os campos para criar um novo utilizador.' });
       return;
     }
@@ -295,7 +337,7 @@ const Conta = () => {
       const response = await fetch('/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...newUser, telemovel: 'N/A' }),
+        body: JSON.stringify({ ...finalNewUser, telemovel: 'N/A' }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.message);
@@ -311,25 +353,32 @@ const Conta = () => {
   
   const handleCreateProduct = async () => {
     setFormMessage({type: '', text: ''});
-    if (!newProduct.name || newProduct.price === undefined || !newProduct.images[0] || !newProduct.category) {
+    const finalNewProduct = {
+        ...newProduct,
+        name: newProduct.name.trim(),
+        description: newProduct.description.trim(),
+        images: newProduct.images.map(img => img.trim()).filter(img => img)
+    };
+    
+    if (!finalNewProduct.name || finalNewProduct.price === undefined || finalNewProduct.images.length === 0 || !finalNewProduct.category) {
         setFormMessage({type: 'error', text: 'Por favor, preencha os campos obrigatórios: Nome, Preço, Imagem Principal e Categoria.'});
         return;
     }
 
-    const isValidImage = await isImageURL(newProduct.images[0]);
+    const isValidImage = await isImageURL(finalNewProduct.images[0]);
     if (!isValidImage) {
         setFormMessage({type: 'error', text: 'O URL da imagem principal não é válido.'});
         return;
     }
 
-    const totalStock = Object.values(newProduct.stock).reduce((sum, qty) => sum + qty, 0);
+    const totalStock = Object.values(finalNewProduct.stock).reduce((sum, qty) => sum + qty, 0);
     if (totalStock === 0) {
         setFormMessage({type: 'error', text: 'Não é possível criar um produto sem stock. Adicione pelo menos uma unidade.'});
         return;
     }
     
     try {
-      await addDoc(collection(db, 'products'), { ...newProduct, inStock: totalStock > 0, createdAt: new Date() });
+      await addDoc(collection(db, 'products'), { ...finalNewProduct, inStock: totalStock > 0, createdAt: new Date() });
       setFormMessage({type: 'success', text: 'Produto criado com sucesso!'});
       setIsCreatingProduct(false);
       setNewProduct({ name: '', description: '', price: 0, images: [''], category: '', inStock: true, stock: {}, sketchfabUrl: '' });
@@ -351,18 +400,25 @@ const Conta = () => {
     setFormMessage({type: '', text: ''});
     if (!selectedProductToEdit?.id) return;
     
-    if (!editProductData.name || editProductData.price === undefined || !editProductData.images[0]) {
+    const finalEditProduct = {
+        ...editProductData,
+        name: editProductData.name.trim(),
+        description: editProductData.description.trim(),
+        images: editProductData.images.map(img => img.trim()).filter(img => img)
+    };
+
+    if (!finalEditProduct.name || finalEditProduct.price === undefined || finalEditProduct.images.length === 0) {
         setFormMessage({type: 'error', text: 'Nome, preço e imagem principal são campos obrigatórios.'});
         return;
     }
 
-    const isValidImage = await isImageURL(editProductData.images[0]);
+    const isValidImage = await isImageURL(finalEditProduct.images[0]);
     if (!isValidImage) {
         setFormMessage({type: 'error', text: 'O URL da imagem principal não é válido.'});
         return;
     }
 
-    const totalStock = Object.values(editProductData.stock).reduce((sum, qty) => sum + qty, 0);
+    const totalStock = Object.values(finalEditProduct.stock).reduce((sum, qty) => sum + qty, 0);
     if (totalStock === 0) {
         setFormMessage({type: 'error', text: 'Não é possível guardar um produto sem stock. Adicione pelo menos uma unidade.'});
         return;
@@ -370,7 +426,7 @@ const Conta = () => {
 
     try {
       const productDocRef = doc(db, 'products', selectedProductToEdit.id);
-      await updateDoc(productDocRef, { ...editProductData, inStock: totalStock > 0 });
+      await updateDoc(productDocRef, { ...finalEditProduct, inStock: totalStock > 0 });
       setFormMessage({type: 'success', text: 'Produto atualizado com sucesso!'});
       setSelectedProductToEdit(null);
       fetchProducts();

@@ -9,7 +9,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {
-    const { amount, cartItems, userId, userName, userEmail } = req.body; 
+    const { amount, cartItems, userId, userName = '', userEmail = '' } = req.body; 
 
     if (!amount || amount <= 0 || !cartItems || cartItems.length === 0 || !userId) {
       return res.status(400).json({ error: { message: 'Dados do pedido inválidos ou incompletos.' } });
@@ -25,24 +25,24 @@ export default async function handler(req, res) {
         },
         metadata: {
             userId: userId,
-            userName: userName || 'N/A', // Fallback para string se ainda for null por algum motivo
-            userEmail: userEmail || 'N/A', // Fallback para string se ainda for null por algum motivo
+            userName: userName,
+            userEmail: userEmail,
             cart_summary: JSON.stringify(cartItems.map(item => ({ id: item.id, qty: item.quantity, size: item.size })))
         },
       });
 
-     
       const orderData = {
         userId: userId,
-        userName: userName, // Este já deve ser null ou string
-        userEmail: userEmail, // Este já deve ser null ou string
+        userName: userName,
+        userEmail: userEmail,
         items: cartItems.map(item => ({
           id: item.id,
           name: item.name,
           price: item.price,
           quantity: item.quantity,
           size: item.size,
-          image: item.image
+          // Garante que a imagem é lida corretamente, independentemente de quantas existam
+          image: item.images && item.images.length > 0 ? item.images[0] : null
         })),
         totalAmount: amount / 100,
         paymentIntentId: paymentIntent.id,

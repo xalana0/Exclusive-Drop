@@ -17,15 +17,19 @@ export default async function handler(req, res) {
   const { username, email } = req.body;
   const userId = token.id;
 
-  if (!username || !email) {
+  // --- MELHORIA DE VALIDAÇÃO ---
+  const finalUsername = username ? username.trim() : '';
+  const finalEmail = email ? email.trim() : '';
+
+  if (!finalUsername || !finalEmail) {
     return res.status(400).json({ message: 'Nome de utilizador e email são obrigatórios.' });
   }
 
   try {
     const userDocRef = doc(db, 'users', userId);
     await updateDoc(userDocRef, {
-      username,
-      email,
+      username: finalUsername,
+      email: finalEmail,
     });
     res.status(200).json({ message: 'Perfil atualizado com sucesso!' });
   } catch (error) {
