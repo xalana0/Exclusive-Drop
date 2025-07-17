@@ -194,7 +194,9 @@ export default function Home() {
                       <ProductCard
                         name={product.name}
                         price={`€${product.price.toFixed(2)}`}
-                        image={product.images && product.images.length > 0 ? product.images[0] : '/placeholder.svg'}
+                        // --- CORREÇÃO AQUI ---
+                        // Alterado de 'product.images[0]' para a nova propriedade 'product.image'
+                        image={product.image || '/placeholder.svg'}
                         isOutOfStock={isOutOfStock}
                       />
                       <button
