@@ -1,4 +1,5 @@
-// pages/api/create-payment-intent.js
+// Ficheiro: src/api/create-payment-intent.js
+
 import Stripe from 'stripe';
 import { db } from '../../lib/firebase';
 import { collection, addDoc, doc, updateDoc, runTransaction, serverTimestamp, getDoc } from 'firebase/firestore';
@@ -41,7 +42,9 @@ export default async function handler(req, res) {
           price: item.price,
           quantity: item.quantity,
           size: item.size,
-          // Garante que a imagem é lida corretamente, independentemente de quantas existam
+          // --- CORREÇÃO FINAL APLICADA AQUI ---
+          // Garante que a primeira imagem do array 'images' é usada.
+          // Se não houver imagens, guarda null para evitar o erro de 'undefined'.
           image: item.images && item.images.length > 0 ? item.images[0] : null
         })),
         totalAmount: amount / 100,
