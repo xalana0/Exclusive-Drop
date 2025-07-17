@@ -697,6 +697,7 @@ const Conta = () => {
               ) : (
                 products.map((product) => (
                   <div key={product.id} className="product-item">
+                    {/* --- CORREÇÃO AQUI --- */}
                     <img src={product.image || '/placeholder.svg'} alt={product.name} className="product-image" />
                     <div className="product-info">
                       <h3>{product.name}</h3>
@@ -736,7 +737,7 @@ const Conta = () => {
                     <ul>
                       {order.items.map((item, index) => (
                         <li key={index} className="order-product-item">
-                          {/* --- CORREÇÃO FINAL AQUI --- */}
+                          {/* --- CORREÇÃO AQUI --- */}
                           <img src={item.image || '/placeholder.svg'} alt={item.name} className="order-product-image"/>
                           <span>{item.name} ({item.size}) x {item.quantity} - €{(item.price * item.quantity).toFixed(2)}</span>
                         </li>
@@ -767,7 +768,7 @@ const Conta = () => {
                     <ul>
                       {order.items.map((item, index) => (
                         <li key={index} className="order-product-item">
-                          {/* --- CORREÇÃO FINAL AQUI --- */}
+                           {/* --- CORREÇÃO AQUI --- */}
                           <img src={item.image || '/placeholder.svg'} alt={item.name} className="order-product-image"/>
                           <span>{item.name} ({item.size}) x {item.quantity} - €{(item.price * item.quantity).toFixed(2)}</span>
                         </li>
