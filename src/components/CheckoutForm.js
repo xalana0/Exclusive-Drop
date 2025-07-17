@@ -1,12 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
 import { useCart } from '@/components/cartcontext';
 import { useRouter } from 'next/navigation';
-import { db } from '../lib/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { doc, getDoc, runTransaction, updateDoc } from 'firebase/firestore'; 
 import { useSession } from 'next-auth/react';
 
 const CARD_ELEMENT_OPTIONS = {
@@ -31,88 +28,75 @@ function CheckoutForm() {
   const stripe = useStripe();
   const elements = useElements();
   const { cartItems, subtotal, clearCart } = useCart();
-  // --- ALTERAÇÃO AQUI ---
-  // Apanha também o 'status' da sessão para validação
   const { data: session, status: sessionStatus } = useSession();
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
   const [succeeded, setSucceeded] = useState(false);
   const router = useRouter();
 
+  useEffect(() => {
+    if (!stripe || !elements) {
+      return;
+    }
+  }, [stripe, elements]);
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     setLoading(true);
     setErrorMessage(null);
 
-    // --- MELHORIA DE VALIDAÇÃO ---
-    // Verifica se o Stripe carregou, se o carrinho não está vazio
-    // E, crucialmente, se a sessão está autenticada e tem um ID de utilizador.
     if (!stripe || !elements || subtotal <= 0 || sessionStatus !== 'authenticated' || !session?.user?.id) {
       setErrorMessage("Não é possível processar o pagamento. Verifique a sua sessão ou o carrinho.");
       setLoading(false);
       return;
     }
 
-    const cardElement = elements.getElement(CardElement);
-
-    const { error, paymentMethod } = await stripe.createPaymentMethod({
-      type: 'card',
-      card: cardElement,
+    const res = await fetch('/api/create-payment-intent', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        amount: Math.round(subtotal * 100),
+        cartItems: cartItems,
+        userId: session.user.id,
+        userName: session.user.username || 'Utilizador',
+        userEmail: session.user.email,
+      }),
     });
 
-    if (error) {
-      setErrorMessage(error.message);
+    const data = await res.json();
+
+    if (!res.ok) {
+      setErrorMessage(data.error.message);
       setLoading(false);
-    } else {
-      console.log('PaymentMethod:', paymentMethod);
+      return;
+    }
+    
+    // --- ALTERAÇÃO APLICADA AQUI ---
+    // A chamada a 'confirmCardPayment' foi simplificada.
+    // Agora, apenas passamos o elemento do cartão, sem os 'billing_details'.
+    // O Stripe recolhe os dados necessários diretamente do CardElement.
+    const { error: stripeError, paymentIntent } = await stripe.confirmCardPayment(data.clientSecret, {
+        payment_method: {
+            card: elements.getElement(CardElement),
+        },
+    });
 
-      try {
-        const userId = session.user.id;
-        const userEmail = session.user.email || 'guest@example.com';
-        // --- ALTERAÇÃO AQUI ---
-        // Passa 'username' em vez de 'name' para corresponder ao objeto da sessão
-        const userName = session.user.username || 'Utilizador Convidado';
+    if (stripeError) {
+      setErrorMessage(stripeError.message);
+      setLoading(false);
+      return;
+    }
 
-        // --- CORREÇÃO IMPORTANTE ---
-        // Aqui chamamos a nossa API de backend que agora tem a lógica de criação de pedido
-        const res = await fetch('/api/create-payment-intent', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                amount: Math.round(subtotal * 100), // Envia o valor em cêntimos
-                cartItems: cartItems,
-                userId: userId,
-                userName: userName,
-                userEmail: userEmail
-            }),
-        });
-        
-        const data = await res.json();
-        
-        if (!res.ok) {
-            throw new Error(data.error.message);
-        }
-
-        const { clientSecret } = data;
-
-        const { error: stripeError } = await stripe.confirmCardPayment(clientSecret);
-
-        if (stripeError) {
-            throw new Error(stripeError.message);
-        }
-
+    if (paymentIntent.status === 'succeeded') {
+        console.log('Pagamento bem-sucedido!', paymentIntent);
         setSucceeded(true);
         clearCart();
         router.push('/success-page');
-
-      } catch (e) {
-        console.error("Erro ao processar o pedido ou atualizar o stock: ", e);
-        setErrorMessage(`Erro: ${e.message || "Ocorreu um erro inesperado. Por favor, tente novamente."}`);
-        setSucceeded(false);
-      } finally {
-        setLoading(false);
-      }
+    } else {
+        setErrorMessage("O pagamento não foi concluído com sucesso. Tente novamente.");
     }
+
+    setLoading(false);
   };
 
   return (
@@ -178,8 +162,6 @@ function CheckoutForm() {
 
       <button
         type="submit"
-        // --- ALTERAÇÃO AQUI ---
-        // O botão também fica desativado se a sessão não estiver pronta
         disabled={!stripe || loading || succeeded || subtotal <= 0 || sessionStatus !== 'authenticated'}
         style={{
           padding: '15px 25px',
