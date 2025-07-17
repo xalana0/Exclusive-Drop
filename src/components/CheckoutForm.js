@@ -27,12 +27,13 @@ const CARD_ELEMENT_OPTIONS = {
   },
 };
 
-// Componente de formulário para o processo de checkout com Stripe.
 function CheckoutForm() {
   const stripe = useStripe();
   const elements = useElements();
   const { cartItems, subtotal, clearCart } = useCart();
-  const { data: session } = useSession();
+  // --- ALTERAÇÃO AQUI ---
+  // Apanha também o 'status' da sessão para validação
+  const { data: session, status: sessionStatus } = useSession();
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
   const [succeeded, setSucceeded] = useState(false);
@@ -43,7 +44,11 @@ function CheckoutForm() {
     setLoading(true);
     setErrorMessage(null);
 
-    if (!stripe || !elements || subtotal <= 0) {
+    // --- MELHORIA DE VALIDAÇÃO ---
+    // Verifica se o Stripe carregou, se o carrinho não está vazio
+    // E, crucialmente, se a sessão está autenticada e tem um ID de utilizador.
+    if (!stripe || !elements || subtotal <= 0 || sessionStatus !== 'authenticated' || !session?.user?.id) {
+      setErrorMessage("Não é possível processar o pagamento. Verifique a sua sessão ou o carrinho.");
       setLoading(false);
       return;
     }
@@ -62,61 +67,44 @@ function CheckoutForm() {
       console.log('PaymentMethod:', paymentMethod);
 
       try {
-        const userId = session?.user?.id || 'guest';
-        const userEmail = session?.user?.email || 'guest@example.com';
+        const userId = session.user.id;
+        const userEmail = session.user.email || 'guest@example.com';
+        // --- ALTERAÇÃO AQUI ---
+        // Passa 'username' em vez de 'name' para corresponder ao objeto da sessão
+        const userName = session.user.username || 'Utilizador Convidado';
 
-        await runTransaction(db, async (transaction) => {
-          const productDocs = new Map();
-
-          for (const item of cartItems) {
-            const productRef = doc(db, 'products', item.id);
-            const productDocSnapshot = await transaction.get(productRef);
-            
-            if (!productDocSnapshot.exists()) {
-              throw new Error(`Produto com ID ${item.id} não encontrado.`);
-            }
-            productDocs.set(item.id, productDocSnapshot);
-          }
-
-          for (const item of cartItems) {
-            const productRef = doc(db, 'products', item.id);
-            const productDocSnapshot = productDocs.get(item.id);
-
-            const currentStock = productDocSnapshot.data().stock || {};
-            const currentQuantity = currentStock[item.size] || 0;
-
-            if (currentQuantity < item.quantity) {
-              throw new Error(`Stock insuficiente para o produto ${item.name} (Tamanho: ${item.size}). Stock disponível: ${currentQuantity}, Necessário: ${item.quantity}`);
-            }
-
-            const newStock = {
-              ...currentStock,
-              [item.size]: currentQuantity - item.quantity,
-            };
-            transaction.update(productRef, { stock: newStock });
-          }
-
-          const orderRef = doc(collection(db, 'orders'));
-          transaction.set(orderRef, {
-            userId: userId,
-            userEmail: userEmail,
-            items: cartItems.map(item => ({
-              id: item.id,
-              name: item.name,
-              price: item.price,
-              quantity: item.quantity,
-              size: item.size,
-              image: item.image,
-            })),
-            totalAmount: subtotal,
-            orderDate: serverTimestamp(),
-            status: 'completed',
-          });
+        // --- CORREÇÃO IMPORTANTE ---
+        // Aqui chamamos a nossa API de backend que agora tem a lógica de criação de pedido
+        const res = await fetch('/api/create-payment-intent', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                amount: Math.round(subtotal * 100), // Envia o valor em cêntimos
+                cartItems: cartItems,
+                userId: userId,
+                userName: userName,
+                userEmail: userEmail
+            }),
         });
+        
+        const data = await res.json();
+        
+        if (!res.ok) {
+            throw new Error(data.error.message);
+        }
+
+        const { clientSecret } = data;
+
+        const { error: stripeError } = await stripe.confirmCardPayment(clientSecret);
+
+        if (stripeError) {
+            throw new Error(stripeError.message);
+        }
 
         setSucceeded(true);
         clearCart();
         router.push('/success-page');
+
       } catch (e) {
         console.error("Erro ao processar o pedido ou atualizar o stock: ", e);
         setErrorMessage(`Erro: ${e.message || "Ocorreu um erro inesperado. Por favor, tente novamente."}`);
@@ -190,7 +178,9 @@ function CheckoutForm() {
 
       <button
         type="submit"
-        disabled={!stripe || loading || succeeded || subtotal <= 0}
+        // --- ALTERAÇÃO AQUI ---
+        // O botão também fica desativado se a sessão não estiver pronta
+        disabled={!stripe || loading || succeeded || subtotal <= 0 || sessionStatus !== 'authenticated'}
         style={{
           padding: '15px 25px',
           backgroundColor: subtotal <= 0 ? '#333333' : '#8A2BE2',
