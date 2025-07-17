@@ -1,4 +1,6 @@
-'use client';
+// src/components/Conta.js
+
+'useclient';
 import { useState, useEffect, useCallback } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/router';
@@ -31,8 +33,8 @@ const getDefaultStockForCategory = (category) => {
   }, {});
 };
 
-// --- NOVA FUNÇÃO DE VALIDAÇÃO ---
-// Valida o formato do email
+// --- MELHORIA ---
+// Função de validação de email centralizada
 const validateEmail = (email) => {
     if (!email) return false;
     return /\S+@\S+\.\S+/.test(email);
@@ -51,7 +53,6 @@ const isImageURL = (url) => {
         img.onerror = () => resolve(false);
     });
 };
-
 
 const Conta = () => {
   const { data: session, status } = useSession();
@@ -80,12 +81,15 @@ const Conta = () => {
 
   const [products, setProducts] = useState([]);
   const [selectedProductToEdit, setSelectedProductToEdit] = useState(null);
-  const [editProductData, setEditProductData] = useState({ name: '', description: '', price: 0, images: [''], category: '', inStock: true, stock: {}, sketchfabUrl: '' });
   const [isCreatingProduct, setIsCreatingProduct] = useState(false);
-  const [newProduct, setNewProduct] = useState({ name: '', description: '', price: 0, images: [''], category: '', inStock: true, stock: {}, sketchfabUrl: '' });
   const [searchTermProducts, setSearchTermProducts] = useState('');
   const [filteredProducts, setFilteredProducts] = useState([]);
 
+  // --- ALTERAÇÃO PRINCIPAL ---
+  // Estados para produto agora usam 'image' (singular)
+  const [editProductData, setEditProductData] = useState({ name: '', description: '', price: 0, image: '', category: '', inStock: true, stock: {}, sketchfabUrl: '' });
+  const [newProduct, setNewProduct] = useState({ name: '', description: '', price: 0, image: '', category: '', inStock: true, stock: {}, sketchfabUrl: '' });
+  
   const [userOrders, setUserOrders] = useState([]);
   const [allOrders, setAllOrders] = useState([]);
   const [usersMap, setUsersMap] = useState({});
@@ -189,6 +193,8 @@ const Conta = () => {
     setFormMessage({ type: '', text: '' });
     if (!userData?.id) return;
     
+    // --- MELHORIA ---
+    // Remove espaços em branco antes de validar
     const finalName = editName.trim();
     const finalEmail = editEmail.trim();
 
@@ -197,7 +203,7 @@ const Conta = () => {
       return;
     }
     
-    // --- MELHORIA DE VALIDAÇÃO ---
+    // --- MELHORIA ---
     if (!validateEmail(finalEmail)) {
         setFormMessage({ type: 'error', text: "O formato do email é inválido." });
         return;
@@ -273,6 +279,7 @@ const Conta = () => {
   const handleSaveEditedUser = async () => {
     if (!selectedUserToEdit?.id) return;
     
+    // --- MELHORIA ---
     const finalUsername = editUserData.username.trim();
     const finalEmail = editUserData.email.trim();
 
@@ -281,14 +288,13 @@ const Conta = () => {
       return;
     }
     
-    // --- MELHORIA DE VALIDAÇÃO ---
+    // --- MELHORIA ---
     if (!validateEmail(finalEmail)) {
         setFormMessage({ type: 'error', text: 'O formato do email é inválido.' });
         return;
     }
 
-    // --- MELHORIA DE VALIDAÇÃO ---
-    // Verifica se o novo email já está a ser usado por outro utilizador
+    // --- MELHORIA ---
     const isEmailTaken = userList.some(user => user.email === finalEmail && user.id !== selectedUserToEdit.id);
     if (isEmailTaken) {
         setFormMessage({ type: 'error', text: 'Este email já está em uso por outro utilizador.' });
@@ -351,23 +357,25 @@ const Conta = () => {
     }
   };
   
+  // --- ALTERAÇÃO ---
+  // Lógica de criação de produto simplificada para uma única imagem
   const handleCreateProduct = async () => {
     setFormMessage({type: '', text: ''});
     const finalNewProduct = {
         ...newProduct,
         name: newProduct.name.trim(),
         description: newProduct.description.trim(),
-        images: newProduct.images.map(img => img.trim()).filter(img => img)
+        image: newProduct.image.trim()
     };
     
-    if (!finalNewProduct.name || finalNewProduct.price === undefined || finalNewProduct.images.length === 0 || !finalNewProduct.category) {
-        setFormMessage({type: 'error', text: 'Por favor, preencha os campos obrigatórios: Nome, Preço, Imagem Principal e Categoria.'});
+    if (!finalNewProduct.name || finalNewProduct.price === undefined || !finalNewProduct.image || !finalNewProduct.category) {
+        setFormMessage({type: 'error', text: 'Por favor, preencha os campos obrigatórios: Nome, Preço, URL da Imagem e Categoria.'});
         return;
     }
 
-    const isValidImage = await isImageURL(finalNewProduct.images[0]);
+    const isValidImage = await isImageURL(finalNewProduct.image);
     if (!isValidImage) {
-        setFormMessage({type: 'error', text: 'O URL da imagem principal não é válido.'});
+        setFormMessage({type: 'error', text: 'O URL da imagem não é válido.'});
         return;
     }
 
@@ -381,21 +389,15 @@ const Conta = () => {
       await addDoc(collection(db, 'products'), { ...finalNewProduct, inStock: totalStock > 0, createdAt: new Date() });
       setFormMessage({type: 'success', text: 'Produto criado com sucesso!'});
       setIsCreatingProduct(false);
-      setNewProduct({ name: '', description: '', price: 0, images: [''], category: '', inStock: true, stock: {}, sketchfabUrl: '' });
+      setNewProduct({ name: '', description: '', price: 0, image: '', category: '', inStock: true, stock: {}, sketchfabUrl: '' });
       fetchProducts();
     } catch (error) {
       setFormMessage({type: 'error', text: 'Erro ao criar o produto.'});
     }
   };
 
-  const handleEditProduct = (product) => {
-    setSelectedProductToEdit(product);
-    const defaultStock = getDefaultStockForCategory(product.category);
-    const currentStock = { ...defaultStock, ...(product.stock || {}) };
-    setEditProductData({ ...product, stock: currentStock, images: product.images || [''] });
-    setFormMessage({type: '', text: ''});
-  };
-
+  // --- ALTERAÇÃO ---
+  // Lógica de edição de produto simplificada para uma única imagem
   const handleSaveEditedProduct = async () => {
     setFormMessage({type: '', text: ''});
     if (!selectedProductToEdit?.id) return;
@@ -404,17 +406,17 @@ const Conta = () => {
         ...editProductData,
         name: editProductData.name.trim(),
         description: editProductData.description.trim(),
-        images: editProductData.images.map(img => img.trim()).filter(img => img)
+        image: editProductData.image.trim()
     };
 
-    if (!finalEditProduct.name || finalEditProduct.price === undefined || finalEditProduct.images.length === 0) {
-        setFormMessage({type: 'error', text: 'Nome, preço e imagem principal são campos obrigatórios.'});
+    if (!finalEditProduct.name || finalEditProduct.price === undefined || !finalEditProduct.image) {
+        setFormMessage({type: 'error', text: 'Nome, preço e URL da Imagem são campos obrigatórios.'});
         return;
     }
 
-    const isValidImage = await isImageURL(finalEditProduct.images[0]);
+    const isValidImage = await isImageURL(finalEditProduct.image);
     if (!isValidImage) {
-        setFormMessage({type: 'error', text: 'O URL da imagem principal não é válido.'});
+        setFormMessage({type: 'error', text: 'O URL da imagem não é válido.'});
         return;
     }
 
@@ -434,35 +436,8 @@ const Conta = () => {
       setFormMessage({type: 'error', text: 'Erro ao guardar as alterações do produto.'});
     }
   };
-
-  const handleDeleteProduct = async (productId) => {
-    if (window.confirm('Tem a certeza que deseja apagar este produto?')) {
-      try {
-        await deleteDoc(doc(db, 'products', productId));
-        setFormMessage({ type: 'success', text: 'Produto apagado com sucesso!' });
-        fetchProducts();
-      } catch (error) {
-        setFormMessage({ type: 'error', text: 'Erro ao apagar o produto.' });
-      }
-    }
-  };
   
-  const handleImageChange = (index, value, productStateSetter) => {
-    productStateSetter(prev => {
-        const newImages = [...prev.images];
-        newImages[index] = value;
-        return { ...prev, images: newImages };
-    });
-  };
-
-  const addImageField = (productStateSetter) => {
-    productStateSetter(prev => ({ ...prev, images: [...prev.images, ''] }));
-  };
-
-  const removeImageField = (index, productStateSetter) => {
-    productStateSetter(prev => ({ ...prev, images: prev.images.filter((_, i) => i !== index) }));
-  };
-
+  // As funções para manipular múltiplas imagens foram removidas
 
   useEffect(() => {
     const lowercasedSearchTerm = searchTermProducts.toLowerCase();
@@ -635,16 +610,11 @@ const Conta = () => {
                       <label>Preço:</label>
                       <input type="number" value={newProduct.price} onChange={(e) => setNewProduct({ ...newProduct, price: parseFloat(e.target.value) || 0 })} />
                     </div>
-                    {newProduct.images.map((url, index) => (
-                        <div key={index} className="form-group image-url-group">
-                            <label>URL da Imagem {index + 1}:</label>
-                            <div className="image-url-input">
-                                <input type="text" value={url} onChange={(e) => handleImageChange(index, e.target.value, setNewProduct)} />
-                                {index > 0 && <button onClick={() => removeImageField(index, setNewProduct)} className="remove-image-btn">-</button>}
-                            </div>
-                        </div>
-                    ))}
-                    <button onClick={() => addImageField(setNewProduct)} className="add-image-btn">+ Adicionar outra imagem</button>
+                    {/* --- ALTERAÇÃO AQUI --- */}
+                    <div className="form-group">
+                        <label>URL da Imagem:</label>
+                        <input type="text" value={newProduct.image} onChange={(e) => setNewProduct({...newProduct, image: e.target.value})} />
+                    </div>
                     <div className="form-group">
                       <label>Categoria:</label>
                       <div style={{ display: 'flex', gap: '1rem' }}>
@@ -697,16 +667,11 @@ const Conta = () => {
                         <label>Preço:</label>
                         <input type="number" value={editProductData.price} onChange={(e) => setEditProductData({ ...editProductData, price: parseFloat(e.target.value) || 0 })} />
                     </div>
-                    {editProductData.images.map((url, index) => (
-                        <div key={index} className="form-group image-url-group">
-                            <label>URL da Imagem {index + 1}:</label>
-                            <div className="image-url-input">
-                                <input type="text" value={url} onChange={(e) => handleImageChange(index, e.target.value, setEditProductData)} />
-                                {index > 0 && <button onClick={() => removeImageField(index, setEditProductData)} className="remove-image-btn">-</button>}
-                            </div>
-                        </div>
-                    ))}
-                    <button onClick={() => addImageField(setEditProductData)} className="add-image-btn">+ Adicionar outra imagem</button>
+                    {/* --- ALTERAÇÃO AQUI --- */}
+                    <div className="form-group">
+                        <label>URL da Imagem:</label>
+                        <input type="text" value={editProductData.image} onChange={(e) => setEditProductData({...editProductData, image: e.target.value})} />
+                    </div>
                     <div className="form-group">
                         <label>URL Sketchfab (Opcional):</label>
                         <input type="text" value={editProductData.sketchfabUrl} onChange={(e) => setEditProductData({ ...editProductData, sketchfabUrl: e.target.value })} />
@@ -733,7 +698,8 @@ const Conta = () => {
               ) : (
                 products.map((product) => (
                   <div key={product.id} className="product-item">
-                    <img src={product.images && product.images[0] ? product.images[0] : '/placeholder.svg'} alt={product.name} className="product-image" />
+                    {/* --- ALTERAÇÃO AQUI --- */}
+                    <img src={product.image || '/placeholder.svg'} alt={product.name} className="product-image" />
                     <div className="product-info">
                       <h3>{product.name}</h3>
                       <p>€{product.price?.toFixed(2)}</p>
@@ -772,7 +738,8 @@ const Conta = () => {
                     <ul>
                       {order.items.map((item, index) => (
                         <li key={index} className="order-product-item">
-                          <img src={item.image} alt={item.name} className="order-product-image"/>
+                           {/* --- ALTERAÇÃO AQUI --- */}
+                          <img src={item.image || '/placeholder.svg'} alt={item.name} className="order-product-image"/>
                           <span>{item.name} ({item.size}) x {item.quantity} - €{(item.price * item.quantity).toFixed(2)}</span>
                         </li>
                       ))}
@@ -802,7 +769,8 @@ const Conta = () => {
                     <ul>
                       {order.items.map((item, index) => (
                         <li key={index} className="order-product-item">
-                          <img src={item.image} alt={item.name} className="order-product-image"/>
+                          {/* --- ALTERAÇÃO AQUI --- */}
+                          <img src={item.image || '/placeholder.svg'} alt={item.name} className="order-product-image"/>
                           <span>{item.name} ({item.size}) x {item.quantity} - €{(item.price * item.quantity).toFixed(2)}</span>
                         </li>
                       ))}

@@ -1,4 +1,4 @@
-// Ficheiro: src/api/create-payment-intent.js
+// src/api/create-payment-intent.js
 
 import Stripe from 'stripe';
 import { db } from '../../lib/firebase';
@@ -42,10 +42,9 @@ export default async function handler(req, res) {
           price: item.price,
           quantity: item.quantity,
           size: item.size,
-          // --- CORREÇÃO FINAL APLICADA AQUI ---
-          // Garante que a primeira imagem do array 'images' é usada.
-          // Se não houver imagens, guarda null para evitar o erro de 'undefined'.
-          image: item.images && item.images.length > 0 ? item.images[0] : null
+          // --- ALTERAÇÃO ---
+          // Agora usa a propriedade 'image' que já vem correta do carrinho
+          image: item.image || null
         })),
         totalAmount: amount / 100,
         paymentIntentId: paymentIntent.id,

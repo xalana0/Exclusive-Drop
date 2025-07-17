@@ -1,3 +1,5 @@
+// src/components/cartcontext.js
+
 'use client';
 import { createContext, useContext, useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
@@ -9,7 +11,7 @@ export function CartProvider({ children }) {
   const [notification, setNotification] = useState('');
   const { data: session, status } = useSession();
 
-  // Limpa a notificação após alguns segundos
+  // Efeito para limpar a notificação após alguns segundos
   useEffect(() => {
     if (notification) {
       const timer = setTimeout(() => {
@@ -19,28 +21,57 @@ export function CartProvider({ children }) {
     }
   }, [notification]);
 
-  // Carrega o carrinho do localStorage quando a aplicação inicia
+  // --- ALTERAÇÃO/CORREÇÃO ---
+  // Este useEffect agora gere a carga, gravação e limpeza do carrinho
+  // com base na sessão do utilizador, corrigindo o problema do F5 e do carrinho partilhado.
   useEffect(() => {
-    try {
-      const storedCartItems = localStorage.getItem('cartItems');
-      if (storedCartItems) {
-        setCartItems(JSON.parse(storedCartItems));
+    // Não faz nada enquanto a sessão está a ser carregada
+    if (status === 'loading') {
+      return;
+    }
+
+    const currentUserId = session?.user?.id;
+    const storedCart = localStorage.getItem('cartItems');
+    const storedUserId = localStorage.getItem('cartUserId');
+
+    // Se existe um utilizador com sessão iniciada
+    if (currentUserId) {
+      // Se o utilizador atual é o mesmo que o dono do carrinho guardado
+      if (currentUserId === storedUserId && storedCart) {
+        try {
+          setCartItems(JSON.parse(storedCart));
+        } catch (error) {
+          console.error("Falha ao ler o carrinho do localStorage:", error);
+          setCartItems([]);
+        }
+      } else {
+        // Se o utilizador é diferente (ou não há carrinho para este user), limpa tudo
+        setCartItems([]);
+        localStorage.setItem('cartUserId', currentUserId); // Define o novo dono do carrinho
+        localStorage.setItem('cartItems', '[]');
       }
-    } catch (error) {
-      console.error("Failed to load cart from localStorage:", error);
+    } else {
+      // Se não há sessão (utilizador fez logout ou é convidado), limpa tudo
+      setCartItems([]);
+      localStorage.removeItem('cartUserId');
+      localStorage.removeItem('cartItems');
     }
-  }, []);
+  }, [session, status]);
 
-  // Guarda o carrinho no localStorage sempre que ele é alterado
+
+  // Efeito para guardar o carrinho no localStorage sempre que os itens mudam
   useEffect(() => {
-    try {
-      localStorage.setItem('cartItems', JSON.stringify(cartItems));
-    } catch (error) {
-      console.error("Failed to save cart to localStorage:", error);
+    // Só guarda se houver um utilizador autenticado
+    if (status === 'authenticated' && session?.user?.id) {
+        try {
+            localStorage.setItem('cartItems', JSON.stringify(cartItems));
+            localStorage.setItem('cartUserId', session.user.id);
+        } catch (error) {
+            console.error("Falha ao guardar o carrinho no localStorage:", error);
+        }
     }
-  }, [cartItems]);
+  }, [cartItems, session, status]);
 
-  // O useEffect problemático que limpava o carrinho foi REMOVIDO daqui.
 
   const addToCart = (product) => {
     setCartItems((prev) => {
