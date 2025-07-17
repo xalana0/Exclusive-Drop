@@ -32,9 +32,13 @@ body {
   z-index: 10;
 }
 
-.nome-link {
-  text-decoration: none;
+.title-button {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
   color: inherit;
+  font: inherit;
 }
 
 .nome {
@@ -122,6 +126,8 @@ body {
   transform: translateX(8px);
 }
 
+/* ------------------------------------- */
+/* Secção de Destaque/Hero Banner */
 .hero-banner {
   width: 100%;
   height: 400px;
@@ -169,6 +175,7 @@ body {
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
 }
 
+/* Container e botão para alternar filtros */
 .filter-toggle-container {
   text-align: center;
   margin-bottom: 1.5rem;
@@ -195,6 +202,8 @@ body {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
+
+/* Filtros */
 .filters-container {
   padding: 0 3rem 2rem;
   display: flex;
@@ -234,17 +243,18 @@ body {
 
 .filter-group select:focus,
 .filter-group input[type="number"]:focus {
-  border-color: #8a2be2;
+  border-color: #8A2BE2;
   box-shadow: 0 0 0 2px rgba(138, 43, 226, 0.2);
 }
 
 .filter-group input[type="checkbox"] {
   width: 18px;
   height: 18px;
-  accent-color: #8a2be2;
+  accent-color: #8A2BE2;
   cursor: pointer;
 }
 
+/* Destaque de Categorias na Home */
 .category-highlights {
   padding: 2rem 3rem;
   margin-bottom: 3rem;
@@ -308,6 +318,9 @@ body {
   color: white;
   background-color: rgba(0, 0, 0, 0.7);
 }
+
+
+/* ------------------------------------- */
 
 .productsContainer {
   flex: 1;
@@ -398,6 +411,7 @@ body {
   left: 100%;
 }
 
+
 @media (max-width: 768px) {
   .header {
     flex-direction: column;
@@ -431,23 +445,5 @@ body {
   }
   .nome {
     font-size: 3rem;
-  }
-  .hero-banner {
-    height: 300px;
-  }
-  .hero-banner h1 {
-    font-size: 3rem;
-  }
-  .hero-banner p {
-    font-size: 1rem;
-  }
-  .filters-container {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 1rem;
-    gap: 1rem;
-  }
-  .category-grid {
-    grid-template-columns: 1fr;
   }
 }

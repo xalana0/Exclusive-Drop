@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useCart } from "@/components/cartcontext";
 
-// Constantes de tamanhos, agora sincronizadas com a criação de produtos.
 const SIZES_BY_CATEGORY = {
   Roupas: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
   Ténis: ['38', '39', '40', '41', '42', '43', '44', '45'],
 };
 
-// Função para analisar uma string de query para um objeto.
 const parseQueryString = (queryString) => {
   const params = {};
   queryString.split('&').forEach(param => {
@@ -18,19 +17,20 @@ const parseQueryString = (queryString) => {
   return params;
 };
 
-// Converte um objeto de volta para uma string de query.
 const buildQueryString = (params) => {
   return Object.entries(params)
     .map(([key, value]) => `${key}=${value}`)
     .join('&');
 };
 
-// Modal para exibir detalhes do produto e adicionar ao carrinho.
 const ProductModal = ({ product, onClose, onAdd }) => {
+  const { cartItems, setNotification } = useCart();
   const [selectedSize, setSelectedSize] = useState("");
   const [showSizeGuide, setShowSizeGuide] = useState(false);
   const [stockForSelectedSize, setStockForSelectedSize] = useState(null);
   const [show3DView, setShow3DView] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   if (!product) return null;
 
@@ -51,15 +51,22 @@ const ProductModal = ({ product, onClose, onAdd }) => {
   const sketchfabEmbedUrl = product.sketchfabUrl ? `${product.sketchfabUrl}/embed?${finalSketchfabParamsString}` : '';
 
   const handleAdd = () => {
+    setModalMessage('');
     if (!selectedSize) {
-      alert("Por favor, selecione um tamanho.");
+      setModalMessage("Por favor, selecione um tamanho.");
       return;
     }
-    if (stockForSelectedSize === 0) {
-      alert("Este tamanho está esgotado.");
+    
+    const existingItem = cartItems.find(item => item.id === product.id && item.size === selectedSize);
+    const quantityInCart = existingItem ? existingItem.quantity : 0;
+
+    if (quantityInCart >= stockForSelectedSize) {
+      setModalMessage("Não pode adicionar mais unidades, pois excederia o stock disponível.");
       return;
     }
-    onAdd({ ...product, size: selectedSize });
+
+    onAdd({ ...product, size: selectedSize, stock: product.stock });
+    setNotification(`${product.name} (${selectedSize}) foi adicionado ao carrinho.`);
     onClose();
   };
 
@@ -67,7 +74,6 @@ const ProductModal = ({ product, onClose, onAdd }) => {
     setShowSizeGuide(!showSizeGuide);
   };
   
-  // Função que gera dinamicamente a tabela do guia de tamanhos.
   const generateSizeGuideTable = (category) => {
       const sizes = SIZES_BY_CATEGORY[category];
       if (!sizes) return null;
@@ -144,15 +150,28 @@ const ProductModal = ({ product, onClose, onAdd }) => {
             ) : (
               <div className="modal-image-wrapper">
                 <img
-                  src={product.image || "/placeholder.svg"}
+                  src={product.images && product.images.length > 0 ? product.images[currentImageIndex] : "/placeholder.svg"}
                   alt={product.name}
                   className="modal-product-image"
                 />
+                {product.images && product.images.length > 1 && (
+                    <div className="thumbnail-gallery">
+                        {product.images.map((imgUrl, index) => (
+                            <img 
+                                key={index}
+                                src={imgUrl}
+                                alt={`Thumbnail ${index + 1}`}
+                                className={`thumbnail ${index === currentImageIndex ? 'active' : ''}`}
+                                onClick={() => setCurrentImageIndex(index)}
+                            />
+                        ))}
+                    </div>
+                )}
               </div>
             )}
-            {(product.image || product.sketchfabUrl) && (
+            {(product.images && product.images[0] || product.sketchfabUrl) && (
               <div className="toggle-view-buttons">
-                {product.image && (
+                {product.images && product.images[0] && (
                   <button
                     className={!show3DView ? 'active' : ''}
                     onClick={() => setShow3DView(false)}
@@ -207,6 +226,8 @@ const ProductModal = ({ product, onClose, onAdd }) => {
             {currentSizeGuideContent && (
               <button className="size-guide-button" onClick={toggleSizeGuide}>Guia de Tamanhos</button>
             )}
+            
+            {modalMessage && <p className="error-message" style={{textAlign: 'center', marginTop: '1rem'}}>{modalMessage}</p>}
 
             <button className="addToCartBtn" onClick={handleAdd}>
               Adicionar ao carrinho

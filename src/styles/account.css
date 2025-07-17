@@ -1,3 +1,63 @@
+/* styles/account.css */
+
+.error-message {
+  color: #dc3545;
+  text-align: center;
+  margin: 1rem 0;
+  padding: 0.5rem;
+  border-radius: 5px;
+  background-color: rgba(220, 53, 69, 0.1);
+  font-weight: bold;
+}
+
+.success-message {
+  color: #28a745;
+  text-align: center;
+  margin: 1rem 0;
+  padding: 0.5rem;
+  border-radius: 5px;
+  background-color: rgba(40, 167, 69, 0.1);
+  font-weight: bold;
+}
+
+.image-url-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 0.5rem;
+}
+
+.image-url-input {
+    display: flex;
+    width: 100%;
+    gap: 10px;
+}
+
+.image-url-input input {
+    flex-grow: 1;
+}
+
+.remove-image-btn {
+    padding: 0.5rem 0.8rem;
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.add-image-btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+/* General Styling */
 .dashboard-container {
   padding: 3rem 2rem;
   min-height: 100vh;
@@ -52,8 +112,7 @@
   font-size: 1rem;
   font-weight: 500;
   text-align: left;
-  transition: background-color 0.3s ease, border-color 0.3s ease,
-    transform 0.2s ease;
+  transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
   display: flex;
   align-items: center;
   gap: 0.8rem;
@@ -82,15 +141,15 @@
   background-color: rgba(220, 53, 69, 0.9);
   border-color: rgba(220, 53, 69, 0.9);
 }
-.sidebar .logout-button-back-button-purple {
+.sidebar .logout-button-back-button-purple{
   margin-top: 1.5rem;
-  background-color: #6a1aab;
-  border-color: #6a1aab;
+  background-color: #6A1AAB;
+  border-color: #6A1AAB;
 }
 
-.sidebar .logout-button-back-button-purple:hover {
-  background-color: #6a1aab;
-  border-color: #6a1aab;
+.sidebar .logout-button-back-button-purple:hover{
+  background-color: #6A1AAB;
+  border-color: #6A1AAB;
 }
 
 .main-content {
@@ -102,19 +161,14 @@
   min-height: 500px;
 }
 
-.error-message,
-.no-permission-message,
-.no-items-message {
-  color: red;
+.no-permission-message, .no-items-message {
+  color: #ccc;
   text-align: center;
   margin-top: 20px;
   font-size: 1.1rem;
 }
 
-.profile-section,
-.users-section,
-.products-section,
-.orders-section {
+.profile-section, .users-section, .products-section, .orders-section {
   padding: 1rem;
 }
 
@@ -162,11 +216,7 @@
   justify-content: flex-end;
 }
 
-.save-btn,
-.cancel-btn,
-.edit-btn,
-.add-btn,
-.delete-btn {
+.save-btn, .cancel-btn, .edit-btn, .add-btn, .delete-btn {
   padding: 0.8rem 1.5rem;
   border: none;
   border-radius: 5px;
@@ -232,34 +282,34 @@
 }
 
 .search-bar {
-  position: relative;
-  margin-bottom: 1.5rem;
-  max-width: 400px;
+    position: relative;
+    margin-bottom: 1.5rem;
+    max-width: 400px;
 }
 
 .search-bar input {
-  width: 100%;
-  padding: 0.8rem 0.8rem 0.8rem 2.5rem;
-  background-color: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 5px;
-  color: white;
-  font-size: 1rem;
+    width: 100%;
+    padding: 0.8rem 0.8rem 0.8rem 2.5rem;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
+    color: white;
+    font-size: 1rem;
 }
 
 .search-bar input:focus {
-  outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
 }
 
 .search-icon {
-  position: absolute;
-  left: 0.8rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #bbb;
-  font-size: 1.1rem;
+    position: absolute;
+    left: 0.8rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #bbb;
+    font-size: 1.1rem;
 }
 
 .form-modal {
@@ -382,99 +432,99 @@
 }
 
 .product-item .stock-details span {
-  background-color: rgba(0, 123, 255, 0.3);
-  padding: 0.2em 0.5em;
-  border-radius: 5px;
-  font-size: 0.85rem;
-  margin: 0 0.2rem;
-  white-space: nowrap;
-  display: inline-block;
-  margin-top: 0.5rem;
+    background-color: rgba(0, 123, 255, 0.3);
+    padding: 0.2em 0.5em;
+    border-radius: 5px;
+    font-size: 0.85rem;
+    margin: 0 0.2rem;
+    white-space: nowrap;
+    display: inline-block;
+    margin-top: 0.5rem;
 }
 
 .stock-inputs-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-  gap: 0.8rem;
-  margin-top: 0.5rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 0.8rem;
+    margin-top: 0.5rem;
 }
 .stock-input-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 .stock-input-item label {
-  margin-bottom: 0;
-  min-width: 30px;
-  color: #ccc;
+    margin-bottom: 0;
+    min-width: 30px;
+    color: #ccc;
 }
 .stock-input-item input {
-  width: 60px;
-  padding: 0.5rem;
-  text-align: center;
+    width: 60px;
+    padding: 0.5rem;
+    text-align: center;
 }
 
 .orders-history-tab {
-  margin-top: 2rem;
+    margin-top: 2rem;
 }
 
 .orders-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
 }
 
 .order-item {
-  background-color: rgba(255, 255, 255, 0.05);
-  padding: 1.5rem;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    background-color: rgba(255, 255, 255, 0.05);
+    padding: 1.5rem;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 }
 
 .order-item h3 {
-  color: #fff;
-  margin-bottom: 0.8rem;
-  font-size: 1.6rem;
+    color: #fff;
+    margin-bottom: 0.8rem;
+    font-size: 1.6rem;
 }
 
 .order-item p {
-  color: #ccc;
-  margin-bottom: 0.4rem;
+    color: #ccc;
+    margin-bottom: 0.4rem;
 }
 
 .order-item h4 {
-  color: #eee;
-  margin-top: 1rem;
-  margin-bottom: 0.5rem;
-  font-size: 1.2rem;
+    color: #eee;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    font-size: 1.2rem;
 }
 
 .order-item ul {
-  list-style: none;
-  padding: 0;
+    list-style: none;
+    padding: 0;
 }
 
 .order-product-item {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  background-color: rgba(255, 255, 255, 0.03);
-  padding: 0.8rem;
-  border-radius: 5px;
-  margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background-color: rgba(255, 255, 255, 0.03);
+    padding: 0.8rem;
+    border-radius: 5px;
+    margin-bottom: 0.5rem;
 }
 
 .order-product-item img {
-  width: 60px;
-  height: 60px;
-  object-fit: cover;
-  border-radius: 3px;
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 3px;
 }
 
 .order-product-item span {
-  color: #e0e0e0;
-  font-size: 1rem;
+    color: #e0e0e0;
+    font-size: 1rem;
 }
 
 .sketchfab-preview {
@@ -540,17 +590,17 @@
 
 @media (max-width: 600px) {
   .dashboard-container {
-    padding: 3rem 4rem;
-    min-height: 100vh;
-    font-family: "Roboto Mono", serif;
-    font-style: normal;
-    color: white;
-    position: relative;
-    z-index: 2;
-    max-width: 95%;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
+     padding: 3rem 4rem;
+  min-height: 100vh;
+  font-family: "Roboto Mono", serif;
+  font-style: normal;
+  color: white;
+  position: relative;
+  z-index: 2;
+  max-width: 95%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
   }
 
   .account-title {
@@ -567,8 +617,7 @@
     font-size: 1.5rem;
   }
 
-  .user-item,
-  .order-item {
+  .user-item, .order-item {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.8rem;

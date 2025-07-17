@@ -11,7 +11,8 @@ export default function CartPage() {
     clearCart,
     increaseQuantity,
     decreaseQuantity,
-    subtotal
+    subtotal,
+    notification,
   } = useCart();
   const { data: session } = useSession();
 
@@ -19,6 +20,8 @@ export default function CartPage() {
     <>
       <div className="cart-container">
         <h1 className="cart-title">Carrinho</h1>
+
+        {notification && <div className="cart-notification">{notification}</div>}
 
         <div className="cart-grid">
           <div className="cart-items-list">
@@ -32,7 +35,11 @@ export default function CartPage() {
             ) : (
               cartItems.map((item) => (
                 <div key={item.id + item.size} className="cart-item">
-                  <img src={item.image} alt={item.name} className="cart-item-image" />
+                  <img 
+                    src={item.images && item.images[0] ? item.images[0] : '/placeholder.svg'} 
+                    alt={item.name} 
+                    className="cart-item-image" 
+                  />
                   <div className="cart-item-details">
                     <h3>{item.name}</h3>
                     <p>Tamanho: {item.size}</p>
@@ -84,7 +91,7 @@ export default function CartPage() {
                   className="checkout-btn"
                   disabled={cartItems.length === 0}
               >
-                  Ir para Checkout (Stripe)
+                  Ir para o Checkout
               </button>
             </Link>
           </div>

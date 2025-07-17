@@ -56,7 +56,7 @@ const Conta = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [activeTab, setActiveTab] = useState(router.query.tab || 'conta');
   const [loading, setLoading] = useState(true);
-  const [formMessage, setFormMessage] = useState({ type: '', text: '' }); // { type: 'error' | 'success', text: '...' }
+  const [formMessage, setFormMessage] = useState({ type: '', text: '' });
 
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [editName, setEditName] = useState('');
@@ -75,9 +75,9 @@ const Conta = () => {
 
   const [products, setProducts] = useState([]);
   const [selectedProductToEdit, setSelectedProductToEdit] = useState(null);
-  const [editProductData, setEditProductData] = useState({ name: '', description: '', price: 0, image: '', category: '', inStock: true, stock: {}, sketchfabUrl: '' });
+  const [editProductData, setEditProductData] = useState({ name: '', description: '', price: 0, images: [''], category: '', inStock: true, stock: {}, sketchfabUrl: '' });
   const [isCreatingProduct, setIsCreatingProduct] = useState(false);
-  const [newProduct, setNewProduct] = useState({ name: '', description: '', price: 0, image: '', category: '', inStock: true, stock: {}, sketchfabUrl: '' });
+  const [newProduct, setNewProduct] = useState({ name: '', description: '', price: 0, images: [''], category: '', inStock: true, stock: {}, sketchfabUrl: '' });
   const [searchTermProducts, setSearchTermProducts] = useState('');
   const [filteredProducts, setFilteredProducts] = useState([]);
 
@@ -256,17 +256,21 @@ const Conta = () => {
 
   const handleSaveEditedUser = async () => {
     if (!selectedUserToEdit?.id) return;
+    if (!editUserData.username || !editUserData.email) {
+      setFormMessage({ type: 'error', text: 'O nome de utilizador e o email não podem estar vazios.' });
+      return;
+    }
     try {
       await updateDoc(doc(db, 'users', selectedUserToEdit.id), {
         username: editUserData.username,
         email: editUserData.email,
         isAdmin: editUserData.isAdmin,
       });
-      alert('Utilizador atualizado com sucesso!');
+      setFormMessage({ type: 'success', text: 'Utilizador atualizado com sucesso!' });
       setSelectedUserToEdit(null);
       fetchUserList();
     } catch (error) {
-      alert('Erro ao guardar o utilizador.');
+      setFormMessage({ type: 'error', text: 'Erro ao guardar o utilizador.' });
     }
   };
 
@@ -274,17 +278,17 @@ const Conta = () => {
     if (window.confirm('Tem a certeza que deseja apagar este utilizador?')) {
       try {
         await deleteDoc(doc(db, 'users', userId));
-        alert('Utilizador apagado com sucesso!');
+        setFormMessage({ type: 'success', text: 'Utilizador apagado com sucesso!' });
         fetchUserList();
       } catch (error) {
-        alert('Erro ao apagar o utilizador.');
+        setFormMessage({ type: 'error', text: 'Erro ao apagar o utilizador.' });
       }
     }
   };
 
   const handleCreateUser = async () => {
     if (!newUser.username || !newUser.email || !newUser.password) {
-      alert('Por favor, preencha todos os campos para criar um novo utilizador.');
+      setFormMessage({ type: 'error', text: 'Por favor, preencha todos os campos para criar um novo utilizador.' });
       return;
     }
     try {
@@ -296,39 +300,39 @@ const Conta = () => {
       const data = await response.json();
       if (!response.ok) throw new Error(data.message);
       
-      alert('Utilizador criado com sucesso!');
+      setFormMessage({ type: 'success', text: 'Utilizador criado com sucesso!' });
       setIsCreatingUser(false);
       setNewUser({ username: '', email: '', password: '', isAdmin: false });
       fetchUserList();
     } catch (error) {
-      alert(error.message || 'Erro ao criar o utilizador.');
+      setFormMessage({ type: 'error', text: error.message || 'Erro ao criar o utilizador.' });
     }
   };
   
   const handleCreateProduct = async () => {
     setFormMessage({type: '', text: ''});
-    if (!newProduct.name || !newProduct.price || !newProduct.image || !newProduct.category) {
-        setFormMessage({type: 'error', text: 'Por favor, preencha todos os campos obrigatórios.'});
-      return;
-    }
-    
-    if (!newProduct.inStock) {
-        if (!window.confirm("Este produto está a ser criado como 'Esgotado'. Deseja continuar?")) {
-            return;
-        }
+    if (!newProduct.name || newProduct.price === undefined || !newProduct.images[0] || !newProduct.category) {
+        setFormMessage({type: 'error', text: 'Por favor, preencha os campos obrigatórios: Nome, Preço, Imagem Principal e Categoria.'});
+        return;
     }
 
-    const isValidImage = await isImageURL(newProduct.image);
+    const isValidImage = await isImageURL(newProduct.images[0]);
     if (!isValidImage) {
-        setFormMessage({type: 'error', text: 'O URL da imagem fornecido não é válido ou não foi encontrado.'});
+        setFormMessage({type: 'error', text: 'O URL da imagem principal não é válido.'});
+        return;
+    }
+
+    const totalStock = Object.values(newProduct.stock).reduce((sum, qty) => sum + qty, 0);
+    if (totalStock === 0) {
+        setFormMessage({type: 'error', text: 'Não é possível criar um produto sem stock. Adicione pelo menos uma unidade.'});
         return;
     }
     
     try {
-      await addDoc(collection(db, 'products'), { ...newProduct, createdAt: new Date() });
+      await addDoc(collection(db, 'products'), { ...newProduct, inStock: totalStock > 0, createdAt: new Date() });
       setFormMessage({type: 'success', text: 'Produto criado com sucesso!'});
       setIsCreatingProduct(false);
-      setNewProduct({ name: '', description: '', price: 0, image: '', category: '', inStock: true, stock: {}, sketchfabUrl: '' });
+      setNewProduct({ name: '', description: '', price: 0, images: [''], category: '', inStock: true, stock: {}, sketchfabUrl: '' });
       fetchProducts();
     } catch (error) {
       setFormMessage({type: 'error', text: 'Erro ao criar o produto.'});
@@ -339,7 +343,7 @@ const Conta = () => {
     setSelectedProductToEdit(product);
     const defaultStock = getDefaultStockForCategory(product.category);
     const currentStock = { ...defaultStock, ...(product.stock || {}) };
-    setEditProductData({ ...product, stock: currentStock });
+    setEditProductData({ ...product, stock: currentStock, images: product.images || [''] });
     setFormMessage({type: '', text: ''});
   };
 
@@ -347,15 +351,26 @@ const Conta = () => {
     setFormMessage({type: '', text: ''});
     if (!selectedProductToEdit?.id) return;
     
-    const isValidImage = await isImageURL(editProductData.image);
+    if (!editProductData.name || editProductData.price === undefined || !editProductData.images[0]) {
+        setFormMessage({type: 'error', text: 'Nome, preço e imagem principal são campos obrigatórios.'});
+        return;
+    }
+
+    const isValidImage = await isImageURL(editProductData.images[0]);
     if (!isValidImage) {
-        setFormMessage({type: 'error', text: 'O URL da imagem fornecido não é válido ou não foi encontrado.'});
+        setFormMessage({type: 'error', text: 'O URL da imagem principal não é válido.'});
+        return;
+    }
+
+    const totalStock = Object.values(editProductData.stock).reduce((sum, qty) => sum + qty, 0);
+    if (totalStock === 0) {
+        setFormMessage({type: 'error', text: 'Não é possível guardar um produto sem stock. Adicione pelo menos uma unidade.'});
         return;
     }
 
     try {
       const productDocRef = doc(db, 'products', selectedProductToEdit.id);
-      await updateDoc(productDocRef, { ...editProductData });
+      await updateDoc(productDocRef, { ...editProductData, inStock: totalStock > 0 });
       setFormMessage({type: 'success', text: 'Produto atualizado com sucesso!'});
       setSelectedProductToEdit(null);
       fetchProducts();
@@ -368,13 +383,30 @@ const Conta = () => {
     if (window.confirm('Tem a certeza que deseja apagar este produto?')) {
       try {
         await deleteDoc(doc(db, 'products', productId));
-        alert('Produto apagado com sucesso!');
+        setFormMessage({ type: 'success', text: 'Produto apagado com sucesso!' });
         fetchProducts();
       } catch (error) {
-        alert('Erro ao apagar o produto.');
+        setFormMessage({ type: 'error', text: 'Erro ao apagar o produto.' });
       }
     }
   };
+  
+  const handleImageChange = (index, value, productStateSetter) => {
+    productStateSetter(prev => {
+        const newImages = [...prev.images];
+        newImages[index] = value;
+        return { ...prev, images: newImages };
+    });
+  };
+
+  const addImageField = (productStateSetter) => {
+    productStateSetter(prev => ({ ...prev, images: [...prev.images, ''] }));
+  };
+
+  const removeImageField = (index, productStateSetter) => {
+    productStateSetter(prev => ({ ...prev, images: prev.images.filter((_, i) => i !== index) }));
+  };
+
 
   useEffect(() => {
     const lowercasedSearchTerm = searchTermProducts.toLowerCase();
@@ -446,6 +478,7 @@ const Conta = () => {
         return (
           <div className="tab-content">
             <h2>Gestão de Utilizadores</h2>
+            {formMessage.text && <p className={formMessage.type === 'error' ? 'error-message' : 'success-message'} style={{textAlign: 'center', marginBottom: '1rem'}}>{formMessage.text}</p>}
             <div className="search-bar">
               <FaSearch className="search-icon" />
               <input type="text" placeholder="Pesquisar utilizadores..." value={searchTermUsers} onChange={(e) => setSearchTermUsers(e.target.value)} />
@@ -524,7 +557,6 @@ const Conta = () => {
         return (
           <div className="tab-content">
             <h2>Gestão de Produtos</h2>
-            {formMessage.text && <p className={formMessage.type === 'error' ? 'error-message' : 'success-message'} style={{textAlign: 'center', marginBottom: '1rem'}}>{formMessage.text}</p>}
             <div className="search-bar">
               <FaSearch className="search-icon" />
               <input type="text" placeholder="Pesquisar produtos..." value={searchTermProducts} onChange={(e) => setSearchTermProducts(e.target.value)} />
@@ -547,10 +579,16 @@ const Conta = () => {
                       <label>Preço:</label>
                       <input type="number" value={newProduct.price} onChange={(e) => setNewProduct({ ...newProduct, price: parseFloat(e.target.value) || 0 })} />
                     </div>
-                    <div className="form-group">
-                      <label>URL da Imagem:</label>
-                      <input type="text" value={newProduct.image} onChange={(e) => setNewProduct({ ...newProduct, image: e.target.value })} />
-                    </div>
+                    {newProduct.images.map((url, index) => (
+                        <div key={index} className="form-group image-url-group">
+                            <label>URL da Imagem {index + 1}:</label>
+                            <div className="image-url-input">
+                                <input type="text" value={url} onChange={(e) => handleImageChange(index, e.target.value, setNewProduct)} />
+                                {index > 0 && <button onClick={() => removeImageField(index, setNewProduct)} className="remove-image-btn">-</button>}
+                            </div>
+                        </div>
+                    ))}
+                    <button onClick={() => addImageField(setNewProduct)} className="add-image-btn">+ Adicionar outra imagem</button>
                     <div className="form-group">
                       <label>Categoria:</label>
                       <div style={{ display: 'flex', gap: '1rem' }}>
@@ -571,7 +609,7 @@ const Conta = () => {
                           {Object.keys(newProduct.stock).map(size => (
                             <div key={size} className="stock-input-item">
                               <label>{size}:</label>
-                              <input type="number" value={newProduct.stock[size]} onChange={(e) => setNewProduct(prev => ({ ...prev, stock: { ...prev.stock, [size]: parseInt(e.target.value) || 0 } }))} />
+                              <input type="number" min="0" value={newProduct.stock[size]} onChange={(e) => setNewProduct(prev => ({ ...prev, stock: { ...prev.stock, [size]: parseInt(e.target.value) || 0 } }))} />
                             </div>
                           ))}
                         </div>
@@ -581,10 +619,7 @@ const Conta = () => {
                       <label>URL Sketchfab (Opcional):</label>
                       <input type="text" value={newProduct.sketchfabUrl} onChange={(e) => setNewProduct({ ...newProduct, sketchfabUrl: e.target.value })} />
                     </div>
-                    <div className="form-group checkbox-group">
-                      <input type="checkbox" id="inStockNew" checked={newProduct.inStock} onChange={(e) => setNewProduct({ ...newProduct, inStock: e.target.checked })} />
-                      <label htmlFor="inStockNew">Em Stock</label>
-                    </div>
+                    {formMessage.text && <p className={formMessage.type === 'error' ? 'error-message' : 'success-message'} style={{textAlign: 'center', marginTop: '1rem'}}>{formMessage.text}</p>}
                     <div className="actions">
                       <button className="save-btn" onClick={handleCreateProduct}>Criar Produto</button>
                       <button className="cancel-btn" onClick={() => setIsCreatingProduct(false)}>Cancelar</button>
@@ -606,27 +641,30 @@ const Conta = () => {
                         <label>Preço:</label>
                         <input type="number" value={editProductData.price} onChange={(e) => setEditProductData({ ...editProductData, price: parseFloat(e.target.value) || 0 })} />
                     </div>
-                    <div className="form-group">
-                        <label>URL da Imagem:</label>
-                        <input type="text" value={editProductData.image} onChange={(e) => setEditProductData({ ...editProductData, image: e.target.value })} />
-                    </div>
+                    {editProductData.images.map((url, index) => (
+                        <div key={index} className="form-group image-url-group">
+                            <label>URL da Imagem {index + 1}:</label>
+                            <div className="image-url-input">
+                                <input type="text" value={url} onChange={(e) => handleImageChange(index, e.target.value, setEditProductData)} />
+                                {index > 0 && <button onClick={() => removeImageField(index, setEditProductData)} className="remove-image-btn">-</button>}
+                            </div>
+                        </div>
+                    ))}
+                    <button onClick={() => addImageField(setEditProductData)} className="add-image-btn">+ Adicionar outra imagem</button>
                     <div className="form-group">
                         <label>URL Sketchfab (Opcional):</label>
                         <input type="text" value={editProductData.sketchfabUrl} onChange={(e) => setEditProductData({ ...editProductData, sketchfabUrl: e.target.value })} />
-                    </div>
-                    <div className="form-group checkbox-group">
-                        <input type="checkbox" id="inStockEdit" checked={editProductData.inStock} onChange={(e) => setEditProductData({ ...editProductData, inStock: e.target.checked })} />
-                        <label htmlFor="inStockEdit">Em Stock</label>
                     </div>
                     <h4>Stock por Tamanho:</h4>
                     <div className="stock-inputs-grid">
                         {Object.keys(editProductData.stock).map(size => (
                             <div key={size} className="stock-input-item">
                                 <label>{size}:</label>
-                                <input type="number" value={editProductData.stock[size]} onChange={(e) => setEditProductData(prev => ({...prev, stock: { ...prev.stock, [size]: parseInt(e.target.value) || 0 }}))} />
+                                <input type="number" min="0" value={editProductData.stock[size]} onChange={(e) => setEditProductData(prev => ({...prev, stock: { ...prev.stock, [size]: parseInt(e.target.value) || 0 }}))} />
                             </div>
                         ))}
                     </div>
+                    {formMessage.text && <p className={formMessage.type === 'error' ? 'error-message' : 'success-message'} style={{textAlign: 'center', marginTop: '1rem'}}>{formMessage.text}</p>}
                     <div className="actions">
                       <button className="save-btn" onClick={handleSaveEditedProduct}>Guardar Alterações</button>
                       <button className="cancel-btn" onClick={() => setSelectedProductToEdit(null)}>Cancelar</button>
@@ -637,9 +675,9 @@ const Conta = () => {
               {filteredProducts.length === 0 ? (
                 <p className="no-items-message">Nenhum produto encontrado.</p>
               ) : (
-                filteredProducts.map((product) => (
+                products.map((product) => (
                   <div key={product.id} className="product-item">
-                    <img src={product.image} alt={product.name} className="product-image" />
+                    <img src={product.images && product.images[0] ? product.images[0] : '/placeholder.svg'} alt={product.name} className="product-image" />
                     <div className="product-info">
                       <h3>{product.name}</h3>
                       <p>€{product.price?.toFixed(2)}</p>

@@ -63,7 +63,7 @@ export default function Home() {
 
     if (inStockOnly) {
       currentProducts = currentProducts.filter(product => {
-        if (product.stock) {
+        if (product.stock && typeof product.stock === 'object') {
           return Object.values(product.stock).some(qty => qty > 0);
         }
         return false;
@@ -81,12 +81,10 @@ export default function Home() {
     setSelectedProduct(null);
   };
 
-  // Define a categoria para filtrar os produtos.
   const handleCategoryFilter = (category) => {
     setCategoryFilter(category);
   };
 
-  // Limpa todos os filtros aplicados.
   const handleClearFilters = () => {
     setCategoryFilter('Todos');
     setMinPrice('');
@@ -98,9 +96,9 @@ export default function Home() {
     <>
       <main className="main">
         <header className="header">
-          <Link href="/" className="nome-link">
+          <button onClick={handleClearFilters} className="title-button">
             <h1 className="nome">Exclusive Drop</h1>
-          </Link>
+          </button>
           <div className="header-links">
             <Link href="/cartpage" className="cartLink">
               Carrinho ({cartItems.length})
@@ -110,7 +108,7 @@ export default function Home() {
             </Link>
             {session && (
               <button onClick={() => signOut()} className="logout-button">
-                Logout
+                Sair
               </button>
             )}
           </div>
@@ -182,28 +180,34 @@ export default function Home() {
                         checked={inStockOnly}
                         onChange={(e) => setInStockOnly(e.target.checked)}
                     />
-                    <label htmlFor="in-stock-only" style={{ margin: 0, cursor: 'pointer' }}>Em Stock</label>
+                    <label htmlFor="in-stock-only" style={{ margin: 0, cursor: 'pointer' }}>Apenas em Stock</label>
                 </div>
               </div>
             )}
 
             <div className="productsGrid">
               {filteredProducts.length > 0 ? (
-                filteredProducts.map((product) => (
-                  <div key={product.id} className="productWrapper animate-in">
-                    <ProductCard
-                      name={product.name}
-                      price={`€${product.price.toFixed(2)}`}
-                      image={product.image}
-                    />
-                    <button
-                      className="addToCartBtn"
-                      onClick={() => handleOpenModal(product)}
-                    >
-                      Ver Detalhes
-                    </button>
-                  </div>
-                ))
+                filteredProducts.map((product) => {
+                  const isOutOfStock = !product.stock || Object.values(product.stock).every(qty => qty === 0);
+                  return (
+                    <div key={product.id} className="productWrapper animate-in">
+                      <ProductCard
+                        name={product.name}
+                        price={`€${product.price.toFixed(2)}`}
+                        image={product.images && product.images.length > 0 ? product.images[0] : '/placeholder.svg'}
+                        isOutOfStock={isOutOfStock}
+                      />
+                      <button
+                        className="addToCartBtn"
+                        onClick={() => handleOpenModal(product)}
+                        disabled={isOutOfStock}
+                        style={{ cursor: isOutOfStock ? 'not-allowed' : 'pointer', opacity: isOutOfStock ? 0.5 : 1 }}
+                      >
+                        {isOutOfStock ? 'Esgotado' : 'Ver Detalhes'}
+                      </button>
+                    </div>
+                  );
+                })
               ) : (
                 <p style={{ color: 'white', fontSize: '1.2rem', textAlign: 'center', width: '100%', gridColumn: '1 / -1' }}>
                   Nenhum produto encontrado com os filtros selecionados.
@@ -222,7 +226,7 @@ export default function Home() {
         marginTop: 'auto',
         borderTop: '1px solid #333333'
       }}>
-        <p>Contacto: +351 111 111 111 | Email: suporte@exclusivedrop.com</p>
+        <p>Contacto: +351 123 456 789 | Email: suporte@exclusivedrop.com</p>
       </footer>
 
       {selectedProduct && (

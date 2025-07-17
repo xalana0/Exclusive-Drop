@@ -1,14 +1,24 @@
 'use client';
 import { createContext, useContext, useState, useEffect } from "react";
-import { useSession } from "next-auth/react"; // 1. Importar o useSession
+import { useSession } from "next-auth/react";
 
 const CartContext = createContext();
 
 export function CartProvider({ children }) {
   const [cartItems, setCartItems] = useState([]);
-  const { data: session, status } = useSession(); // 2. Obter o estado da sessão
+  const [notification, setNotification] = useState(''); // Estado para notificações
+  const { data: session, status } = useSession();
 
-  // Efeito para carregar o carrinho do localStorage ao iniciar
+  // Limpa a notificação após alguns segundos
+  useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => {
+        setNotification('');
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [notification]);
+
   useEffect(() => {
     try {
       const storedCartItems = localStorage.getItem('cartItems');
@@ -20,7 +30,6 @@ export function CartProvider({ children }) {
     }
   }, []);
 
-  // Efeito para guardar o carrinho no localStorage sempre que os itens mudam
   useEffect(() => {
     try {
       localStorage.setItem('cartItems', JSON.stringify(cartItems));
@@ -29,16 +38,11 @@ export function CartProvider({ children }) {
     }
   }, [cartItems]);
 
-  // --- INÍCIO DA NOVA LÓGICA ---
-  // 3. Efeito para limpar o carrinho quando a sessão do utilizador muda
   useEffect(() => {
-    // Se o estado da sessão mudar (login/logout), limpamos o carrinho.
-    // Isto garante que cada utilizador tem o seu próprio carrinho isolado.
     if (status !== 'loading') {
         clearCart();
     }
-  }, [session, status]); // Este efeito é executado sempre que 'session' ou 'status' mudam
-  // --- FIM DA NOVA LÓGICA ---
+  }, [session, status]);
 
 
   const addToCart = (product) => {
@@ -66,11 +70,17 @@ export function CartProvider({ children }) {
 
   const increaseQuantity = (productId, size) => {
     setCartItems((prev) =>
-      prev.map((item) =>
-        item.id === productId && item.size === size
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
-      )
+      prev.map((item) => {
+        if (item.id === productId && item.size === size) {
+          if (item.quantity < item.stock[size]) {
+            return { ...item, quantity: item.quantity + 1 };
+          } else {
+            setNotification(`Apenas ${item.stock[size]} unidades disponíveis para este tamanho.`);
+            return item;
+          }
+        }
+        return item;
+      })
     );
   };
 
@@ -98,6 +108,8 @@ export function CartProvider({ children }) {
     decreaseQuantity,
     clearCart,
     subtotal,
+    notification,
+    setNotification,
   };
 
   return (
