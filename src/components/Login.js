@@ -1,15 +1,24 @@
+// src/components/Login.js
+
+// --- ALTERAÇÃO ---
+// Adicionado o useState e os ícones
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import { signIn } from 'next-auth/react';
 import Link from 'next/link';
 import BackgroundAnimation from '@/components/Background';
+// --- ALTERAÇÃO ---
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
-// Componente para o formulário de login do utilizador.
 const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const router = useRouter();
+
+  // --- ALTERAÇÃO ---
+  // Estado para controlar a visibilidade da palavra-passe
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -46,9 +55,19 @@ const Login = () => {
               <label>Utilizador</label>
               <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} required />
             </div>
+            {/* --- ALTERAÇÃO --- */}
+            {/* O campo da palavra-passe agora tem um ícone para alternar a visibilidade */}
             <div className="input-container">
               <label>Palavra-passe</label>
-              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              <input 
+                type={showPassword ? "text" : "password"} 
+                value={password} 
+                onChange={(e) => setPassword(e.target.value)} 
+                required 
+              />
+              <span className="password-toggle-icon" onClick={() => setShowPassword(!showPassword)}>
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </span>
             </div>
 
             {errorMessage && <p className="error-message">{errorMessage}</p>}

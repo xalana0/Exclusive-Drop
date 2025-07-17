@@ -1,3 +1,5 @@
+/* src/styles/LoginRegister.css */
+
 * {
   margin: 0;
   padding: 0;
@@ -62,8 +64,11 @@
   box-sizing: border-box;
 }
 
+/* --- ALTERAÇÃO --- */
+/* Adicionado position: relative para que o ícone possa ser posicionado dentro dele */
 .input-container {
   margin-bottom: 1rem;
+  position: relative;
 }
 
 .input-container label {
@@ -79,6 +84,9 @@
 .input-container input {
   width: 100%;
   padding: 12px 15px;
+  /* --- ALTERAÇÃO --- */
+  /* Adicionado padding-right para não sobrepor o texto com o ícone */
+  padding-right: 40px; 
   border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 5px;
   background-color: rgba(255, 255, 255, 0.05);
@@ -99,6 +107,22 @@
 .input-container input::placeholder {
   color: rgba(255, 255, 255, 0.5);
 }
+
+/* --- NOVO ESTILO ADICIONADO --- */
+/* Estilo para o ícone de olho */
+.password-toggle-icon {
+  position: absolute;
+  top: 41px; /* Ajuste vertical para alinhar com o campo de input */
+  right: 15px;
+  color: #9ca3af; /* Cor cinza para o ícone */
+  cursor: pointer;
+  z-index: 10;
+}
+
+.password-toggle-icon:hover {
+    color: #fff;
+}
+
 
 .button {
   background-color: transparent;

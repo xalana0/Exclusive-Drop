@@ -1,6 +1,4 @@
-// src/components/Conta.js
-
-'useclient';
+'use client';
 import { useState, useEffect, useCallback } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/router';
@@ -33,14 +31,11 @@ const getDefaultStockForCategory = (category) => {
   }, {});
 };
 
-// --- MELHORIA ---
-// Função de validação de email centralizada
 const validateEmail = (email) => {
     if (!email) return false;
     return /\S+@\S+\.\S+/.test(email);
 };
 
-// Função para validar se um URL é de uma imagem
 const isImageURL = (url) => {
     if (!url) return false;
     if (!/\.(jpg|jpeg|png|webp|gif|svg)$/i.test(url)) {
@@ -85,8 +80,6 @@ const Conta = () => {
   const [searchTermProducts, setSearchTermProducts] = useState('');
   const [filteredProducts, setFilteredProducts] = useState([]);
 
-  // --- ALTERAÇÃO PRINCIPAL ---
-  // Estados para produto agora usam 'image' (singular)
   const [editProductData, setEditProductData] = useState({ name: '', description: '', price: 0, image: '', category: '', inStock: true, stock: {}, sketchfabUrl: '' });
   const [newProduct, setNewProduct] = useState({ name: '', description: '', price: 0, image: '', category: '', inStock: true, stock: {}, sketchfabUrl: '' });
   
@@ -193,8 +186,6 @@ const Conta = () => {
     setFormMessage({ type: '', text: '' });
     if (!userData?.id) return;
     
-    // --- MELHORIA ---
-    // Remove espaços em branco antes de validar
     const finalName = editName.trim();
     const finalEmail = editEmail.trim();
 
@@ -203,7 +194,6 @@ const Conta = () => {
       return;
     }
     
-    // --- MELHORIA ---
     if (!validateEmail(finalEmail)) {
         setFormMessage({ type: 'error', text: "O formato do email é inválido." });
         return;
@@ -279,7 +269,6 @@ const Conta = () => {
   const handleSaveEditedUser = async () => {
     if (!selectedUserToEdit?.id) return;
     
-    // --- MELHORIA ---
     const finalUsername = editUserData.username.trim();
     const finalEmail = editUserData.email.trim();
 
@@ -288,13 +277,11 @@ const Conta = () => {
       return;
     }
     
-    // --- MELHORIA ---
     if (!validateEmail(finalEmail)) {
         setFormMessage({ type: 'error', text: 'O formato do email é inválido.' });
         return;
     }
 
-    // --- MELHORIA ---
     const isEmailTaken = userList.some(user => user.email === finalEmail && user.id !== selectedUserToEdit.id);
     if (isEmailTaken) {
         setFormMessage({ type: 'error', text: 'Este email já está em uso por outro utilizador.' });
@@ -357,8 +344,6 @@ const Conta = () => {
     }
   };
   
-  // --- ALTERAÇÃO ---
-  // Lógica de criação de produto simplificada para uma única imagem
   const handleCreateProduct = async () => {
     setFormMessage({type: '', text: ''});
     const finalNewProduct = {
@@ -396,8 +381,14 @@ const Conta = () => {
     }
   };
 
-  // --- ALTERAÇÃO ---
-  // Lógica de edição de produto simplificada para uma única imagem
+  const handleEditProduct = (product) => {
+    setSelectedProductToEdit(product);
+    const defaultStock = getDefaultStockForCategory(product.category);
+    const currentStock = { ...defaultStock, ...(product.stock || {}) };
+    setEditProductData({ ...product, stock: currentStock, image: product.image || '' });
+    setFormMessage({type: '', text: ''});
+  };
+
   const handleSaveEditedProduct = async () => {
     setFormMessage({type: '', text: ''});
     if (!selectedProductToEdit?.id) return;
@@ -437,8 +428,18 @@ const Conta = () => {
     }
   };
   
-  // As funções para manipular múltiplas imagens foram removidas
-
+  const handleDeleteProduct = async (productId) => {
+    if (window.confirm('Tem a certeza que deseja apagar este produto?')) {
+      try {
+        await deleteDoc(doc(db, 'products', productId));
+        setFormMessage({ type: 'success', text: 'Produto apagado com sucesso!' });
+        fetchProducts();
+      } catch (error) {
+        setFormMessage({ type: 'error', text: 'Erro ao apagar o produto.' });
+      }
+    }
+  };
+  
   useEffect(() => {
     const lowercasedSearchTerm = searchTermProducts.toLowerCase();
     const filtered = products.filter(product =>
@@ -610,7 +611,6 @@ const Conta = () => {
                       <label>Preço:</label>
                       <input type="number" value={newProduct.price} onChange={(e) => setNewProduct({ ...newProduct, price: parseFloat(e.target.value) || 0 })} />
                     </div>
-                    {/* --- ALTERAÇÃO AQUI --- */}
                     <div className="form-group">
                         <label>URL da Imagem:</label>
                         <input type="text" value={newProduct.image} onChange={(e) => setNewProduct({...newProduct, image: e.target.value})} />
@@ -667,7 +667,6 @@ const Conta = () => {
                         <label>Preço:</label>
                         <input type="number" value={editProductData.price} onChange={(e) => setEditProductData({ ...editProductData, price: parseFloat(e.target.value) || 0 })} />
                     </div>
-                    {/* --- ALTERAÇÃO AQUI --- */}
                     <div className="form-group">
                         <label>URL da Imagem:</label>
                         <input type="text" value={editProductData.image} onChange={(e) => setEditProductData({...editProductData, image: e.target.value})} />
@@ -698,7 +697,6 @@ const Conta = () => {
               ) : (
                 products.map((product) => (
                   <div key={product.id} className="product-item">
-                    {/* --- ALTERAÇÃO AQUI --- */}
                     <img src={product.image || '/placeholder.svg'} alt={product.name} className="product-image" />
                     <div className="product-info">
                       <h3>{product.name}</h3>
@@ -738,7 +736,7 @@ const Conta = () => {
                     <ul>
                       {order.items.map((item, index) => (
                         <li key={index} className="order-product-item">
-                           {/* --- ALTERAÇÃO AQUI --- */}
+                          {/* --- CORREÇÃO FINAL AQUI --- */}
                           <img src={item.image || '/placeholder.svg'} alt={item.name} className="order-product-image"/>
                           <span>{item.name} ({item.size}) x {item.quantity} - €{(item.price * item.quantity).toFixed(2)}</span>
                         </li>
@@ -769,7 +767,7 @@ const Conta = () => {
                     <ul>
                       {order.items.map((item, index) => (
                         <li key={index} className="order-product-item">
-                          {/* --- ALTERAÇÃO AQUI --- */}
+                          {/* --- CORREÇÃO FINAL AQUI --- */}
                           <img src={item.image || '/placeholder.svg'} alt={item.name} className="order-product-image"/>
                           <span>{item.name} ({item.size}) x {item.quantity} - €{(item.price * item.quantity).toFixed(2)}</span>
                         </li>

@@ -1,9 +1,13 @@
+// src/components/Register.js
+
 import { useRouter } from 'next/router';
+// --- ALTERAÇÃO ---
 import { useState } from 'react';
 import BackgroundAnimation from '@/components/Background';
 import Link from 'next/link';
+// --- ALTERAÇÃO ---
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
-// Componente para o formulário de registo de novos utilizadores.
 const Register = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
@@ -14,12 +18,16 @@ const Register = () => {
   const [isRegistered, setIsRegistered] = useState(false);
   const router = useRouter();
 
-  // Valida o formato do email no lado do cliente.
+  // --- ALTERAÇÃO ---
+  // Estados para controlar a visibilidade de cada campo de palavra-passe
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+
   const validateEmail = (email) => {
     return /\S+@\S+\.\S+/.test(email);
   };
 
-  // Submete os dados de registo para a API.
   const handleRegister = async (e) => {
     e.preventDefault();
     setErrorMessage('');
@@ -81,13 +89,31 @@ const Register = () => {
                 <label>Telemóvel</label>
                 <input type="tel" value={telemovel} onChange={(e) => setTelemovel(e.target.value)} required />
               </div>
+              {/* --- ALTERAÇÃO --- */}
               <div className="input-container">
                 <label>Palavra-passe</label>
-                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                <input 
+                  type={showPassword ? "text" : "password"} 
+                  value={password} 
+                  onChange={(e) => setPassword(e.target.value)} 
+                  required 
+                />
+                 <span className="password-toggle-icon" onClick={() => setShowPassword(!showPassword)}>
+                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                </span>
               </div>
+              {/* --- ALTERAÇÃO --- */}
               <div className="input-container">
                 <label>Confirmar Palavra-passe</label>
-                <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
+                <input 
+                  type={showConfirmPassword ? "text" : "password"} 
+                  value={confirmPassword} 
+                  onChange={(e) => setConfirmPassword(e.target.value)} 
+                  required 
+                />
+                 <span className="password-toggle-icon" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
+                    {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                </span>
               </div>
 
               {errorMessage && <p className="error-message">{errorMessage}</p>}
