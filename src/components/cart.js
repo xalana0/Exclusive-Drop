@@ -1,3 +1,5 @@
+// src/components/cart.js
+
 "use client";
 import { useCart } from "@/components/cartcontext";
 import Link from "next/link";
@@ -35,8 +37,10 @@ export default function CartPage() {
             ) : (
               cartItems.map((item) => (
                 <div key={item.id + item.size} className="cart-item">
+                  {/* --- CORREÇÃO AQUI --- */}
+                  {/* Alterado para usar a propriedade 'item.image' singular */}
                   <img 
-                    src={item.images && item.images[0] ? item.images[0] : '/placeholder.svg'} 
+                    src={item.image || '/placeholder.svg'} 
                     alt={item.name} 
                     className="cart-item-image" 
                   />

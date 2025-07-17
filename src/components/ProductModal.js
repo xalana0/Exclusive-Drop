@@ -1,3 +1,5 @@
+// src/components/ProductModal.js
+
 import React, { useState, useEffect } from 'react';
 import { useCart } from "@/components/cartcontext";
 
@@ -7,6 +9,7 @@ const SIZES_BY_CATEGORY = {
 };
 
 const parseQueryString = (queryString) => {
+  if (!queryString) return {};
   const params = {};
   queryString.split('&').forEach(param => {
     const parts = param.split('=');
@@ -30,7 +33,6 @@ const ProductModal = ({ product, onClose, onAdd }) => {
   const [stockForSelectedSize, setStockForSelectedSize] = useState(null);
   const [show3DView, setShow3DView] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   if (!product) return null;
 
@@ -149,29 +151,19 @@ const ProductModal = ({ product, onClose, onAdd }) => {
               </div>
             ) : (
               <div className="modal-image-wrapper">
+                {/* --- CORREÇÃO AQUI --- */}
+                {/* Alterado para usar a propriedade 'product.image' singular */}
                 <img
-                  src={product.images && product.images.length > 0 ? product.images[currentImageIndex] : "/placeholder.svg"}
+                  src={product.image || "/placeholder.svg"}
                   alt={product.name}
                   className="modal-product-image"
                 />
-                {product.images && product.images.length > 1 && (
-                    <div className="thumbnail-gallery">
-                        {product.images.map((imgUrl, index) => (
-                            <img 
-                                key={index}
-                                src={imgUrl}
-                                alt={`Thumbnail ${index + 1}`}
-                                className={`thumbnail ${index === currentImageIndex ? 'active' : ''}`}
-                                onClick={() => setCurrentImageIndex(index)}
-                            />
-                        ))}
-                    </div>
-                )}
               </div>
             )}
-            {(product.images && product.images[0] || product.sketchfabUrl) && (
+            {/* O seletor 2D/3D já estava funcional e não precisa de alteração */}
+            {(product.image || product.sketchfabUrl) && (
               <div className="toggle-view-buttons">
-                {product.images && product.images[0] && (
+                {product.image && (
                   <button
                     className={!show3DView ? 'active' : ''}
                     onClick={() => setShow3DView(false)}
